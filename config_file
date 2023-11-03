@@ -1,0 +1,15 @@
+# This is a comment
+
+server {
+    listen 80;  # Listen on port 80
+    server_name example.com sfgg sfg fgdfgd ;  # Your domain name
+    root /var/www/html;  # Document root
+
+    # Define the location block to handle requests
+    location /sd {
+        root /var/www/h;  # Document root
+        index index.html index.htm;  # Default index files
+    }
+
+    # Add additional location blocks as needed for your application
+}

@@ -1,4 +1,4 @@
-NAME = PmergeMe
+NAME = webserv
 
 SRC = $(wildcard *.cpp)
 
