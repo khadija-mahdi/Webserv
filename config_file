@@ -1,15 +1,41 @@
-# This is a comment
 
-server {
-    listen 80;  # Listen on port 80
-    server_name example.com sfgg sfg fgdfgd ;  # Your domain name
-    root /var/www/html;  # Document root
+events {
+    worker_connections  1024;
+}
 
-    # Define the location block to handle requests
-    location /sd {
-        root /var/www/h;  # Document root
-        index index.html index.htm;  # Default index files
+http {
+
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+    client_max_body_size 10M;
+
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location  {
+            root   html;
+            index  index.html index.htm;
+        }
+
+        error_page  404              /404.html;
+        error_page   500  /500.html;
+       
     }
 
-    # Add additional location blocks as needed for your application
+    server {
+       listen       8000;
+       listen       somename:8080;
+       server_name  somename  alias  another.alias;
+
+        location / {
+           root   html;
+           index  index.html index.htm;
+       }
+    }
+
+
 }
