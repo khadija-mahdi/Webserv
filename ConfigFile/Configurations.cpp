@@ -19,7 +19,7 @@ void        Configurations::Http::setMax_body_size(std::string &bodySize){ max_b
 void        Configurations::Http::setError_pages(std::map<int, std::string> &errors){error_pages = errors;}
 
 
- //--------------------------------------------location class --------------------------------------
+//--------------------------------------------location class --------------------------------------
 
 std::vector<std::string>    Location::getIndex() const{return index;}
 

@@ -102,7 +102,8 @@ void PreProcessingFile(){
         std::string lines;
         readConfigFile(lines);
         CurlyBrackets(lines);
-        std::cout << lines;
+        Blocks(lines);
+        // std::cout << lines;
     }
     catch(const std::exception& e)
     {

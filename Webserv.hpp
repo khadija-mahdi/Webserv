@@ -21,3 +21,4 @@
 // #include "ConfigFile/Configurations.hpp"
 
 void PreProcessingFile();
+void Blocks(std::string &lines);
