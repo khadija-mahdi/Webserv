@@ -22,3 +22,4 @@
 
 void PreProcessingFile();
 void Blocks(std::string &lines);
+std::string Blocks(const std::string& lines, const std::string& blockName);

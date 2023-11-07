@@ -90,7 +90,6 @@ void CurlyBrackets(std::string &lines){
         else if (lines[i] == '}')
             Breakets--;
     }
-    std::cout << "bre : " << Breakets  << ", falg : " << flag << std::endl;
     if (Breakets || !flag)
         throw std::runtime_error("syntax error in curly brackets.");
 }
@@ -102,8 +101,7 @@ void PreProcessingFile(){
         std::string lines;
         readConfigFile(lines);
         CurlyBrackets(lines);
-        Blocks(lines);
-        // std::cout << lines;
+        Blocks(lines, "server");
     }
     catch(const std::exception& e)
     {
