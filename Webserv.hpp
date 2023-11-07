@@ -18,18 +18,6 @@
 #include <stack>
 #include <vector>
 #include <deque>
-#include "ConfigFile/Configurations.hpp"
+// #include "ConfigFile/Configurations.hpp"
 
-void readConfigFile(std::string &lines);
-void CurlyBrackets(std::string &lines);
-
-class configurations {
-public:
-    class events {
-        int worker_connections;
-    public:
-        int getWorkerConnections() const{
-           return worker_connections; 
-        }
-    };
-};
+void PreProcessingFile();

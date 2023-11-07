@@ -5,24 +5,25 @@ events {
 
 http {
 
-    include       mime.types;
-    default_type  application/octet-stream;
-    sendfile        on;
-    keepalive_timeout  65;
-    client_max_body_size 10M;
+    include                 mime.types;
+    default_type            application/octet-stream;
+    sendfile                on;
+    keepalive_timeout       65;
+    client_max_body_size    10M;
 
 
     server {
-        listen       80;
-        server_name  localhost;
+        listen          80;
+        host            localhost;
+        server_name     localhost;
 
-        location  {
+        location {
             root   html;
             index  index.html index.htm;
         }
 
-        error_page  404              /404.html;
-        error_page   500  /500.html;
+        error_page      404   /404.html;
+        error_page      500  /500.html;
        
     }
 
@@ -30,12 +31,10 @@ http {
        listen       8000;
        listen       somename:8080;
        server_name  somename  alias  another.alias;
-
-        location / {
+        
+        location kk {
            root   html;
            index  index.html index.htm;
        }
     }
-
-
 }
