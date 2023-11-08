@@ -15,7 +15,7 @@ std::string locationSyntax(std::string word){
 
 bool isInFormat(std::string& word, std::string& line) {
     if (word == "events " || word == "http " 
-        || word == "    server " ||word ==  locationSyntax(word)){
+        || word == "	server " ||word ==  locationSyntax(word)){
         if (word + "{" != line)
             throw std::runtime_error("syntax error in :" + line);
     }
@@ -62,7 +62,7 @@ bool lineSpace(std::string &line) {
 
 void readConfigFile(std::string &lines){
     std::string line = "";
-    std::fstream conf("config_file");
+    std::fstream conf("config_file.conf");
     if (conf.is_open())
     {   
         while (std::getline(conf, line, '\n')){
@@ -95,18 +95,16 @@ void CurlyBrackets(std::string &lines){
 }
 
 
-void PreProcessingFile(){
+std::string PreProcessingFile(){
+    std::string lines = "";
     try
-    {
-        std::string lines;
+    {    
         readConfigFile(lines);
         CurlyBrackets(lines);
-        Blocks(lines, "server");
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
     }
+    return lines;
 }
-
-void pacingConfigFile(){}

@@ -11,7 +11,7 @@ OBJ= $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 CPP = c++
 
 # CPPFLAGS = -Wall -Wextra -Werror -std=c++98
-CPPFLAGS = -std=c++98
+CPPFLAGS = -std=c++98 -fsanitize=address -g
 
 GREEN = \033[0;32m
 RED = \033[0;31m
@@ -21,7 +21,7 @@ RM = rm -f
 
 all: $(NAME)
 
-$(OBJ_DIR)/%.o: %.cpp
+$(OBJ_DIR)/%.o: %.cpp Webserv.hpp
 	@mkdir -p $(dir $@)
 	@$(CPP) ${CPPFLAGS} -c $< -o $@
 

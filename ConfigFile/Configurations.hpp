@@ -1,11 +1,12 @@
+#pragma once
 #include "../Webserv.hpp"
 
 class Location {
 private:
+	std::string					root;
 	std::vector<std::string>	index;
 	std::map<int, std::string>	error_pages;
 	std::map<int, std::string>	redirection; // path , status code
-	std::string					root;
 	std::string					autoindex; // on / of
 	std::string					allow;
 	std::string					upload;
@@ -39,7 +40,7 @@ class Server {
 	std::string					root;
 	std::string					host; //localhost / 127.0.0.1 /0.0.0.0
 	int							listen; //(port)
-	Location					Locations[];
+	std::vector<Location>		Locations;
 
 public:
 	std::vector<std::string>	getServer_names() const;
@@ -65,13 +66,14 @@ public:
 	public:
 		void	setWorkerConnections(int);
 		int		getWorkerConnections() const;
+		void	eventsBlock(std::string &lines);
 	};
 
 	class Http {
 	private:
 		std::string					max_body_size;
 		std::map<int, std::string>	error_pages;
-		Server						Servers[];
+		std::vector<Server>			Servers;
 	public:
 
 		void						setMax_body_size(std::string &);

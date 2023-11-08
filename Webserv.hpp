@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <string>
-#include <cstring>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -18,8 +17,14 @@
 #include <stack>
 #include <vector>
 #include <deque>
-// #include "ConfigFile/Configurations.hpp"
+#include "ConfigFile/Configurations.hpp"
+#include <cstring>
 
-void PreProcessingFile();
-void Blocks(std::string &lines);
+
+class Location;
+class Server;
+class Configurations;
+
+std::string PreProcessingFile();
 std::string Blocks(const std::string& lines, const std::string& blockName);
+std::map<std::string, std::string> extractKeyValues(const std::string& config);
