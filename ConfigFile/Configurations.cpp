@@ -17,7 +17,7 @@ void    Configurations::Events::eventsBlock(std::string &lines) {
     if (value.size() == 1){
         const char *integerV = value["worker_connections"].c_str();
         int intvalue = atoi(integerV);
-        std::cout << intvalue << std::endl;
+        // std::cout << intvalue << std::endl;
         setWorkerConnections(intvalue);
     }
     else{
@@ -35,7 +35,8 @@ std::map<int, std::string>  Configurations::Http::getError_pages() const { retur
 
 void        Configurations::Http::setMax_body_size(std::string &bodySize){ max_body_size = bodySize;}
 
-void        Configurations::Http::setError_pages(std::map<int, std::string> &errors){error_pages = errors;}
+void        Configurations::Http::setError_pages(std::string & _value, int _key){error_pages[_key] = _value;}
+void	    Configurations::Http::addServer(Server const &loc){Servers.push_back(loc);}
 
 
 //--------------------------------------------location class --------------------------------------
@@ -58,11 +59,11 @@ std::string                 Location::getUpload_stor() const{return upload_stor;
 
 
 
-void    Location::setIndex(std::vector<std::string> const & errors){index = errors;}
+void    Location::setIndex(std::string const & _index){index.push_back(_index);}
 
-void    Location::setError_pages(std::map<int, std::string> const & errors){error_pages = errors;}
+void    Location::setError_pages(std::string & _value, int _key){error_pages[_key] = _value;;}
 
-void    Location::setRedirection(std::map<int, std::string> const & errors){ redirection = errors;}
+void    Location::setRedirection(std::string & _value, int _key){ redirection[_key] = _value;}
 
 void    Location::setRoot(std::string const &_root){ root = _root;}
 
@@ -91,11 +92,11 @@ std::string                 Server::getHost() const{return host;}
 int                         Server::getListen() const{return listen;}
 
 
-void    Server::setServer_names(std::vector<std::string> const & errors){ server_names = errors;}
+void    Server::setServer_names(std::string const & _name){ server_names.push_back(_name);}
 
-void    Server::setError_pages(std::map<int, std::string> const & errors){ error_pages = errors;}
+void    Server::setError_pages(std::string & _value, int _key){ error_pages[_key] = _value;}
 
-void    Server::setRedirection(std::map<int, std::string> const & errors){ redirection = errors;}
+void    Server::setRedirection(std::string & _value, int _key){ redirection[_key] = _value;}
 
 void    Server::setRoot(std::string const &_root){ root = _root;}
 
@@ -103,3 +104,5 @@ void    Server::setHost(std::string const& _Host){ host = _Host;}
 
 void    Server::setListen(int lis){ listen = lis;}
 
+
+void	 Server::addLocation(Location const &loc){Locations.push_back(loc);}

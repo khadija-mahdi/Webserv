@@ -19,12 +19,19 @@
 #include <deque>
 #include "ConfigFile/Configurations.hpp"
 #include <cstring>
+#include <sstream>
+#include <stdexcept>
 
 
 class Location;
 class Server;
 class Configurations;
+class Http;
 
+std::map<std::string, std::string> extractKeyValues(const std::string& config);
 std::string PreProcessingFile();
 std::string Blocks(const std::string& lines, const std::string& blockName);
-std::map<std::string, std::string> extractKeyValues(const std::string& config);
+bool        isDigit(std::string &value);
+void        splitKeyValue(std::string &block, std::string &key, std::string &value, std::string word, int flag);
+int         linesLength(std::string& Block);
+void        parsingValues(std::string &lines);
