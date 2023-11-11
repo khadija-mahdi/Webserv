@@ -1,20 +1,20 @@
 
 #include "Webserv.hpp"
 
-std::string &splitBlocks(std::string &mainBlock, std::string &nameChild){
-    std::string childBlock = "";
-     int pos = 0;
-    std::istringstream BlockStream(mainBlock);
-    std::string line;
+// std::string &splitBlocks(std::string &mainBlock, std::string &nameChild){
+//     std::string childBlock = "";
+//      int pos = 0;
+//     std::istringstream BlockStream(mainBlock);
+//     std::string line;
 
-    while (std::getline(BlockStream, line)) {
-        int start = mainBlock.find(, pos);
-        childBlock += line + "\n";
-        else
-            continue;
+//     while (std::getline(BlockStream, line)) {
+//         int start = mainBlock.find(, pos);
+//         childBlock += line + "\n";
+//         else
+//             continue;
 
-    }
-}
+//     }
+// }
 void parseEventsBlock(std::string& events){ //!  Events done, it dons't accept any other values  just "{worker_connections only}";
     Configurations::Events event;
     std::string value = "";
