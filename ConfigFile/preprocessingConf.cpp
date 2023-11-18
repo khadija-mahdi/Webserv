@@ -1,4 +1,24 @@
-#include "Webserv.hpp"
+#include "Configurations.hpp"
+
+int linesLength(std::string& Block){
+    int len = 0;
+    for (size_t i = 0 ; Block[i]; i++)
+    {
+        if (Block[i] == '\n')  
+            len++;
+    }
+    return len;
+}
+
+bool isDigit(std::string &value){
+    for (int i = 0; i < value.length() -2  ; i++)
+    {
+        if (!std::isdigit(value[i]))
+            throw std::runtime_error("key is not integer : " + value);
+    }
+    return true;
+}
+
 
 std::string locationSyntax(std::string word){
     std::string locWord = "";
@@ -62,7 +82,7 @@ bool lineSpace(std::string &line) {
 
 void readConfigFile(std::string &lines){
     std::string line = "";
-    std::fstream conf("config_file.conf");
+    std::fstream conf("config/config_file.conf");
     if (conf.is_open())
     {   
         while (std::getline(conf, line, '\n')){
@@ -97,14 +117,8 @@ void CurlyBrackets(std::string &lines){
 
 std::string PreProcessingFile(){
     std::string lines = "";
-    try
-    {    
-        readConfigFile(lines);
-        CurlyBrackets(lines);
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
+    
+    readConfigFile(lines);
+    CurlyBrackets(lines);
     return lines;
 }

@@ -72,7 +72,7 @@ public:
 	void	printRedirection(){
 		std::map<int, std::string>::iterator it = redirection.begin();
 		for (; it != redirection.end(); ++it) {
-			std::cout<< "red : " << it->first << " => " << it->second << "\n";
+			std::cout<< "server redirection  : " << it->first << " => " << it->second << "\n";
 		}
 	}
 	
@@ -109,3 +109,60 @@ public:
 	}
 	};
 };
+
+
+class Values {
+    std::vector<std::pair<std::string, std::pair<int, int> > > extractedBlocks;
+public:
+    std::vector<std::pair<std::string, std::pair<int, int> > > &BlocksS(const std::string &lines, const std::string &blockName) {
+        int pos = 0;
+
+        while (pos < lines.length()) {
+            int start = lines.find(blockName, pos);
+            if (start == std::string::npos)
+                break;
+            int openBrace = lines.find('{', start);
+            if (openBrace == std::string::npos)
+                break;
+            int closeBrace = openBrace + 1;
+            int bracesCount = 1;
+
+            while (bracesCount > 0 && closeBrace < lines.length()) {
+                if (lines[closeBrace] == '{') {
+                    bracesCount++;
+                } else if (lines[closeBrace] == '}') {
+                    bracesCount--;
+                }
+                closeBrace++;
+            }
+            if (bracesCount == 0) {
+                std::string block = lines.substr(openBrace, closeBrace - openBrace);
+                extractedBlocks.push_back(std::make_pair(block, std::make_pair(start, closeBrace)));
+                pos = closeBrace;
+            } else {
+                break;
+            }
+        }
+        return extractedBlocks;
+    }
+
+    void printPairVect(std::string &lines){
+        extractedBlocks = BlocksS(lines, "server");
+        std::cout << extractedBlocks.size() << std::endl;
+        for (size_t i = 0; i < extractedBlocks.size(); ++i) {
+            std::cout << "Element " << i + 1 << ": ";
+            std::cout << extractedBlocks[i].first << " (" << extractedBlocks[i].second.first << ", " << extractedBlocks[i].second.second << ")\n";
+        }
+    }
+};
+
+bool isDigit(std::string &value);
+int linesLength(std::string& Block);
+void   splitKeyValue(std::string &block, std::string &key, std::string &value, std::string word, int flag);
+std::string Blocks(const std::string& lines, const std::string& blockName);
+std::vector<std::string> BlocksExtra(const std::string &lines, const std::string &blockName);
+void singleData(Server & server, std::string &serverBlock);
+void errorPagesSter(std::string &httpBlock, Configurations::Http &httpConfig);
+void processRedirection(const std::string& line, std::string& value, int& errorCode);
+void processErrorPage(const std::string& line, std::string &value, int& errorCode) ;
+std::map<std::string, std::string> extractKeyValues(const std::string& Block);

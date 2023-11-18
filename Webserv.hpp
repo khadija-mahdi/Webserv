@@ -21,17 +21,16 @@
 #include <cstring>
 #include <sstream>
 #include <stdexcept>
+#include <utility> // For std::pair
+
 
 
 class Location;
 class Server;
 class Configurations;
 class Http;
+class Values;
 
-std::map<std::string, std::string> extractKeyValues(const std::string& config);
 std::string PreProcessingFile();
-std::string Blocks(const std::string& lines, const std::string& blockName);
-bool        isDigit(std::string &value);
-void        splitKeyValue(std::string &block, std::string &key, std::string &value, std::string word, int flag);
-int         linesLength(std::string& Block);
-void        parsingValues(std::string &lines);
+void pacingConfigFile();
+void parsingValues(std::string &lines);

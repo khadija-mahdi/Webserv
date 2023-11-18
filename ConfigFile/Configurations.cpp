@@ -6,24 +6,24 @@ int Configurations::Events::getWorkerConnections() const{return worker_connectio
 
 void    Configurations::Events::setWorkerConnections(int worCon){ worker_connections = worCon;}
 
-void    Configurations::Events::eventsBlock(std::string &lines) {
+// void    Configurations::Events::eventsBlock(std::string &lines) {
 
-    std::string extractedBlock = Blocks(lines, "events");
-    if (!extractedBlock.empty())
-        return;
-    std::map<std::string, std::string>  value = extractKeyValues(extractedBlock);
-    if (!value.size())
-        return;
-    if (value.size() == 1){
-        const char *integerV = value["worker_connections"].c_str();
-        int intvalue = atoi(integerV);
-        // std::cout << intvalue << std::endl;
-        setWorkerConnections(intvalue);
-    }
-    else{
-        throw std::runtime_error("events blocks error");
-    }
-}
+//     std::string extractedBlock = Blocks(lines, "events");
+//     if (!extractedBlock.empty())
+//         return;
+//     std::map<std::string, std::string>  value = extractKeyValues(extractedBlock);
+//     if (!value.size())
+//         return;
+//     if (value.size() == 1){
+//         const char *integerV = value["worker_connections"].c_str();
+//         int intvalue = atoi(integerV);
+//         // std::cout << intvalue << std::endl;
+//         setWorkerConnections(intvalue);
+//     }
+//     else{
+//         throw std::runtime_error("events blocks error");
+//     }
+// }
 
 
 
@@ -106,3 +106,7 @@ void    Server::setListen(int lis){ listen = lis;}
 
 
 void	 Server::addLocation(Location const &loc){Locations.push_back(loc);}
+
+
+/*----------------------------------------------------pacing functions -----------------------------------------*/
+
