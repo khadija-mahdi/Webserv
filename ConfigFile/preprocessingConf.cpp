@@ -26,6 +26,9 @@ std::string locationSyntax(std::string word){
     for(i = 0; word[i] &&( word[i] == ' ' || word[i] == '\t'); i++);
     for(; word[i] && word[i] != ' '; i++)
         locWord += word[i];
+    for(; word[i] &&( word[i] == ' ' || word[i] == '\t'); i++);
+    if (!word[i])
+        throw std::runtime_error("syntax error in :" + word);
     if (locWord == "location")
         return word;
     throw std::runtime_error("syntax error in :" + word);

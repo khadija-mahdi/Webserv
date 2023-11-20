@@ -15,9 +15,7 @@ void parseEventsBlock(std::string & events){ //!  Events done, it dons't accept 
 
 Location parseLocationBlock(std::string &locationBlock) {
     Location location;
-    
     locationValues(location, locationBlock);
-    location.errorPagesSter(locationBlock);
     return location;
 }
 
@@ -27,6 +25,8 @@ void locationInServer(std::string &ServerBlock, Server &ServerConfig){
     int start, end;
     
     extractedBlocks = loc.BlocksS(ServerBlock,"location");
+    if (extractedBlocks.size() == 0)
+        return;
     for (size_t i = 0; i < extractedBlocks.size(); ++i) {
         Location location = parseLocationBlock(extractedBlocks[i].first);
         ServerConfig.addLocation(location);
@@ -44,7 +44,6 @@ Server parseServerBlock(std::string &serverBlock) {
     int errorCode = 0;
     locationInServer(serverBlock, server);
     singleData(server,serverBlock);
-    server.errorPagesSter(serverBlock);
     return server;
 }
 
@@ -55,6 +54,8 @@ void ServerInHttp(std::string &httpBlock,  Configurations::Http &httpConfig){
     int start, end;
     
     extractedBlocks = serv.BlocksS(httpBlock,"server");
+    if(extractedBlocks.size() < 1)
+        throw std::runtime_error("block server not found ");
     for (size_t i = 0; i < extractedBlocks.size(); ++i) {
         Server server = parseServerBlock(extractedBlocks[i].first);
         httpConfig.addServer(server);
@@ -109,4 +110,6 @@ void parsingValues(std::string &lines) {
         std::string httpBlock = https[0];
         parseHttpBlock(httpBlock);
     }
+    else
+        throw std::runtime_error("http Block not exist");
 }

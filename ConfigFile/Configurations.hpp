@@ -1,9 +1,6 @@
 #pragma once
 #include "../Webserv.hpp"
 
-void	processRedirection(const std::string& line, std::string& value, int& errorCode);
-void	processErrorPage(const std::string& line, std::string &value, int& errorCode);
-
 struct Redirection {
     std::string	ReturnLocation;
     int			statusCode;
@@ -16,9 +13,9 @@ private:
 	std::map<int, std::string>	error_pages;
 	Redirection					redirection; // path , status code
 	std::string					autoindex; // on / of
-	std::vector<std::string>	allow;
+	std::vector<std::string>	allow; // method get post delete
 	std::string					upload; // on , of
-	std::string					upload_stor;
+	std::string					upload_stor; // path to stor upload
 
 
 public:
@@ -109,6 +106,9 @@ public:
 		void						setIncludes(std::string &, std::string );
 		void						setDefault_type(std::string &);
 	
+		std::vector<Server>			getServe() const{
+			return Servers;
+		}
 		std::string							getMax_body_size() const;
 		std::string							getDefault_type() const;
 		std::map<int, std::string>			getError_pages() const;

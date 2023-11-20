@@ -1,4 +1,5 @@
 #include "Configurations.hpp"
+
 std::map<std::string, std::string> extractKeyValuesIN(const std::string& Block) {
     std::map<std::string, std::string> keyValues;
     std::istringstream BlockStream(Block);
@@ -32,7 +33,7 @@ std::map<std::string, std::string> extractKeyValuesIN(const std::string& Block) 
                 keyValues[individualKey] = values;
         }
         else 
-            throw std::runtime_error("syntax error values value. [" + line + "]");
+            throw std::runtime_error("syntax error values value : " + line);
     }
 
     return keyValues;

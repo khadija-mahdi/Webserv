@@ -61,6 +61,8 @@ std::map<std::string, std::string> extractKeyValues(const std::string& Block) {
     std::map<std::string, std::string> keyValues;
     std::istringstream BlockStream(Block);
     std::string line;
+    if (Block.empty())
+        return keyValues;
 
     while (std::getline(BlockStream, line)) {
         std::vector<std::string> parts;
@@ -101,6 +103,8 @@ void   splitKeyValue(std::string &block, std::string &key, std::string &value, s
     if (pos == std::string::npos && flag == 1)
         throw std::runtime_error("block error : " + block);
     size_t end = block.find("}");
+    // if(pos = std::string::npos)
+    //     return;
     for(int i = pos ; i < end ; i++)
         keyValue += block[i];
     int vstart = 0;
@@ -189,7 +193,11 @@ void singleData(Server & server, std::string &serverBlock){
     for (; it != values.end(); ++it) {
         if(it->first == "listen" && isDigit(it->second)){
             flag++;
-            server.setListen(atoi(it->second.c_str()));
+            int value = atoi(it->second.c_str());
+            if (value > 0 && value <= 65536)
+                server.setListen(value);
+            else
+                throw std::runtime_error("not a valid port : " + it->second);
         }
         else if(it->first == "host"){
             flag++;
@@ -228,6 +236,8 @@ void locationValues(Location &location, std::string &locationBlock){
     int flag = 0;
 
     values = extractKeyValues(locationBlock);
+    if (values.size() == 0)
+        return;
     std::map<std::string, std::string>::iterator it = values.begin();
     for (; it != values.end(); ++it) {
         if(it->first == "root"){
@@ -281,10 +291,7 @@ void locationValues(Location &location, std::string &locationBlock){
             location.setUpload_stor(it->second.c_str());
         }
         else if(it->first == "return" && processRedirection(path, st, it->second))
-        {
-            std::cout << "path " << path << " , status : " << st << std::endl;
             location.setRedirection(path, st);
-        }
         else if (it->first == "error_page" && processErrors(path, st, it->second))
             location.setError_pages(path, st);
         else
@@ -292,24 +299,6 @@ void locationValues(Location &location, std::string &locationBlock){
     }
     // if (flag != 3)
     //     throw std::runtime_error("the obligation keys not found"); //? need to set obligation values
-}
-
-
-void processErrorPage(const std::string& line, std::string &value, int& errorCode) {
-    std::istringstream iss(line);
-    std::string key;
-
-    iss >> key;
-
-    if (key == "error_page" && (iss >> key)) {
-        std::istringstream keyStream(key);
-
-        if (keyStream >> errorCode) {
-            iss >> value;
-        } else { 
-            throw std::runtime_error("Invalid error page: " + line);
-        }
-    }
 }
 
 
