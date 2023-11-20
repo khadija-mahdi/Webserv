@@ -1,27 +1,37 @@
 #pragma once
 #include "../Webserv.hpp"
 
+void	processRedirection(const std::string& line, std::string& value, int& errorCode);
+void	processErrorPage(const std::string& line, std::string &value, int& errorCode);
+
+struct Redirection {
+    std::string	ReturnLocation;
+    int			statusCode;
+};
 class Location {
 private:
+
 	std::string					root;
 	std::vector<std::string>	index;
 	std::map<int, std::string>	error_pages;
-	std::map<int, std::string>	redirection; // path , status code
+	Redirection					redirection; // path , status code
 	std::string					autoindex; // on / of
-	std::string					allow;
-	std::string					upload;
+	std::vector<std::string>	allow;
+	std::string					upload; // on , of
 	std::string					upload_stor;
+
 
 public:
 
 	std::vector<std::string>	getIndex() const;
 	std::map<int, std::string>  getError_pages() const;
-	std::map<int, std::string>	getRedirection() const;
+	Redirection					getRedirection() const;
 	std::string					getRoot() const;
 	std::string					getAutoindex() const;
-	std::string					getAllow() const;
+	std::vector<std::string>	getAllow() const;
 	std::string					getUpload() const;
 	std::string					getUpload_stor() const;
+
 
 	void	setIndex(std::string const & _name );
 	void	setRedirection(std::string & _value, int _key);
@@ -40,21 +50,23 @@ public:
 };
 
 class Server {
+
 	std::string					host; //localhost / 127.0.0.1 /0.0.0.0
 	int							listen; //(port)
 	std::vector<std::string>	server_names;
 	std::map<int, std::string>	error_pages;
-	std::map<int, std::string>	redirection; // path , status code
+	Redirection					redirection; // path , status code
 	std::string					root;
 	std::vector<Location>		Locations;
 
 public:
+
 	std::string					getHost() const;
 	int							getListen() const;
 	std::string					getRoot() const;
 	std::vector<std::string>	getServer_names() const;
 	std::map<int, std::string>  getError_pages() const;
-	std::map<int, std::string>	getRedirection() const;
+	Redirection					getRedirection() const;
 
 	void	setHost(std::string  const &);
 	void	setListen(int);
@@ -69,12 +81,6 @@ public:
 			std::cout<< "server error : " << it->first << " => " << it->second << "\n";
 		}
 	}
-	void	printRedirection(){
-		std::map<int, std::string>::iterator it = redirection.begin();
-		for (; it != redirection.end(); ++it) {
-			std::cout<< "server redirection  : " << it->first << " => " << it->second << "\n";
-		}
-	}
 	
 };
 
@@ -86,27 +92,34 @@ public:
 	public:
 		void	setWorkerConnections(int);
 		int		getWorkerConnections() const;
-		void	eventsBlock(std::string &lines);
 	};
 
 	class Http {
 	private:
-		std::string					max_body_size;
-		std::map<int, std::string>	error_pages;
-		std::vector<Server>			Servers;
+		std::string							max_body_size;
+		std::string							default_type;
+		std::map<int, std::string>			error_pages;
+		std::vector<Server>					Servers;
+		std::map<std::string, std::string>	Includes;
 	public:
 
 		void						setMax_body_size(std::string &);
 		void						setError_pages(std::string & _value, int _key);
 		void 						addServer(Server const &);
-		std::string					getMax_body_size() const;
-		std::map<int, std::string>	getError_pages() const;
+		void						setIncludes(std::string &, std::string );
+		void						setDefault_type(std::string &);
+	
+		std::string							getMax_body_size() const;
+		std::string							getDefault_type() const;
+		std::map<int, std::string>			getError_pages() const;
+		std::map<std::string, std::string>	getIncludes() const;
+
 		void	printErrorPages(){
 			std::map<int, std::string>::iterator it = error_pages.begin();
 			for (; it != error_pages.end(); ++it) {
 				std::cout<< "http error : " << it->first << " => " << it->second << "\n";
+			}
 		}
-	}
 	};
 };
 
@@ -145,7 +158,6 @@ public:
         }
         return extractedBlocks;
     }
-
     void printPairVect(std::string &lines){
         extractedBlocks = BlocksS(lines, "server");
         std::cout << extractedBlocks.size() << std::endl;
@@ -156,13 +168,24 @@ public:
     }
 };
 
-bool isDigit(std::string &value);
-int linesLength(std::string& Block);
-void   splitKeyValue(std::string &block, std::string &key, std::string &value, std::string word, int flag);
-std::string Blocks(const std::string& lines, const std::string& blockName);
-std::vector<std::string> BlocksExtra(const std::string &lines, const std::string &blockName);
-void singleData(Server & server, std::string &serverBlock);
-void errorPagesSter(std::string &httpBlock, Configurations::Http &httpConfig);
-void processRedirection(const std::string& line, std::string& value, int& errorCode);
-void processErrorPage(const std::string& line, std::string &value, int& errorCode) ;
-std::map<std::string, std::string> extractKeyValues(const std::string& Block);
+
+
+
+std::map<std::string, std::string>	extractKeyValues(const std::string& Block);
+std::vector<std::string>			BlocksExtra(const std::string &lines, const std::string &blockName);
+std::string							Blocks(const std::string& lines, const std::string& blockName);
+bool								isDigit(std::string &value);
+int									linesLength(std::string& Block);
+void								splitKeyValue(std::string &block, std::string &key, std::string &value, std::string word, int flag);
+void								singleData(Server & server, std::string &serverBlock);
+void								includeMimeTypes(std::string &fileName);
+void								CurlyBrackets(std::string &lines);
+void								readConfigFile(std::string &lines, int flag);
+void 								syntaxForm(std::string &line, int check);
+std::string 						&skepComment(std::string &line);
+bool								lineSpace(std::string &line);
+void								locationValues(Location &location, std::string &locationBlock);
+bool								processErrors(std::string& path, int &status, std::string &key);
+
+
+

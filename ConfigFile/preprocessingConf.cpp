@@ -43,21 +43,22 @@ bool isInFormat(std::string& word, std::string& line) {
 }
 
 
-void syntaxForm(std::string &line){
+void syntaxForm(std::string &line, int check){
     int flag = 0;
     std::string word = "";
     for(int i = 0; line[i] ; i++){
         if (line[i] == '{'){
             flag++;
             word = line.substr(0,i);
-            isInFormat(word, line);
+            if (check == 1)
+                isInFormat(word, line);
         }
         if (line[i] == '}')
             flag++;
     }
     if(!flag) {
         if (line[line.size() - 1] != ';')
-            throw std::runtime_error("syntax error in :" + line);
+            throw std::runtime_error("syntax error in no ; in end of line :" + line);
     }
 }
 
@@ -80,7 +81,7 @@ bool lineSpace(std::string &line) {
 }
 
 
-void readConfigFile(std::string &lines){
+void readConfigFile(std::string &lines, int flag){
     std::string line = "";
     std::fstream conf("config/config_file.conf");
     if (conf.is_open())
@@ -89,7 +90,9 @@ void readConfigFile(std::string &lines){
             line = skepComment(line);
             if (line.empty() || lineSpace(line))
                 continue;
-            syntaxForm(line); 
+            while(line[line.size() - 1] == '\t' || line[line.size() - 1] == ' ')
+                line = line.erase(line.size() -1);
+            syntaxForm(line, flag); 
             lines += line + "\n";
         }
         conf.close();
@@ -118,7 +121,7 @@ void CurlyBrackets(std::string &lines){
 std::string PreProcessingFile(){
     std::string lines = "";
     
-    readConfigFile(lines);
+    readConfigFile(lines, 1);
     CurlyBrackets(lines);
     return lines;
 }

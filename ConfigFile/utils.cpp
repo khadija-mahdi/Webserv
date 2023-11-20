@@ -1,5 +1,62 @@
 #include "Configurations.hpp"
 
+bool isDigitStr(std::string &value){
+    for (int i = 0; i < value.length() ; i++)
+    {
+        if (!std::isdigit(value[i]))
+            return 0;
+    }
+    return true;
+}
+
+bool processRedirection(std::string& path, int &status, std::string &key){
+
+    std::istringstream iss(key);
+
+    std::string word;
+    int i = 0;
+    
+    while (iss >> word) {
+        if (isDigitStr(word) && i == 0) {
+            status = atoi(word.c_str());
+            i++;
+        } 
+        else if (!isDigitStr(word)){
+            i++;
+            path = word;
+        }
+    }
+    if (i == 1 || (i == 2) && status >= 100 && status <= 599)
+        return true;
+    else
+        throw std::runtime_error("not a true redirection syntax: " + key);
+    return 0;
+}
+
+bool processErrors(std::string& path, int &status, std::string &key){
+
+    std::istringstream iss(key);
+
+    std::string word;
+    int i = 0;
+    
+    while (iss >> word) {
+        if (isDigitStr(word) && i == 0) {
+            status = atoi(word.c_str());
+            i++;
+        } 
+        else if (!isDigitStr(word)){
+            i++;
+            path = word;
+        }
+    }
+    if ((i == 2) && status >= 100 && status <= 599)
+        return true;
+    else
+        throw std::runtime_error("not a true redirection syntax: " + key);
+    return 0;
+}
+
 std::map<std::string, std::string> extractKeyValues(const std::string& Block) {
     std::map<std::string, std::string> keyValues;
     std::istringstream BlockStream(Block);
@@ -124,6 +181,8 @@ std::vector<std::string> BlocksExtra(const std::string &lines, const std::string
 void singleData(Server & server, std::string &serverBlock){
     std::map<std::string, std::string> values;
     int flag = 0;
+    int st;
+    std::string path = "";
 
     values = extractKeyValues(serverBlock);
     std::map<std::string, std::string>::iterator it = values.begin();
@@ -142,21 +201,97 @@ void singleData(Server & server, std::string &serverBlock){
         }
         else if(it->first == "server_names")
         {
-            std::string key;
+            std::string key = it->second;
             std::istringstream iss(key);
             std::string word;
             while (iss >> word) {
                 server.setServer_names(word);
             }
-            for (size_t i = 0; i < server.getServer_names().size(); ++i) {
-                std::cout << "name " << i + 1 << ": " << server.getServer_names()[i] << std::endl;
-            }
         }
-        else if (it->first != "error_page" && it->first != "return")
+        else if(it->first == "return" && processRedirection(path, st, it->second))
+            server.setRedirection(path, st);
+        else if (it->first == "error_page" && processErrors(path, st, it->second))
+            server.setError_pages(path, st);
+        else
             throw std::runtime_error("server wrong key : " + it->first);
     }
     if (flag != 3)
         throw std::runtime_error("the obligation keys not found");
+}
+
+
+
+void locationValues(Location &location, std::string &locationBlock){
+    std::map<std::string, std::string> values;
+    int st;
+    std::string path = "";
+    int flag = 0;
+
+    values = extractKeyValues(locationBlock);
+    std::map<std::string, std::string>::iterator it = values.begin();
+    for (; it != values.end(); ++it) {
+        if(it->first == "root"){
+            flag++;
+            location.setRoot(it->second.c_str());
+        }
+        else if(it->first == "index")
+        {
+            std::string key = it->second;
+            std::istringstream iss(key);
+            std::string word;
+            while (iss >> word)
+                location.setIndex(word);
+        }
+        else if(it->first == "autoindex"){
+            flag++;
+            if (it->second == "on" || it->second == "off")
+                location.setAutoindex(it->second);
+            else
+                 throw std::runtime_error("location wrong value : " + it->first + " = " + it->second);
+        }
+        else if(it->first == "allow"){
+            std::string method = it->second;
+            std::istringstream allow(method);
+            std::string methodName;
+            while (allow >> methodName){
+                if (methodName == "get" || methodName == "post" || methodName == "delete" || methodName == "all")
+                {
+                    if (methodName == "all"){
+                        location.setAllow("post");
+                        location.setAllow("get");
+                        location.setAllow("delete");
+                    }
+                    else
+                        location.setAllow(methodName);
+                }
+                else
+                    throw std::runtime_error("No method called : " + methodName);
+            }
+            location.setAllow(it->second.c_str());
+        }
+        else if(it->first == "upload"){
+            flag++;
+            if (it->second == "on" || it->second == "off")
+                location.setAutoindex(it->second);
+            else
+                throw std::runtime_error("location wrong value : " + it->first + " = " + it->second);
+        }
+        else if(it->first == "upload_stor"){
+            flag++;
+            location.setUpload_stor(it->second.c_str());
+        }
+        else if(it->first == "return" && processRedirection(path, st, it->second))
+        {
+            std::cout << "path " << path << " , status : " << st << std::endl;
+            location.setRedirection(path, st);
+        }
+        else if (it->first == "error_page" && processErrors(path, st, it->second))
+            location.setError_pages(path, st);
+        else
+            throw std::runtime_error("location wrong key : " + it->first);
+    }
+    // if (flag != 3)
+    //     throw std::runtime_error("the obligation keys not found"); //? need to set obligation values
 }
 
 
@@ -178,54 +313,5 @@ void processErrorPage(const std::string& line, std::string &value, int& errorCod
 }
 
 
-void processRedirection(const std::string& line, std::string& value, int& errorCode) {
-    std::istringstream iss(line);
-    std::string key;
-
-    iss >> key;
-
-    if (key == "return") {
-        if (iss >> errorCode) {
-            if (iss >> value) {
-                // Check if there is more than 3 words
-                std::string word;
-                if (iss >> word) {
-                    throw std::runtime_error("Invalid redirection: " + line);
-                }
-            } else {
-                throw std::runtime_error("Invalid redirection: " + line);
-            }
-        } else {
-            // Case: "return path"
-            errorCode = 0; // Set a default error code if not provided
-            iss.clear();   // Clear the error flag
-            if (iss >> value) {
-                // Check if there is exactly 2 words
-                std::string word;
-                if (iss >> word) {
-                    throw std::runtime_error("Invalid redirection: " + line);
-                }
-                return;
-            } else {
-                throw std::runtime_error("Invalid redirection: " + line);
-            }
-        }
-    }
-}
 
 
-void errorPagesSter(std::string &httpBlock, Configurations::Http &httpConfig){
-    std::string value = "";
-    int errorCode = 0;
-
-    std::istringstream BlockStream(httpBlock);
-    std::string line = "";
-    while (std::getline(BlockStream, line)) {
-        processErrorPage(line, value, errorCode);
-        if (!value.empty()){
-            httpConfig.setError_pages(value, errorCode);
-            value = "";
-        }
-    }
-    httpConfig.printErrorPages();
-}

@@ -6,36 +6,20 @@ int Configurations::Events::getWorkerConnections() const{return worker_connectio
 
 void    Configurations::Events::setWorkerConnections(int worCon){ worker_connections = worCon;}
 
-// void    Configurations::Events::eventsBlock(std::string &lines) {
-
-//     std::string extractedBlock = Blocks(lines, "events");
-//     if (!extractedBlock.empty())
-//         return;
-//     std::map<std::string, std::string>  value = extractKeyValues(extractedBlock);
-//     if (!value.size())
-//         return;
-//     if (value.size() == 1){
-//         const char *integerV = value["worker_connections"].c_str();
-//         int intvalue = atoi(integerV);
-//         // std::cout << intvalue << std::endl;
-//         setWorkerConnections(intvalue);
-//     }
-//     else{
-//         throw std::runtime_error("events blocks error");
-//     }
-// }
-
-
 
 //------------------------------------------Http class --------------------------------------------
 
 std::string                 Configurations::Http::getMax_body_size() const{return max_body_size;}
+std::string                 Configurations::Http::getDefault_type() const{return default_type;}
 
 std::map<int, std::string>  Configurations::Http::getError_pages() const { return error_pages; }
+std::map<std::string, std::string>  Configurations::Http::getIncludes() const { return Includes; }
 
 void        Configurations::Http::setMax_body_size(std::string &bodySize){ max_body_size = bodySize;}
+void        Configurations::Http::setDefault_type(std::string &defTyp){ default_type = defTyp;}
 
 void        Configurations::Http::setError_pages(std::string & _value, int _key){error_pages[_key] = _value;}
+void        Configurations::Http::setIncludes(std::string & _value, std::string _key){Includes[_key] = _value;}
 void	    Configurations::Http::addServer(Server const &loc){Servers.push_back(loc);}
 
 
@@ -43,7 +27,7 @@ void	    Configurations::Http::addServer(Server const &loc){Servers.push_back(lo
 
 std::vector<std::string>    Location::getIndex() const{return index;}
 
-std::map<int, std::string>  Location::getRedirection() const{return redirection;}
+Redirection                 Location::getRedirection() const{return redirection;}
 
 std::map<int, std::string>  Location::getError_pages() const{return error_pages;}
 
@@ -51,7 +35,7 @@ std::string                 Location::getRoot() const{return root;}
 
 std::string                 Location::getAutoindex() const{return autoindex;}
 
-std::string                 Location::getAllow() const{return allow;}
+std::vector<std::string>    Location::getAllow() const{return allow;}
 
 std::string                 Location::getUpload() const{return upload;}
 
@@ -63,7 +47,10 @@ void    Location::setIndex(std::string const & _index){index.push_back(_index);}
 
 void    Location::setError_pages(std::string & _value, int _key){error_pages[_key] = _value;;}
 
-void    Location::setRedirection(std::string & _value, int _key){ redirection[_key] = _value;}
+void    Location::setRedirection(std::string & _value, int _key){
+    redirection.ReturnLocation = _value;
+    redirection.statusCode = _key;
+}
 
 void    Location::setRoot(std::string const &_root){ root = _root;}
 
@@ -73,7 +60,7 @@ void    Location::setUpload(std::string const& _upload){ upload = _upload;}
 
 void    Location::setUpload_stor(std::string const& _upload_stor){ upload_stor = _upload_stor;}
 
-void    Location::setAllow(std::string const& _allow){ allow = _allow;}
+void    Location::setAllow(std::string const& _allow){ allow.push_back(_allow);}
 
 
 //-----------------------------------Server class ------------------------------------------
@@ -81,7 +68,7 @@ void    Location::setAllow(std::string const& _allow){ allow = _allow;}
 
 std::vector<std::string>    Server::getServer_names() const{return server_names;}
 
-std::map<int, std::string>  Server::getRedirection() const{return redirection;}
+Redirection                 Server::getRedirection() const{return redirection;}
 
 std::map<int, std::string>  Server::getError_pages() const{return error_pages;}
 
@@ -96,7 +83,10 @@ void    Server::setServer_names(std::string const & _name){ server_names.push_ba
 
 void    Server::setError_pages(std::string & _value, int _key){ error_pages[_key] = _value;}
 
-void    Server::setRedirection(std::string & _value, int _key){ redirection[_key] = _value;}
+void    Server::setRedirection(std::string & _value, int _key){
+    redirection.ReturnLocation = _value;
+    redirection.statusCode = _key;
+}
 
 void    Server::setRoot(std::string const &_root){ root = _root;}
 

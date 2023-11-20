@@ -12,9 +12,12 @@ void parseEventsBlock(std::string & events){ //!  Events done, it dons't accept 
         throw std::runtime_error("events Block error!!");
 }
 
+
 Location parseLocationBlock(std::string &locationBlock) {
     Location location;
-
+    
+    locationValues(location, locationBlock);
+    location.errorPagesSter(locationBlock);
     return location;
 }
 
@@ -41,21 +44,7 @@ Server parseServerBlock(std::string &serverBlock) {
     int errorCode = 0;
     locationInServer(serverBlock, server);
     singleData(server,serverBlock);
-    while (std::getline(BlockStream, line)) {
-     
-        processErrorPage(line, value, errorCode);
-        if (!value.empty()){
-            server.setError_pages(value, errorCode);
-            value = "";
-        }
-        processRedirection(line, value, errorCode);
-        if (!value.empty()){
-            server.setRedirection(value, errorCode);
-            value = "";
-        }
-    }
-    server.printErrorPages();
-    server.printRedirection();
+    server.errorPagesSter(serverBlock);
     return server;
 }
 
@@ -77,22 +66,25 @@ void ServerInHttp(std::string &httpBlock,  Configurations::Http &httpConfig){
 
 void parseHttpBlock(std::string &httpBlock) {
     Configurations::Http httpConfig;
+    int st;
+    std::string path = "";
 
     std::map<std::string, std::string> values;
     ServerInHttp(httpBlock, httpConfig); //! Parse "server" blocks
     values = extractKeyValues(httpBlock);
     std::map<std::string, std::string>::iterator it = values.begin();
     for (; it != values.end(); ++it) {
-        if(it->first == "client_max_body_size")
+        if (it->first == "include")
+            includeMimeTypes(it->second); //? open mime.types and set this values in map inside the http class
+        else if(it->first == "default_type")
+                httpConfig.setDefault_type(it->second);// set the default path ;
+        else if(it->first == "client_max_body_size")
             httpConfig.setMax_body_size(it->second);
-        else if(it->first == "default_type");
-            // mimeTypes(); //? open mime.types and set this values in map inside the http class
-        else if (it->first == "include");
-            // set the default path ;
-        else if (!(it->first == "error_page"))
+        else if (it->first == "error_page" && processErrors(path, st, it->second))
+            httpConfig.setError_pages(path, st);
+        else 
             throw std::runtime_error("http wrong key !");
     }
-    errorPagesSter(httpBlock,httpConfig);
 
 }
 
