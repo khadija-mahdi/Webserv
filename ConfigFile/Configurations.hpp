@@ -186,6 +186,6 @@ std::string 						&skepComment(std::string &line);
 bool								lineSpace(std::string &line);
 void								locationValues(Location &location, std::string &locationBlock);
 bool								processErrors(std::string& path, int &status, std::string &key);
-
+bool								isDigitStr(std::string &value);
 
 

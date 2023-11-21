@@ -16,6 +16,7 @@ void parseEventsBlock(std::string & events){ //!  Events done, it dons't accept 
 Location parseLocationBlock(std::string &locationBlock) {
     Location location;
     locationValues(location, locationBlock);
+    // location.printErrorPages();
     return location;
 }
 
@@ -44,6 +45,7 @@ Server parseServerBlock(std::string &serverBlock) {
     int errorCode = 0;
     locationInServer(serverBlock, server);
     singleData(server,serverBlock);
+    // server.printErrorPages();
     return server;
 }
 
@@ -65,8 +67,33 @@ void ServerInHttp(std::string &httpBlock,  Configurations::Http &httpConfig){
     httpBlock = httpBlock.substr(0, start) + httpBlock.substr(end+1);
 }
 
+void processErrorPage(const std::string& line, std::string &path, int& status) {
+    std::istringstream iss(line);
+    std::string word;
+
+    iss >> word;
+    int i = -1;
+    if (word == "error_page") {
+        while (iss >> word) {
+            i++;
+            if (isDigitStr(word) && i == 0) {
+                status = atoi(word.c_str());
+                i++;
+            } 
+            else if (!isDigitStr(word) && i == 1){
+                i++;
+                path = word;
+            }    
+            else if ((i != 2) || status < 100 || status > 599)
+                throw std::runtime_error("not a true error pages syntax: " + line);
+        }
+    }
+}
+
 void parseHttpBlock(std::string &httpBlock) {
     Configurations::Http httpConfig;
+    std::istringstream BlockStream(httpBlock);
+    std::string line = "";
     int st;
     std::string path = "";
 
@@ -81,10 +108,16 @@ void parseHttpBlock(std::string &httpBlock) {
                 httpConfig.setDefault_type(it->second);// set the default path ;
         else if(it->first == "client_max_body_size")
             httpConfig.setMax_body_size(it->second);
-        else if (it->first == "error_page" && processErrors(path, st, it->second))
-            httpConfig.setError_pages(path, st);
+        else if (it->first == "error_page"){
+            while (std::getline(BlockStream, line)) {
+                processErrorPage(line, path, st);
+                httpConfig.setError_pages(path, st);
+                path = "";
+            }
+        }
         else 
             throw std::runtime_error("http wrong key !");
+        // httpConfig.printErrorPages();
     }
 
 }
@@ -112,4 +145,12 @@ void parsingValues(std::string &lines) {
     }
     else
         throw std::runtime_error("http Block not exist");
+}
+
+void pacingConfigFile(){
+    Configurations::Events eventsConfig;
+    Configurations::Http httpConfig;
+    std::string lines = PreProcessingFile();
+    parsingValues(lines);
+    
 }
