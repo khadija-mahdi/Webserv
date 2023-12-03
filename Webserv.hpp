@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -18,19 +18,29 @@
 #include <vector>
 #include <deque>
 #include "ConfigFile/Configurations.hpp"
+#include "ConfigFile/ConfServer.hpp"
 #include <cstring>
 #include <sstream>
 #include <stdexcept>
 #include <utility> // For std::pair
 
-
-
 class Location;
-class Server;
+class ConfServer;
 class Configurations;
 class Http;
 class Values;
 
 std::string PreProcessingFile();
-void pacingConfigFile();
-void parsingValues(std::string &lines);
+Configurations pacingConfigFile();
+// Configurations parsingValues(std::string &lines);
+
+template <typename T>
+bool Containes(std::vector<T> Vec, T item)
+{
+	for (typename std::vector<T>::iterator i = Vec.begin(); i != Vec.end(); i++)
+	{
+		if (*i == item)
+			return (true);
+	}
+	return (false);
+}

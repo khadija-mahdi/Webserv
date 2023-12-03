@@ -20,7 +20,7 @@ Location parseLocationBlock(std::string &locationBlock) {
     return location;
 }
 
-void locationInServer(std::string &ServerBlock, Server &ServerConfig){
+void locationInServer(std::string &ServerBlock, ConfServer &ConfServerConfig){
     std::vector<std::pair<std::string, std::pair<int, int> > > extractedBlocks;
     Values loc;
     int start, end;
@@ -30,15 +30,15 @@ void locationInServer(std::string &ServerBlock, Server &ServerConfig){
         return;
     for (size_t i = 0; i < extractedBlocks.size(); ++i) {
         Location location = parseLocationBlock(extractedBlocks[i].first);
-        ServerConfig.addLocation(location);
+        ConfServerConfig.addLocation(location);
         start = extractedBlocks[0].second.first;
         end = extractedBlocks[i].second.second;
     }
     ServerBlock = ServerBlock.substr(0, start) + ServerBlock.substr(end+1);
 }
 
-Server parseServerBlock(std::string &serverBlock) {
-    Server server;
+ConfServer parseServerBlock(std::string &serverBlock) {
+    ConfServer server;
     std::istringstream BlockStream(serverBlock);
     std::string line = "";
     std::string value = "";
@@ -59,7 +59,7 @@ void ServerInHttp(std::string &httpBlock,  Configurations::Http &httpConfig){
     if(extractedBlocks.size() < 1)
         throw std::runtime_error("block server not found ");
     for (size_t i = 0; i < extractedBlocks.size(); ++i) {
-        Server server = parseServerBlock(extractedBlocks[i].first);
+        ConfServer server = parseServerBlock(extractedBlocks[i].first);
         httpConfig.addServer(server);
         start = extractedBlocks[0].second.first;
         end = extractedBlocks[i].second.second;
@@ -147,10 +147,10 @@ void parsingValues(std::string &lines) {
         throw std::runtime_error("http Block not exist");
 }
 
-void pacingConfigFile(){
-    Configurations::Events eventsConfig;
-    Configurations::Http httpConfig;
+Configurations pacingConfigFile(){
+    Configurations Conf;
     std::string lines = PreProcessingFile();
     parsingValues(lines);
     
+	return Conf;
 }

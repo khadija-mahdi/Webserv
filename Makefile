@@ -8,7 +8,7 @@ OBJ_DIR = objects
 
 OBJ= $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
-CPP = c++
+CPP = g++-11
 
 # CPPFLAGS = -Wall -Wextra -Werror -std=c++98
 CPPFLAGS = -std=c++98 -fsanitize=address -g

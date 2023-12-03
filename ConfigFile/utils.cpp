@@ -183,30 +183,30 @@ std::vector<std::string> BlocksExtra(const std::string &lines, const std::string
 }
 
 
-void singleData(Server & server, std::string &serverBlock){
+void singleData(ConfServer & ConfServer, std::string &ConfServerBlock){
 	std::map<std::string, std::string> values;
 	int flag = 0;
 	int st;
 	std::string path = "";
 
-	values = extractKeyValues(serverBlock);
+	values = extractKeyValues(ConfServerBlock);
 	std::map<std::string, std::string>::iterator it = values.begin();
 	for (; it != values.end(); ++it) {
 		if(it->first == "listen" && isDigit(it->second)){
 			flag++;
 			int value = atoi(it->second.c_str());
 			if (value > 0 && value <= 65536)
-				server.setListen(value);
+				ConfServer.setListen(value);
 			else
 				throw std::runtime_error("not a valid port : " + it->second);
 		}
 		else if(it->first == "host"){
 			flag++;
-			server.setHost(it->second.c_str());
+			ConfServer.setHost(it->second.c_str());
 		}
 		else if(it->first == "root"){
 			flag++;
-			server.setRoot(it->second.c_str());
+			ConfServer.setRoot(it->second.c_str());
 		}
 		else if(it->first == "server_names")
 		{
@@ -214,13 +214,13 @@ void singleData(Server & server, std::string &serverBlock){
 			std::istringstream iss(key);
 			std::string word;
 			while (iss >> word) {
-				server.setServer_names(word);
+				ConfServer.setConfServer_names(word);
 			}
 		}
 		else if(it->first == "return" && processRedirection(path, st, it->second))
-			server.setRedirection(path, st);
+			ConfServer.setRedirection(path, st);
 		else if (it->first == "error_page" && processErrors(path, st, it->second))
-			server.setError_pages(path, st);
+			ConfServer.setError_pages(path, st);
 		else
 			throw std::runtime_error("server wrong key : " + it->first);
 	}
