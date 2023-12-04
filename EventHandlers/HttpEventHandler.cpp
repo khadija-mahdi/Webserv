@@ -4,6 +4,7 @@ HttpEventHandler::HttpEventHandler(int SocketFd, struct sockaddr_storage address
 {
 	this->client.address = address;
 	this->client.address_len = address_len;
+	this->response_now = false;
 }
 
 HttpEventHandler::HttpEventHandler() : EventHandler(-1)
@@ -14,8 +15,6 @@ HttpEventHandler::HttpEventHandler() : EventHandler(-1)
 int HttpEventHandler::Read()
 {
 	std::ostringstream ss;
-	if (true)
-		return (0);
 	char buffer[1024];
 	memset(buffer, 0, 1024);
 	int bytes = read(this->SocketFd, buffer, 1024);
@@ -23,13 +22,14 @@ int HttpEventHandler::Read()
 		std::cout << "No bytes are there to read" << std::endl;
 	ss.write(buffer, bytes);
 	requestParser.RequestParser(ss.str());
-	// DEBUGOUT(1, COLORED("`" << buffer << "`", Blue));
-
+	this->response_now = true;
 	return (-1);
 }
 
 int HttpEventHandler::Write()
 {
+	if (!response_now)
+		return (-1);
 	char resp[] = "HTTP/1.0 200 OK\r\n"
 				  "Server: webserver-c\r\n"
 				  "Content-Length: 316\r\n"

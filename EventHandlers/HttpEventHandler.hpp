@@ -13,6 +13,8 @@
 #include <unistd.h>
 #include "Request.hpp"
 
+class Request;
+
 class Client
 {
 public:
@@ -34,8 +36,9 @@ public:
 	const int &GetSocketFd() const;
 
 private:
-	Client client;
 	Request requestParser;
+	Client client;
+	bool response_now;
 };
 
 #endif

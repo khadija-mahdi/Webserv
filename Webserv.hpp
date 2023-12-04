@@ -23,7 +23,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <utility> // For std::pair
-
 class Location;
 class ConfServer;
 class Configurations;

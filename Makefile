@@ -1,6 +1,7 @@
 NAME = webserv
 
 SRC = $(wildcard *.cpp) $(wildcard **/*.cpp)
+INC = $(wildcard *.hpp) $(wildcard **/*.hpp)
 
 OBJ= $(SRC:.cpp=.o)
 
@@ -21,7 +22,7 @@ RM = rm -f
 
 all: $(NAME)
 
-$(OBJ_DIR)/%.o: %.cpp Webserv.hpp
+$(OBJ_DIR)/%.o: %.cpp $(INC)
 	@mkdir -p $(dir $@)
 	@$(CPP) ${CPPFLAGS} -c $< -o $@
 
