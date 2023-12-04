@@ -50,7 +50,7 @@ ConfServer parseServerBlock(std::string &serverBlock) {
 }
 
 
-void ServerInHttp(std::string &httpBlock,  Configurations::Http &httpConfig){
+void ServerInHttp(std::string &httpBlock, Http &httpConfig){
     std::vector<std::pair<std::string, std::pair<int, int> > > extractedBlocks;
     Values serv;
     int start, end;
@@ -91,33 +91,32 @@ void processErrorPage(const std::string& line, std::string &path, int& status) {
 }
 
 void parseHttpBlock(std::string &httpBlock) {
-    Configurations::Http httpConfig;
     std::istringstream BlockStream(httpBlock);
     std::string line = "";
     int st;
     std::string path = "";
 
     std::map<std::string, std::string> values;
-    ServerInHttp(httpBlock, httpConfig); //! Parse "server" blocks
+    ServerInHttp(httpBlock,Configurations::http); //! Parse "server" blocks
     values = extractKeyValues(httpBlock);
     std::map<std::string, std::string>::iterator it = values.begin();
     for (; it != values.end(); ++it) {
         if (it->first == "include")
             includeMimeTypes(it->second); //? open mime.types and set this values in map inside the http class
         else if(it->first == "default_type")
-                httpConfig.setDefault_type(it->second);// set the default path ;
+            Configurations::http.setDefault_type(it->second);// set the default path ;
         else if(it->first == "client_max_body_size")
-            httpConfig.setMax_body_size(it->second);
+        Configurations::http.setMax_body_size(it->second);
         else if (it->first == "error_page"){
             while (std::getline(BlockStream, line)) {
                 processErrorPage(line, path, st);
-                httpConfig.setError_pages(path, st);
+            Configurations::http.setError_pages(path, st);
                 path = "";
             }
         }
         else 
             throw std::runtime_error("http wrong key !");
-        // httpConfig.printErrorPages();
+        //Configurations::http.printErrorPages();
     }
 
 }
@@ -147,10 +146,8 @@ void parsingValues(std::string &lines) {
         throw std::runtime_error("http Block not exist");
 }
 
-Configurations pacingConfigFile(){
-    Configurations Conf;
+void pacingConfigFile(){
     std::string lines = PreProcessingFile();
     parsingValues(lines);
     
-	return Conf;
 }

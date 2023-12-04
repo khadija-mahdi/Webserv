@@ -11,26 +11,26 @@
 #include <exception>
 #include <stdexcept>
 #include <sys/epoll.h>
-
+#include "Webserv.hpp"
 class Reactor
 {
 public:
-    Reactor();
-    ~Reactor();
+	Reactor();
+	~Reactor();
 
 private:
-    std::map<int, EventHandler *> clients;
-    struct epoll_event *events;
-    int epoll_fd;
-    size_t MAX_EVENTS;
-    int event_count;
+	std::map<int, EventHandler *> clients;
+	struct epoll_event *events;
+	int epoll_fd;
+	size_t MAX_EVENTS;
+	int event_count;
 
 public:
-    void RegisterSocket(int SocketFd, EventHandler *);
-    void UnRegisterSocket(int SocketFd);
-    void HandleEvents();
-    void Dispatch();
-    void EventLoop();
+	void RegisterSocket(int SocketFd, EventHandler *);
+	void UnRegisterSocket(int SocketFd);
+	void HandleEvents();
+	void Dispatch();
+	void EventLoop();
 };
 typedef std::map<int, EventHandler *>::iterator iterator;
 void CheckCGIOutput(HttpEventHandler *client);

@@ -41,7 +41,7 @@ std::map<std::string, std::string> extractKeyValuesIN(const std::string& Block) 
 
 void includeMimeTypes(std::string &_file){
     std::map<std::string, std::string> keyValues;
-    Configurations::Http http;
+    Http http;
     std::string line = "";
     std::string lines = "";
     std::fstream fileName(_file.c_str());

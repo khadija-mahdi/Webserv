@@ -25,14 +25,14 @@ public:
 	void setIncludes(std::string &, std::string);
 	void setDefault_type(std::string &);
 
-	std::vector<ConfServer> getConfServes() const
+	std::vector<ConfServer> getConfServes()
 	{
 		return ConfServers;
 	}
-	std::string getMax_body_size() const;
-	std::string getDefault_type() const;
-	std::map<int, std::string> getError_pages() const;
-	std::map<std::string, std::string> getIncludes() const;
+	std::string getMax_body_size();
+	std::string getDefault_type();
+	std::map<int, std::string> getError_pages();
+	std::map<std::string, std::string> getIncludes();
 
 	void printErrorPages()
 	{
@@ -49,23 +49,21 @@ class Configurations
 public:
 	class Events
 	{
-		int worker_connections;
+		static int worker_connections;
 
 	public:
-		static Http getHttp(void); 
-		void setWorkerConnections(int);
-		int getWorkerConnections() const;
+		static void setWorkerConnections(int);
+		static int getWorkerConnections();
 	};
 
-
+	static Http http;
 };
 
 class Values
 {
 	std::vector<std::pair<std::string, std::pair<int, int> > > extractedBlocks;
 
-public:std::string PreProcessingFile();
-Configurations pacingConfigFile();
+public:
 	std::vector<std::pair<std::string, std::pair<int, int> > > &BlocksS(const std::string &lines, const std::string &blockName)
 	{
 		int pos = 0;
@@ -135,4 +133,4 @@ void locationValues(Location &location, std::string &locationBlock);
 bool processErrors(std::string &path, int &status, std::string &key);
 bool isDigitStr(std::string &value);
 std::string PreProcessingFile();
-Configurations pacingConfigFile();
+void pacingConfigFile();

@@ -10,7 +10,7 @@ std::string                 ConfServer::getRoot() const{return root;}
 
 std::string                 ConfServer::getHost() const{return host;}
 
-int                         ConfServer::getListen() const{return listen;}
+std::string                         ConfServer::getListen() const{return listen;}
 
 
 void    ConfServer::setConfServer_names(std::string const & _name){ ConfServer_names.push_back(_name);}
@@ -26,7 +26,7 @@ void    ConfServer::setRoot(std::string const &_root){ root = _root;}
 
 void    ConfServer::setHost(std::string const& _Host){ host = _Host;}
 
-void    ConfServer::setListen(int lis){ listen = lis;}
+void    ConfServer::setListen(std::string const &lis){ listen = lis;}
 
 
 void	 ConfServer::addLocation(Location const &loc){Locations.push_back(loc);}

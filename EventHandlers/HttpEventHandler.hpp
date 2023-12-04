@@ -10,6 +10,8 @@
 #include <arpa/inet.h>
 #include "EventHandler.hpp"
 #include <sstream>
+#include <unistd.h>
+#include "Request.hpp"
 
 class Client
 {
@@ -33,6 +35,7 @@ public:
 
 private:
 	Client client;
+	Request requestParser;
 };
 
 #endif

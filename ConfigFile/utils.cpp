@@ -1,4 +1,5 @@
 #include "Configurations.hpp"
+#include "../Webserv.hpp"
 
 bool isDigitStr(std::string &value){
 	for (int i = 0; i < value.length() ; i++)
@@ -196,7 +197,7 @@ void singleData(ConfServer & ConfServer, std::string &ConfServerBlock){
 			flag++;
 			int value = atoi(it->second.c_str());
 			if (value > 0 && value <= 65536)
-				ConfServer.setListen(value);
+				ConfServer.setListen(SSRT(value));
 			else
 				throw std::runtime_error("not a valid port : " + it->second);
 		}
@@ -220,7 +221,10 @@ void singleData(ConfServer & ConfServer, std::string &ConfServerBlock){
 		else if(it->first == "return" && processRedirection(path, st, it->second))
 			ConfServer.setRedirection(path, st);
 		else if (it->first == "error_page" && processErrors(path, st, it->second))
-			ConfServer.setError_pages(path, st);
+		{
+
+			// ConfServer.setError_pages(path, st);
+		}
 		else
 			throw std::runtime_error("server wrong key : " + it->first);
 	}
