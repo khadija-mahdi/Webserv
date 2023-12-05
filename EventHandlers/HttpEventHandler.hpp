@@ -12,8 +12,10 @@
 #include <sstream>
 #include <unistd.h>
 #include "Request.hpp"
+#include "Response.hpp"
 
 class Request;
+class Response;
 
 class Client
 {
@@ -37,7 +39,9 @@ public:
 
 private:
 	Request requestParser;
+	Response response;
 	Client client;
+	int fd;
 	bool response_now;
 };
 

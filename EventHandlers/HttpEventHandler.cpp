@@ -18,36 +18,48 @@ int HttpEventHandler::Read()
 	char buffer[1024];
 	memset(buffer, 0, 1024);
 	int bytes = read(this->SocketFd, buffer, 1024);
-	if (bytes < 0)
-		std::cout << "No bytes are there to read" << std::endl;
+	if (bytes <= 0)
+		return 0;
+
 	ss.write(buffer, bytes);
-	requestParser.RequestParser(ss.str());
+	std::string rep = "";
+	requestParser.RequestParser(ss.str(), fd);
+	response.setRespose(rep);
 	this->response_now = true;
 	return (-1);
 }
-
 int HttpEventHandler::Write()
 {
+	std::stringstream chunk;
 	if (!response_now)
 		return (-1);
-	char resp[] = "HTTP/1.0 200 OK\r\n"
-				  "Server: webserver-c\r\n"
-				  "Content-Length: 316\r\n"
-				  "Content-type: text/html\r\n\r\n"
-				  "<html>"
-				  "<head><title>My Webpage</title></head>"
-				  "<body>"
-				  "<h1>Hello, Web!</h1>"
-				  "<p>This is a simple webpage.</p>"
-				  "<img src=\"https://helpx.adobe.com/content/dam/help/en/photoshop/using/convert-color-image-black-white/jcr_content/main-pars/before_and_after/image-before/Landscape-Color.jpg\" alt=\"An example image\">"
-				  "</body>"
-				  "</html>\r\n";
-	int valWrite = write(this->GetSocketFd(), resp, strlen(resp));
-	if (valWrite < 0)
-	{
-		DEBUGOUT(1, COLORED("Write failed " << valWrite, Red));
-		exit(1);
+	char buffer[1024];
+	memset(buffer, 0, sizeof(buffer));
+
+	int bytesRead = read(fd, buffer, sizeof(buffer));
+	if (bytesRead < 0) {
+		throw std::runtime_error("Error reading from file descriptor");
 	}
+
+	if (bytesRead == 0) {
+		chunk << "0\r\n";
+		if (write(this->GetSocketFd(),"0\r\n", strlen("0\r\n")) < 0) 
+			throw std::runtime_error("Error writing to socket");
+		close(fd);
+		return (bytesRead);
+	}
+	chunk << std::hex << bytesRead << "\r\n";
+
+	chunk.write(buffer, bytesRead);
+	chunk << "\r\n";
+	std::string httpHeader = "HTTP/1.1 200 OK\r\n"
+						"Content-Type: Content-Type: text/plain\r\n"
+						"Transfer-Encoding: chunked\r\n"
+						"\r\n";
+	std::string chunkData = httpHeader +  chunk.str();
+	if (write(this->GetSocketFd(), chunkData.c_str(), chunkData.length()) < 0) 
+		throw std::runtime_error("Error writing to socket");
+	chunk.str("");
 	return (0);
 }
 

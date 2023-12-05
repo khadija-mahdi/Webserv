@@ -78,3 +78,5 @@ typedef enum Colors
 #define DEBUGOUT(active, x) \
 	std::ostringstream() << x << active;
 #endif
+
+std::string read_file_content(const std::string& file_path);
