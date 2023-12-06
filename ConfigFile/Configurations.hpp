@@ -22,7 +22,7 @@ public:
 	void setMax_body_size(std::string &);
 	void setError_pages(std::string &_value, int _key);
 	void addServer(ConfServer const &);
-	void setIncludes(std::string &, std::string);
+	void setIncludes(std::string const&, std::string const&);
 	void setDefault_type(std::string &);
 
 	std::vector<ConfServer> getConfServes()
@@ -32,7 +32,7 @@ public:
 	std::string getMax_body_size();
 	std::string getDefault_type();
 	std::map<int, std::string> getError_pages();
-	std::map<std::string, std::string> getIncludes();
+	std::map<std::string, std::string> getIncludes()const;
 
 	void printErrorPages()
 	{

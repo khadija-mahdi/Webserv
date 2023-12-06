@@ -41,7 +41,6 @@ std::map<std::string, std::string> extractKeyValuesIN(const std::string& Block) 
 
 void includeMimeTypes(std::string &_file){
     std::map<std::string, std::string> keyValues;
-    Http http;
     std::string line = "";
     std::string lines = "";
     std::fstream fileName(_file.c_str());
@@ -62,7 +61,7 @@ void includeMimeTypes(std::string &_file){
         keyValues = extractKeyValuesIN(lines);
         std::map<std::string, std::string>::iterator it = keyValues.begin();
         for (; it != keyValues.end(); ++it)
-            http.setIncludes(it->second, it->first);
+            Configurations::http.setIncludes(it->second , it->first);
     }
     else
         throw std::runtime_error("Error: could not open file.");

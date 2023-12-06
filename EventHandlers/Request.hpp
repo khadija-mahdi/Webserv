@@ -35,16 +35,6 @@ public:
 	void ParseHeaders(int &resp);
 	void StorHeaderData();
 
-	std::string send_response(int status_code, std::string content)
-	{
-		std::string status_phrase = StatusCodes[status_code];
-		std::string response = "HTTP/1.1 " + SSRT(status_code) + " " + status_phrase + "\r\n"
-							"Content-Type: text/plain\r\n"
-							"Content-Length: " +
-							   SSRT(content.length()) + "\r\n\r\n" + content;
-		return response;
-	}
-	void sendResponseError(int &);
 	~Request();
 };
 

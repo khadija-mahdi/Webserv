@@ -49,16 +49,23 @@ Request::Request(/* args */)
 Request::~Request() {}
 
 std::string Request::getBuffer() const { return Buffer; }
+
 std::string Request::getMethod() const { return Method; }
+
 std::string Request::getPath() const { return Path; }
+
 std::map<std::string, std::string> Request::getHeaders() const { return Headers; }
 
 void Request::setHeaders(std::string &_value, std::string _key) { Headers[_key] = _value; }
+
 void Request::setBuffer(std::string const &buff) { this->Buffer = buff; }
+
 void Request::setMethod(std::string const &meth) { this->Method = meth; }
+
 void Request::setPath(std::string const &path) { this->Path = path; }
 
-void WhiteSpaceFound(std::string &Path)
+// called URI DECODING
+void urlDecoding(std::string &Path)
 {
 	std::ostringstream decoded_ss;
 	int Flag = 0;
@@ -110,7 +117,9 @@ void Request::StorHeaderData()
 
 	std::istringstream requestLineStream(requestLine);
 	requestLineStream >> Method >> Path;
-	WhiteSpaceFound(Path);
+	if(int pos = Path.find("/") != std::string::npos)
+		Path = Path.substr(pos);
+	urlDecoding(Path);
 
 	std::string header;
 	while (std::getline(BufferStream, header) && !header.empty())
@@ -125,76 +134,14 @@ void Request::StorHeaderData()
 	}
 }
 
-std::string DefaultErrorPage(std::string Message, int code)
-{
-    std::string filePath = "/tmp/default_error_page.html";
-
-    // Use std::ofstream constructor with std::ios::trunc to create or truncate the file
-    std::ofstream defaultError(filePath.c_str(), std::ios::trunc);
-	if (!defaultError.is_open())
-	{
-		std::cerr << "Error opening file: " << filePath << std::endl;
-		return "";
-	}
-	defaultError << "<!DOCTYPE html>\n"
-				 << "<html lang=\"en\">\n"
-				 << "<head>\n"
-				 << "    <meta charset=\"UTF-8\">\n"
-				 << "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-				 << "    <title>  " + SSRT(code) + " " + Message + "</title>\n"
-				 << "    <style>\n"
-				 << "        body {\n"
-				 << "            font-family: 'Arial', sans-serif;\n"
-				 << "            background-color: #f4f4f4;\n"
-				 << "            color: #333;\n"
-				 << "            text-align: center;\n"
-				 << "            padding: 50px;\n"
-				 << "            margin: 0;\n"
-				 << "        }\n"
-				 << "        h1 {\n"
-				 << "            font-size: 3em;\n"
-				 << "            color: #555;\n"
-				 << "        }\n"
-				 << "        p {\n"
-				 << "            font-size: 1.2em;\n"
-				 << "            color: #777;\n"
-				 << "        }\n"
-				 << "    </style>\n"
-				 << "</head>\n"
-				 << "<body>\n"
-				 << "    <h1>  " + SSRT(code) + " " + Message + "  </h1>\n"
-				 << "    <p> Oops! Something went wrong.</p>\n"
-				 << "</body>\n"
-				 << "</html>\n";
-	defaultError.close();
-
-	return filePath;
-}
-
-void Request::sendResponseError(int &resp)
-{
-	std::string testPage = DefaultErrorPage(StatusCodes[501], 501);
-	if (!testPage.empty())
-		resp = std::fopen(testPage.c_str(), "r+")->_fileno;
-	// if (!Headers["Transfer-Encoding header"].empty() && Headers["Transfer-Encoding header"] != "chunked")
-	// 	resp = send_response(501, DefaultErrorPage(StatusCodes[501], 501));
-	// else if (Headers["Transfer-Encoding"].empty() && Headers["Content-Length"].empty() && Method == "Post")
-	// 	resp = send_response(400, DefaultErrorPage(StatusCodes[400], 400));
-	// else
-	// 	resp = send_response(200, DefaultErrorPage(StatusCodes[200], 200));
-}
-
 void Request::ParseHeaders(int &resp)
 {
-	if (this->Buffer.find("\r\n\r\n") != std::string::npos)
-	{
-		StorHeaderData();
-		DEBUGOUT(0, COLORED("ParcHeader case is on ", Green));
-		sendResponseError(resp); // headerValid
-		// TODO : add this later
-		// throw HttpError(404);
-		REQUEST_STATE = REQUEST_HANDLER_STAGE;
-	}
+	StorHeaderData();
+	DEBUGOUT(0, COLORED("ParcHeader case is on ", Green));
+	// TODO : add this later
+	// throw HttpError(404);
+
+	REQUEST_STATE = REQUEST_HANDLER_STAGE;
 }
 
 bool Request::RequestParser(std::string Data,int &resp)
@@ -204,8 +151,12 @@ bool Request::RequestParser(std::string Data,int &resp)
 	switch (REQUEST_STATE)
 	{
 	case HEADERS_STAGE:
-		ParseHeaders(resp);
-	// fall through
+	{	
+		if (this->Buffer.find("\r\n\r\n") != std::string::npos)
+			ParseHeaders(resp);
+		std::cout << "Path : " << getPath() << std::endl;
+		// fall through
+	}
 	case REQUEST_HANDLER_STAGE:
 		break;
 	default:

@@ -14,8 +14,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 
-class Request;
-class Response;
+class EventHandler;
 
 class Client
 {

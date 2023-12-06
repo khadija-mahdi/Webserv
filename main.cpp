@@ -3,13 +3,15 @@
 #include <signal.h>
 #include "Webserv.hpp"
 
-std::string read_file_content(const std::string& file_path) {
-    std::ifstream file(file_path.c_str());
-    if (!file) {
+std::string read_file_content(const std::string& path) {
+    std::ifstream file(path.c_str());
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << path << std::endl;
         return "";
     }
     std::ostringstream content;
     content << file.rdbuf();
+    file.close();
     return content.str();
 }
 

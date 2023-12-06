@@ -21,13 +21,18 @@
 #include "ConfigFile/ConfServer.hpp"
 #include <cstring>
 #include <sstream>
+#include <cstdio>
 #include <stdexcept>
+#include <sys/stat.h>
 #include <utility> // For std::pair
+
+
 class Location;
 class ConfServer;
 class Configurations;
 class Http;
 class Values;
+
 
 std::string PreProcessingFile();
 // Configurations parsingValues(std::string &lines);
