@@ -117,7 +117,7 @@ void Request::StorHeaderData()
 
 	std::istringstream requestLineStream(requestLine);
 	requestLineStream >> Method >> Path;
-	if(int pos = Path.find("/") != std::string::npos)
+	if (int pos = Path.find("/") != std::string::npos)
 		Path = Path.substr(pos);
 	urlDecoding(Path);
 
@@ -134,30 +134,58 @@ void Request::StorHeaderData()
 	}
 }
 
-void Request::ParseHeaders(int &resp)
+void Request::ParseHeaders(Response &response)
 {
+	DEBUGOUT(1, "Request ParseHeaders been called again.");
 	StorHeaderData();
-	DEBUGOUT(0, COLORED("ParcHeader case is on ", Green));
-	// TODO : add this later
-	// throw HttpError(404);
+	std::string expectedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
+	response.setStatusCode(200);
+	if (!Headers["Transfer-Encoding"].empty() && Headers["Transfer-Encoding"] != "chunked\r")
+	{
+		std::cout << "/trans : /" << Headers["Transfer-Encoding"] << "/" << std::endl;
+		response.setStatusCode(501);
+	}
+	else if (Headers["Transfer-Encoding"].empty() && Headers["Content-Length"].empty())
+		response.setStatusCode(400);
+	else if (Path.find_last_of(expectedChars) == std::string::npos)
+		response.setStatusCode(400);
+	else if (Path.length() > 2048)
+		response.setStatusCode(414);
+	else
+	{
+		response.setFD(std::fopen("/nfs/homes/kmahdi/Desktop/Server/public/index.html", "r+")->_fileno);
+	}
+	// if (response.getStatusCode() != 200) //-> add 4014 max body size
+	// 	ThrowErrorCode (response.getStatusCode());
+
+	DEBUGOUT(1, COLORED("Path [" << this->Path << "]\n", Yellow));
+	DEBUGOUT(1, COLORED("Path [" << this->Method << "]\n", Yellow));
+
+	std::map<std::string, std::string>::iterator it = Headers.begin();
+	for (; it != Headers.end(); ++it)
+		DEBUGOUT(0, COLORED("Path [" << it->first << "]"
+									 << " = {" << it->second << "}",
+							Yellow));
 
 	REQUEST_STATE = REQUEST_HANDLER_STAGE;
 }
 
-bool Request::RequestParser(std::string Data,int &resp)
+bool Request::RequestParser(std::string Data, Response &response)
 {
 	this->Buffer += Data;
-	DEBUGOUT(0, COLORED("\n" << this->Buffer << "\n", Magenta));
+	DEBUGOUT(1, "Request Parser been called again.");
+	DEBUGOUT(1, COLORED("\n" << this->Buffer << "\n", Yellow));
 	switch (REQUEST_STATE)
 	{
 	case HEADERS_STAGE:
-	{	
+	{
 		if (this->Buffer.find("\r\n\r\n") != std::string::npos)
-			ParseHeaders(resp);
-		std::cout << "Path : " << getPath() << std::endl;
+			ParseHeaders(response);
+
 		// fall through
 	}
 	case REQUEST_HANDLER_STAGE:
+
 		break;
 	default:
 		break;

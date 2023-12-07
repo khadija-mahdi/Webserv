@@ -1,8 +1,11 @@
 
-#pragma once
+#ifndef REQUEST_HPP
+#define REQUEST_HPP
 
 #include "../Webserv.hpp"
+#include "Response.hpp"
 
+class Response;
 enum
 {
 	HEADERS_STAGE = 1,
@@ -17,6 +20,7 @@ private:
 	std::string Buffer;
 	std::string Method;
 	std::string Path;
+	int fd;
 
 public:
 	std::map<int, std::string> StatusCodes;
@@ -31,22 +35,11 @@ public:
 	void setBuffer(std::string const &);
 	void setMethod(std::string const &);
 	void setPath(std::string const &);
-	bool RequestParser(std::string Data, int &resp);
-	void ParseHeaders(int &resp);
+	bool RequestParser(std::string Data, Response& response);
+	void ParseHeaders(Response& response);
 	void StorHeaderData();
 
 	~Request();
 };
 
-class ThrowErrorCode : public std::exception
-{
-	std::string response;
-
-public:
-	ThrowErrorCode() {}
-	virtual ~ThrowErrorCode() throw(){};
-	virtual const char *what() const throw()
-	{
-		return ("Http ERRor");
-	}
-};
+#endif

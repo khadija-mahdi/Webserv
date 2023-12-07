@@ -33,6 +33,25 @@ class Configurations;
 class Http;
 class Values;
 
+struct Data
+{
+	
+};
+
+
+class ThrowErrorCode : public std::exception
+{
+	int status;
+
+public:
+	ThrowErrorCode(int st) {status = st;}
+	virtual ~ThrowErrorCode() throw(){};
+	virtual const char *what() const throw()
+	{
+		return ("Http Error");
+	}
+};
+
 
 std::string PreProcessingFile();
 // Configurations parsingValues(std::string &lines);

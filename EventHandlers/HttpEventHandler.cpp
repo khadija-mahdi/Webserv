@@ -22,7 +22,8 @@ int HttpEventHandler::Read()
 		return 0;
 
 	ss.write(buffer, bytes);
-	requestParser.RequestParser(ss.str(), fd);
+	requestParser.RequestParser(ss.str(), response);
+	response.setRequest(requestParser.getPath());
 	this->response_now = true;
 	return (-1);
 }
@@ -32,8 +33,7 @@ int HttpEventHandler::Write()
 	if (!response_now)
 		return (-1);
 	response.clearResponseBuffer();
-	response.sendResponse(this->GetSocketFd(), requestParser);
-	return (0);
+	return response.sendResponse(this->GetSocketFd());
 }
 
 EventHandler *HttpEventHandler::Accept(void)
