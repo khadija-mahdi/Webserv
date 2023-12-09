@@ -23,12 +23,14 @@ private:
 	std::vector<std::string> allow; // method get post delete
 	std::string upload;				// on , of
 	std::string upload_stor;		// path to stor upload
+	std::string path;		// location path
 
 public:
 	std::vector<std::string> getIndex() const;
 	std::map<int, std::string> getError_pages() const;
 	Redirection getRedirection() const;
 	std::string getRoot() const;
+	std::string getPath() const;
 	std::string getAutoindex() const;
 	std::vector<std::string> getAllow() const;
 	std::string getUpload() const;
@@ -38,6 +40,7 @@ public:
 	void setRedirection(std::string &_value, int _key);
 	void setError_pages(std::string &_value, int _key);
 	void setRoot(std::string const &);
+	void setPath(std::string const &);
 	void setAutoindex(std::string const &);
 	void setAllow(std::string const &);
 	void setUpload(std::string const &);

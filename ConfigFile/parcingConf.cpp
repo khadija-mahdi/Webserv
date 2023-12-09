@@ -1,6 +1,7 @@
 
 #include "Configurations.hpp"
 
+
 void parseEventsBlock(std::string & events){ //!  Events done, it dons't accept any other values  just "{worker_connections only}";
     Configurations::Events event;
     std::string value = "";
@@ -11,7 +12,6 @@ void parseEventsBlock(std::string & events){ //!  Events done, it dons't accept 
     else
         throw std::runtime_error("events Block error!!");
 }
-
 
 Location parseLocationBlock(std::string &locationBlock) {
     Location location;
@@ -24,13 +24,17 @@ void locationInServer(std::string &ServerBlock, ConfServer &ConfServerConfig){
     std::vector<std::pair<std::string, std::pair<int, int> > > extractedBlocks;
     Values loc;
     int start, end;
-    
     extractedBlocks = loc.BlocksS(ServerBlock,"location");
+	std::vector<std::string> paths =  loc.getPaths();
     if (extractedBlocks.size() == 0)
         return;
     for (size_t i = 0; i < extractedBlocks.size(); ++i) {
         Location location = parseLocationBlock(extractedBlocks[i].first);
+
+		location.setPath(paths[i]);
         ConfServerConfig.addLocation(location);
+		if (location.getPath() == "/")
+			ConfServerConfig.setDefaultLocation(i);
         start = extractedBlocks[0].second.first;
         end = extractedBlocks[i].second.second;
     }
@@ -40,9 +44,6 @@ void locationInServer(std::string &ServerBlock, ConfServer &ConfServerConfig){
 ConfServer parseServerBlock(std::string &serverBlock) {
     ConfServer server;
     std::istringstream BlockStream(serverBlock);
-    std::string line = "";
-    std::string value = "";
-    int errorCode = 0;
     locationInServer(serverBlock, server);
     singleData(server,serverBlock);
     // server.printErrorPages();
@@ -51,6 +52,7 @@ ConfServer parseServerBlock(std::string &serverBlock) {
 
 
 void ServerInHttp(std::string &httpBlock, Http &httpConfig){
+	ConfServer server;
     std::vector<std::pair<std::string, std::pair<int, int> > > extractedBlocks;
     Values serv;
     int start, end;
@@ -59,11 +61,12 @@ void ServerInHttp(std::string &httpBlock, Http &httpConfig){
     if(extractedBlocks.size() < 1)
         throw std::runtime_error("block server not found ");
     for (size_t i = 0; i < extractedBlocks.size(); ++i) {
-        ConfServer server = parseServerBlock(extractedBlocks[i].first);
+        server = parseServerBlock(extractedBlocks[i].first);
         httpConfig.addServer(server);
         start = extractedBlocks[0].second.first;
         end = extractedBlocks[i].second.second;
     }
+
     httpBlock = httpBlock.substr(0, start) + httpBlock.substr(end+1);
 }
 
@@ -120,6 +123,7 @@ void parseHttpBlock(std::string &httpBlock) {
     }
 
 }
+
 
 void parsingValues(std::string &lines) {
     std::istringstream BlockStream(lines);

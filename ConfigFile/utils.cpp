@@ -205,10 +205,8 @@ void singleData(ConfServer & ConfServer, std::string &ConfServerBlock){
 			flag++;
 			ConfServer.setHost(it->second.c_str());
 		}
-		else if(it->first == "root"){
-			flag++;
+		else if(it->first == "root")
 			ConfServer.setRoot(it->second.c_str());
-		}
 		else if(it->first == "server_names")
 		{
 			std::string key = it->second;
@@ -228,7 +226,7 @@ void singleData(ConfServer & ConfServer, std::string &ConfServerBlock){
 		else
 			throw std::runtime_error("server wrong key : " + it->first);
 	}
-	if (flag != 3)
+	if (flag != 2)
 		throw std::runtime_error("the obligation keys not found");
 }
 
@@ -245,10 +243,8 @@ void locationValues(Location &location, std::string &locationBlock){
 		return;
 	std::map<std::string, std::string>::iterator it = values.begin();
 	for (; it != values.end(); ++it) {
-		if(it->first == "root"){
-			flag++;
+		if(it->first == "root")
 			location.setRoot(it->second.c_str());
-		}
 		else if(it->first == "index")
 		{
 			std::string key = it->second;
@@ -269,12 +265,12 @@ void locationValues(Location &location, std::string &locationBlock){
 			std::istringstream allow(method);
 			std::string methodName;
 			while (allow >> methodName){
-				if (methodName == "get" || methodName == "post" || methodName == "delete" || methodName == "all")
+				if (methodName == "GET" || methodName == "POST" || methodName == "DELETE" || methodName == "ALL")
 				{
-					if (methodName == "all"){
-						location.setAllow("post");
-						location.setAllow("get");
-						location.setAllow("delete");
+					if (methodName == "ALL"){
+						location.setAllow("POST");
+						location.setAllow("GET");
+						location.setAllow("DELETE");
 					}
 					else
 						location.setAllow(methodName);

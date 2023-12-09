@@ -3,47 +3,8 @@
 Request::Request(/* args */)
 {
 	REQUEST_STATE = HEADERS_STAGE;
-	StatusCodes[100] = "Continue";
-	StatusCodes[101] = "Switching Protocols";
-	StatusCodes[200] = "OK";
-	StatusCodes[201] = "Created";
-	StatusCodes[202] = "Accepted";
-	StatusCodes[203] = "Non-Authoritative Information";
-	StatusCodes[204] = "No Content";
-	StatusCodes[205] = "Reset Content";
-	StatusCodes[206] = "Partial Content";
-	StatusCodes[300] = "Multiple Choices";
-	StatusCodes[301] = "Moved Permanently";
-	StatusCodes[302] = "Found";
-	StatusCodes[303] = "See Other";
-	StatusCodes[304] = "Not Modified";
-	StatusCodes[305] = "Use Proxy";
-	StatusCodes[307] = "Temporary Redirect";
-	StatusCodes[400] = "Bad Request";
-	StatusCodes[401] = "Unauthorized";
-	StatusCodes[402] = "Payment Required";
-	StatusCodes[403] = "Forbidden";
-	StatusCodes[404] = "Not Found";
-	StatusCodes[405] = "Method Not Allowed";
-	StatusCodes[406] = "Not Acceptable";
-	StatusCodes[407] = "Proxy Authentication Required";
-	StatusCodes[408] = "Request Timeout";
-	StatusCodes[409] = "Conflict";
-	StatusCodes[410] = "Gone";
-	StatusCodes[411] = "Length Required";
-	StatusCodes[412] = "Precondition Failed";
-	StatusCodes[413] = "Payload Too Large";
-	StatusCodes[414] = "URI Too Long";
-	StatusCodes[415] = "Unsupported Media Type";
-	StatusCodes[416] = "Range Not Satisfiable";
-	StatusCodes[417] = "Expectation Failed";
-	StatusCodes[426] = "Upgrade Required";
-	StatusCodes[500] = "Internal Server Error";
-	StatusCodes[501] = "Not Implemented";
-	StatusCodes[502] = "Bad Gateway";
-	StatusCodes[503] = "Service Unavailable";
-	StatusCodes[504] = "Gateway Timeout";
-	StatusCodes[505] = "HTTP Version Not Supported";
+	serverIndex = -1;
+	locationIndex = -1;
 }
 
 Request::~Request() {}
@@ -64,7 +25,7 @@ void Request::setMethod(std::string const &meth) { this->Method = meth; }
 
 void Request::setPath(std::string const &path) { this->Path = path; }
 
-// called URI DECODING
+
 void urlDecoding(std::string &Path)
 {
 	std::ostringstream decoded_ss;
@@ -108,7 +69,23 @@ void urlDecoding(std::string &Path)
 	Path = decoded_ss.str();
 }
 
-void Request::StorHeaderData()
+bool IsValidSetOfCharacter(std::string str)
+{
+	std::string expectedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
+	return (str.find_last_of(expectedChars) != std::string::npos);
+}
+
+std::string GetHeadersValue(std::map<std::string, std::string> &headers, std::string Key)
+{
+	HeaderIterator it;
+	it = headers.find(Key);
+	if (it == headers.end())
+		return ("");
+	return (it->second);
+}
+
+
+void Request::fillHeaderData()
 {
 
 	std::istringstream BufferStream(Buffer);
@@ -129,63 +106,161 @@ void Request::StorHeaderData()
 		{
 			std::string key = header.substr(0, colonPos);
 			std::string value = header.substr(colonPos + 2);
+			size_t lastCharPos = value.find_last_not_of("\r\n");
+			if (lastCharPos != std::string::npos)
+				value.erase(lastCharPos + 1);
 			Headers[key] = value;
 		}
 	}
 }
 
-void Request::ParseHeaders(Response &response)
-{
-	DEBUGOUT(1, "Request ParseHeaders been called again.");
-	StorHeaderData();
-	std::string expectedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
-	response.setStatusCode(200);
-	if (!Headers["Transfer-Encoding"].empty() && Headers["Transfer-Encoding"] != "chunked\r")
-	{
-		std::cout << "/trans : /" << Headers["Transfer-Encoding"] << "/" << std::endl;
-		response.setStatusCode(501);
-	}
-	else if (Headers["Transfer-Encoding"].empty() && Headers["Content-Length"].empty())
-		response.setStatusCode(400);
-	else if (Path.find_last_of(expectedChars) == std::string::npos)
-		response.setStatusCode(400);
+
+void Request::parseHeaderErrors(Response &response){
+	if (!GetHeadersValue(Headers, "Transfer-Encoding").empty() && GetHeadersValue(Headers, "Transfer-Encoding") != "chunked")
+		response.setStatusCode(501, 1);
+	else if (Method == "Post" && GetHeadersValue(Headers, "Transfer-Encoding").empty() && GetHeadersValue(Headers, "Content-Length").empty())
+		response.setStatusCode(400, 1);
+	else if (!IsValidSetOfCharacter(Path))
+		response.setStatusCode(400, 1);
 	else if (Path.length() > 2048)
-		response.setStatusCode(414);
-	else
-	{
-		response.setFD(std::fopen("/nfs/homes/kmahdi/Desktop/Server/public/index.html", "r+")->_fileno);
-	}
+		response.setStatusCode(414, 1);
 	// if (response.getStatusCode() != 200) //-> add 4014 max body size
 	// 	ThrowErrorCode (response.getStatusCode());
+	else
+	{
+		fd = open(Path.c_str(), O_RDONLY, 0664);
+		if (fd == -1)
+			response.setStatusCode(404, 1);
+		else
+			response.setFD(fd);
+	}
+}
 
+
+void Request::getCurrentServer(std::vector<ConfServer> &confServers)
+{
+	size_t pos = Headers["Host"].find(":");
+	std::string server_name = Headers["Host"].substr(0, pos);
+	std::string Port = Headers["Host"].substr(pos + 1);
+	std::vector<std::string> serverNames;
+
+	for (size_t i = 0; i < confServers.size(); i++)
+	{	serverNames = confServers[i].getConfServer_names();
+		int pos = std::find(serverNames.begin(), serverNames.end(),server_name) != serverNames.end();
+		if (pos || confServers[i].getHost() == server_name)
+		{
+			if (confServers[i].getListen() == Port)
+			{
+				serverIndex = i;
+				std::cout << "is found in server " << i << std::endl;
+				break;
+			}
+		}
+		else if (confServers[i].getListen() == Port)
+		{
+			serverIndex = i;
+			std::cout << "is found in server with just the port" << i << std::endl;
+		}
+	}
+}
+int getCurrentLocationIndex(std::vector<Location> &confLocation, std::string &Path, int &pos){
+	for (size_t i = 0; i < confLocation.size(); i++)
+	{
+		Path = "/" + Path;
+		pos = Path.find(confLocation[i].getPath());
+		if (pos != std::string::npos){
+			std::cout << "Path is matched in location " << i << confLocation[i].getPath() << std::endl;
+			return i;
+		}
+	}
+	return -1;
+}
+
+int Request::pareRedirection(Location &confLocation, Response &response){ // need more details so more :)
+	if (!confLocation.getRedirection().ReturnLocation.empty()){
+		response.setStatusCode(confLocation.getRedirection().statusCode , 0);
+		response.RedirectionPath = confLocation.getRedirection().ReturnLocation; 
+		// Path = confLocation.getRedirection().ReturnLocation;
+		return true;
+	}
+	std::vector<std::string> allowMethod = confLocation.getAllow();
+	int allow = std::find(allowMethod.begin(), allowMethod.end(), Method) != allowMethod.end();
+	if(!allow)
+	{
+		response.setStatusCode(405, 1);
+		return true;
+	}
+	return false;
+}
+
+void Request::getCurrentLocation(std::vector<ConfServer> &confServers, Response &response){
+	std::vector<Location> confLocation = confServers[serverIndex].getLocations();
+	std::string newPath;
+	int pos1;
+	Path = "/" + Path;
+	locationIndex =  getCurrentLocationIndex(confLocation, Path, pos1);
+	if (confLocation.size() > 0)
+		pareRedirection(confLocation[locationIndex], response);
+	pareRedirection(confLocation[locationIndex], response);
+	if (!confLocation[locationIndex].getRoot().empty())
+		Path = confLocation[locationIndex].getRoot() + Path.substr(pos1);
+	else if (!confServers[serverIndex].getRoot().empty())
+		Path = confServers[serverIndex].getRoot() + Path.substr(pos1);
+	else
+	{
+		response.setStatusCode(40, 1);
+		return;
+	}
+}
+
+
+
+void Request::ParseUrl(Response &response)
+{
+	std::vector<ConfServer> confServers = Configurations::http.getConfServes();
+
+	getCurrentServer(confServers);
+	getCurrentLocation(confServers, response);
+}
+
+void Request::ParseHeaders(Response &response)
+{
+	HeaderIterator it;
+	response.setStatusCode(200, 1);// default
+	DEBUGOUT(1, "Request ParseHeaders been called again.");
+
+	fillHeaderData();
+	parseHeaderErrors(response);
+	it = Headers.begin();
 	DEBUGOUT(1, COLORED("Path [" << this->Path << "]\n", Yellow));
-	DEBUGOUT(1, COLORED("Path [" << this->Method << "]\n", Yellow));
-
-	std::map<std::string, std::string>::iterator it = Headers.begin();
+	DEBUGOUT(1, COLORED("Method [" << this->Method << "]\n", Yellow));
 	for (; it != Headers.end(); ++it)
-		DEBUGOUT(0, COLORED("Path [" << it->first << "]"
-									 << " = {" << it->second << "}",
-							Yellow));
-
+		DEBUGOUT(1, COLORED(it->first << " = " << it->second << " . ", Yellow));
+	ParseUrl(response);
 	REQUEST_STATE = REQUEST_HANDLER_STAGE;
+}
+
+void Request::methodParser(Response &response){
+	if (Method == "Get"){
+
+	}
 }
 
 bool Request::RequestParser(std::string Data, Response &response)
 {
 	this->Buffer += Data;
-	DEBUGOUT(1, "Request Parser been called again.");
-	DEBUGOUT(1, COLORED("\n" << this->Buffer << "\n", Yellow));
+	DEBUGOUT(1, COLORED(this->Buffer, Yellow));
 	switch (REQUEST_STATE)
 	{
 	case HEADERS_STAGE:
-	{
 		if (this->Buffer.find("\r\n\r\n") != std::string::npos)
+		{
+			DEBUGOUT(1, this->Buffer);
 			ParseHeaders(response);
-
+		}
 		// fall through
-	}
 	case REQUEST_HANDLER_STAGE:
-
+		methodParser(response);
 		break;
 	default:
 		break;

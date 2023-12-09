@@ -9,6 +9,8 @@ std::map<int, std::string>  Location::getError_pages() const{return error_pages;
 
 std::string                 Location::getRoot() const{return root;}
 
+std::string                 Location::getPath() const{return path;}
+
 std::string                 Location::getAutoindex() const{return autoindex;}
 
 std::vector<std::string>    Location::getAllow() const{return allow;}
@@ -29,6 +31,8 @@ void    Location::setRedirection(std::string & _value, int _key){
 }
 
 void    Location::setRoot(std::string const &_root){ root = _root;}
+
+void    Location::setPath(std::string const &_Path){ path = _Path;}
 
 void    Location::setAutoindex(std::string const& _autoindex){ autoindex = _autoindex;}
 

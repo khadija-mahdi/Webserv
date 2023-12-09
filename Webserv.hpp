@@ -25,7 +25,8 @@
 #include <stdexcept>
 #include <sys/stat.h>
 #include <utility> // For std::pair
-
+#include <fcntl.h>
+#include <algorithm>
 
 class Location;
 class ConfServer;
@@ -35,23 +36,23 @@ class Values;
 
 struct Data
 {
-	
 };
 
+typedef std::map<std::string, std::string>::iterator HeaderIterator;
 
 class ThrowErrorCode : public std::exception
 {
 	int status;
 
 public:
-	ThrowErrorCode(int st) {status = st;}
+	ThrowErrorCode(int st) { status = st; }
+	int getStatus() const { return status; }
 	virtual ~ThrowErrorCode() throw(){};
 	virtual const char *what() const throw()
 	{
 		return ("Http Error");
 	}
 };
-
 
 std::string PreProcessingFile();
 // Configurations parsingValues(std::string &lines);
@@ -103,4 +104,4 @@ typedef enum Colors
 	std::ostringstream() << x << active;
 #endif
 
-std::string read_file_content(const std::string& file_path);
+std::string read_file_content(const std::string &file_path);

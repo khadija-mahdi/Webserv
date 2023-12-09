@@ -30,13 +30,13 @@ std::string locationSyntax(std::string word){
     if (!word[i])
         throw std::runtime_error("syntax error in :" + word);
     if (locWord == "location")
-        return word;
-    throw std::runtime_error("syntax error in :" + word);
+        return locWord;
+    throw std::runtime_error("syntax error in :" + locWord);
     return NULL;
 }
 
-
 bool isInFormat(std::string& word, std::string& line) {
+	ConfServer ConfServer;
     if (word == "events " || word == "http " 
         || word == "	server " ||word ==  locationSyntax(word)){
         if (word + "{" != line)

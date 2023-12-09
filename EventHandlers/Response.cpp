@@ -44,9 +44,10 @@ Response::Response()
 	StatusCodes[503] = "Service Unavailable";
 	StatusCodes[504] = "Gateway Timeout";
 	StatusCodes[505] = "HTTP Version Not Supported";
-	responseHeader  = httpheader(statusCode);
-	responseBuffer = responseHeader;
 	fd = -1;
+	Headers_Stage = 1;
+	isRed = -1;
+
 	
 }
 
@@ -100,7 +101,10 @@ std::string Response::getResponseHeader()const {return responseHeader;}
 
 void Response::clearResponseBuffer(){responseBuffer = "";}
 
-void Response::setStatusCode(int const &st){ statusCode = st;}
+void Response::setStatusCode(int const &st, int flag){ 
+	statusCode = st;
+	isRed = flag;
+}
 
 int Response::getStatusCode() const{return statusCode;}
 
@@ -117,29 +121,29 @@ int isDirectory(const std::string& path) {
 	return -1; // is not exist
 }
 
-void Response::getContentType() {
-    int pos = Path.find(".");
-    
-    if (isDirectory(Path) == 1) {
+void Response::getContentType(std::string const &contentPath) {
+    int pos = contentPath.find(".");
+    if (isDirectory(contentPath) == 1) {
         ContentType = "dir/html";
     } else if (pos != std::string::npos) {
-        std::string extention = Path.substr(pos + 1, Path.length());
+        std::string extention = contentPath.substr(pos + 1, contentPath.length());
         std::map<std::string, std::string> Types = Configurations::http.getIncludes();
         
         
         if (Types.find(extention) != Types.end()) {
             ContentType = Types[extention];
-        } else {
+        } else 
             ContentType = Configurations::http.getDefault_type();
-        }
     }
     
 }
 
 std::string& Response::httpheader(int const& statusCode) {
-    responseHeader = "HTTP/1.1 " + SSRT(statusCode) + " " + StatusCodes[statusCode] + "\r\n"
-                   + "Content-Type: text/html /\r\n"
-                   + "Transfer-Encoding: chunked\r\n\r\n";
+	getContentType(Path);
+	responseHeader = "HTTP/1.1 " + SSRT(statusCode) + " " + StatusCodes[statusCode] + "\r\n"
+				+ "Content-Type: " + ContentType + "\r\n"
+				+ "Transfer-Encoding: chunked\r\n\r\n";
+
     return responseHeader;
 }
 
@@ -164,54 +168,46 @@ int Response::PrepareNextChunk() {
 }
 
 int Response::sendChunkResponse(int const& clientSocket){
-	int bytes = PrepareNextChunk();
-	DEBUGOUT(1, COLORED(responseBuffer, Magenta));
-	if (write(clientSocket, responseBuffer.c_str(), responseBuffer.length()) < 0) 
-		throw std::runtime_error("Error writing to socket");
+	int bytes = -1;
+	if (Headers_Stage)
+	{
+		responseBuffer = httpheader(statusCode);
+		if (write(clientSocket, responseBuffer.c_str(), responseBuffer.length()) < 0) 
+			throw std::runtime_error("Error writing to socket in header stage");
+		Headers_Stage = false;
+	}
+	else
+	{
+		int bytes = PrepareNextChunk();
+		if (write(clientSocket, responseBuffer.c_str(), responseBuffer.length()) < 0) 
+			throw std::runtime_error("Error writing to socket");
+			return bytes;
+	}
 	return bytes;
 }
 
 int Response::sendResponse(int const &clientSocket)
 {
-	DEBUGOUT(1, COLORED("response : " << DefaultErrorPage(statusCode), Magenta));
-	if (statusCode != 200)
-	{
-		if (write(clientSocket, DefaultErrorPage(statusCode).c_str(), DefaultErrorPage(statusCode).length()) < 0)
+	getContentType(RedirectionPath);
+	if (!isRed){
+    	std::string headerRe = "HTTP/1.1 301 Moved Permanently\r\n"
+                           "Location: "+ RedirectionPath + "\r\n\r\n";
+		if (write(clientSocket, headerRe.c_str(), headerRe.length()) < 0)
 			throw std::runtime_error("Error writing to socket");
-		return (0);
+		return 0;
 	}
-	else
+	else if (statusCode == 200)
 	{
 		if (fd != -1)
 			return sendChunkResponse(clientSocket);
 	}
+	else
+	{
+		DEBUGOUT(1, COLORED("response in error: " << DefaultErrorPage(statusCode), Magenta));
+		if (write(clientSocket, DefaultErrorPage(statusCode).c_str(),
+			DefaultErrorPage(statusCode).length()) < 0)
+			throw std::runtime_error("Error writing to socket");
+		return (0);
+	}
 	return (-1);
 }
-
-// 	statusCode = 200;
-// 	if (isDirectory(request.getPath()) == -1)
-// 	{
-// 		this->statusCode = 404;
-// 		testPage = DefaultErrorPage(StatusCodes[statusCode], statusCode);
-// 		if (testPage != "")
-// 			fd = std::fopen(testPage.c_str(), "r+")->_fileno;
-// 		sendChunkResponse(clientSocket);
-// 		return;
-
-// 	}
-// 	else if (isDirectory(request.getPath()) == 2)
-// 	{
-// 		this->statusCode = 200;
-// 		fd = std::fopen(request.getPath().c_str(), "r+")->_fileno;
-// 		sendChunkResponse(clientSocket);
-// 	}
-// }
-
-// void Response::sendResponse(int const& clientSocket, std::string &FilePath){
-// 	std::string testPage;
-
-// 	if (FilePath != "")
-// 		fd = std::fopen(testPage.c_str(), "r+")->_fileno;
-// 		sendChunkResponse(clientSocket);
-// 	// close(fd);
-// }

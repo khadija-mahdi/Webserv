@@ -20,6 +20,7 @@ private:
 
 public:
 	void setMax_body_size(std::string &);
+	void setPaths(std::string const &);
 	void setError_pages(std::string &_value, int _key);
 	void addServer(ConfServer const &);
 	void setIncludes(std::string const&, std::string const&);
@@ -38,9 +39,7 @@ public:
 	{
 		std::map<int, std::string>::iterator it = error_pages.begin();
 		for (; it != error_pages.end(); ++it)
-		{
 			std::cout << "http error : " << it->first << " => " << it->second << "\n";
-		}
 	}
 };
 
@@ -62,8 +61,11 @@ public:
 class Values
 {
 	std::vector<std::pair<std::string, std::pair<int, int> > > extractedBlocks;
+	std::vector<std::string> paths;
 
 public:
+	std::vector<std::string> getPaths() const  {return paths;};
+	void setPaths(std::string const &nPAThs){ paths.push_back(nPAThs);};
 	std::vector<std::pair<std::string, std::pair<int, int> > > &BlocksS(const std::string &lines, const std::string &blockName)
 	{
 		int pos = 0;
@@ -76,9 +78,13 @@ public:
 			int openBrace = lines.find('{', start);
 			if (openBrace == std::string::npos)
 				break;
+			if (blockName == "location"){
+				ConfServer server;
+				std::string path = lines.substr(start + 9 , openBrace - (start + 10));
+				paths.push_back(path);
+			}
 			int closeBrace = openBrace + 1;
 			int bracesCount = 1;
-
 			while (bracesCount > 0 && closeBrace < lines.length())
 			{
 				if (lines[closeBrace] == '{')

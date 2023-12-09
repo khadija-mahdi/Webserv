@@ -18,16 +18,21 @@ class ConfServer
 	Redirection redirection; // path , status code
 	std::string root;
 	std::vector<Location> Locations;
+	int isDefaultLocation;
 
 public:
+	ConfServer():isDefaultLocation(-1) {}
 	std::string getHost() const;
 	std::string getListen() const;
 	std::string getRoot() const;
+	int getDefaultLocation() const{return isDefaultLocation;};
 	std::vector<std::string> getConfServer_names() const;
+	std::vector<Location>getLocations() const{return Locations;};
 	std::map<int, std::string> getError_pages() const;
 	Redirection getRedirection() const;
 
 	void setHost(std::string const &);
+	void setDefaultLocation(int const &a){isDefaultLocation = a;}
 	void setListen(std::string const &);
 	void setRoot(std::string const &);
 	void setConfServer_names(std::string const &_name);
