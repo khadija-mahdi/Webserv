@@ -27,6 +27,7 @@
 #include <utility> // For std::pair
 #include <fcntl.h>
 #include <algorithm>
+#include <dirent.h>
 
 class Location;
 class ConfServer;

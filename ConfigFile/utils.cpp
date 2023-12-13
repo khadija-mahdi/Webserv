@@ -216,8 +216,10 @@ void singleData(ConfServer & ConfServer, std::string &ConfServerBlock){
 				ConfServer.setConfServer_names(word);
 			}
 		}
-		else if(it->first == "return" && processRedirection(path, st, it->second))
+		else if(it->first == "return" && processRedirection(path, st, it->second)){
 			ConfServer.setRedirection(path, st);
+			std::cout << "path in red : " << path << "and status is  : " << st << std::endl;
+		}
 		else if (it->first == "error_page" && processErrors(path, st, it->second))
 		{
 
@@ -283,7 +285,7 @@ void locationValues(Location &location, std::string &locationBlock){
 		else if(it->first == "upload"){
 			flag++;
 			if (it->second == "on" || it->second == "off")
-				location.setAutoindex(it->second);
+				location.setUpload(it->second);
 			else
 				throw std::runtime_error("location wrong value : " + it->first + " = " + it->second);
 		}
@@ -291,8 +293,10 @@ void locationValues(Location &location, std::string &locationBlock){
 			flag++;
 			location.setUpload_stor(it->second.c_str());
 		}
-		else if(it->first == "return" && processRedirection(path, st, it->second))
+		else if(it->first == "return" && processRedirection(path, st, it->second)){
 			location.setRedirection(path, st);
+			std::cout << "path in red : " << path << "and status is  : " << st << std::endl;
+		}
 		else if (it->first == "error_page" && processErrors(path, st, it->second))
 			location.setError_pages(path, st);
 		else

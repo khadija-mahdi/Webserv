@@ -35,6 +35,7 @@ void locationInServer(std::string &ServerBlock, ConfServer &ConfServerConfig){
         ConfServerConfig.addLocation(location);
 		if (location.getPath() == "/")
 			ConfServerConfig.setDefaultLocation(i);
+		std::cout << " autoindex in location" <<  i << " is : " << location.getAutoindex() << std::endl;	
         start = extractedBlocks[0].second.first;
         end = extractedBlocks[i].second.second;
     }

@@ -10,6 +10,7 @@ struct Redirection
 {
 	std::string ReturnLocation;
 	int statusCode;
+	// Redirection(){ReturnLocation = "" ;}
 };
 
 class Location

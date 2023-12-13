@@ -37,7 +37,7 @@ public:
 
 	std::string& httpheader(int const &statusCode);
 	int sendResponse(int const &statusCode);
-	int sendResponse(int const &statusCode, std::string &FilePath);
+	std::string listDir(const std::string &path);
 	Response(/* args */);
 	~Response(){};
 };

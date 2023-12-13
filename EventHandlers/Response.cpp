@@ -158,6 +158,7 @@ int Response::PrepareNextChunk() {
     } else if (bytesRead == 0) {
         chunk << "0\r\n\r\n";
         responseBuffer = chunk.str();
+		close(fd);
         return 0;
     }
     chunk << std::hex << bytesRead << "\r\n";
@@ -186,19 +187,84 @@ int Response::sendChunkResponse(int const& clientSocket){
 	return bytes;
 }
 
+std::string Response::listDir(const std::string &path) {
+    std::stringstream chunk;
+    std::string dirList = "";
+    struct dirent *entry;
+    DIR *dp;
+
+    dp = opendir(path.c_str());
+    if (dp == NULL) {
+        perror("opendir");
+        return dirList;
+    }
+
+    chunk << "HTTP/1.1 " + SSRT(statusCode) + " "  + StatusCodes[statusCode] + "\r\n"
+          << "Content-Type: text/html\r\n\r\n"
+          << "<html><body><h1>Directory Listing</h1><ul>";
+
+    while ((entry = readdir(dp))) {
+        chunk << "<li><a href=\"" << entry->d_name << "\">" << entry->d_name << "</a></li>";
+    }
+
+    chunk << "</ul></body></html>";
+    dirList = chunk.str();
+    closedir(dp);
+
+    return dirList;
+}
+
+std::string listDir2(const std::string &path) {
+    std::stringstream response;
+    struct dirent *entry;
+    DIR *dp;
+
+    dp = opendir(path.c_str());
+    if (dp == NULL) {
+        perror("opendir");
+        return response.str();
+    }
+
+    response << "HTTP/1.1 200 OK\r\n"
+             << "Content-Type: text/html\r\n\r\n"
+             << "<html><body><h1>Directory Listing</h1><ul>";
+
+    while ((entry = readdir(dp))) {
+        response << "<li><a href=\"" << entry->d_name << "\">" << entry->d_name << "</a></li>";
+    }
+
+    response << "</ul></body></html>";
+    closedir(dp);
+
+    return response.str();
+}
+
 int Response::sendResponse(int const &clientSocket)
 {
-	getContentType(RedirectionPath);
 	if (!isRed){
-    	std::string headerRe = "HTTP/1.1 301 Moved Permanently\r\n"
-                           "Location: "+ RedirectionPath + "\r\n\r\n";
+		std::cout << RedirectionPath;
+		std::cout << RedirectionPath << std::endl; 
+    	std::string headerRe = "HTTP/1.1 " + SSRT(301) + " " + StatusCodes[301] + "\r\n"
+                           "Location: " + RedirectionPath + " \r\n\r\n";
+		DEBUGOUT(1, COLORED("response in error: " << headerRe, Magenta));
 		if (write(clientSocket, headerRe.c_str(), headerRe.length()) < 0)
 			throw std::runtime_error("Error writing to socket");
 		return 0;
 	}
+	if (isRed == 2){
+		std::string res = listDir(RedirectionPath); 
+		std::cout << RedirectionPath << std::endl;
+		if (res != ""){
+			DEBUGOUT(1, COLORED("response in lis dir : " << res, Magenta));
+			if (write(clientSocket, res.c_str(), res.length()) < 0)
+				throw std::runtime_error("Error writing to socket");
+		}
+		return 0;
+
+	}
 	else if (statusCode == 200)
 	{
-		if (fd != -1)
+		if (fd > 0)
 			return sendChunkResponse(clientSocket);
 	}
 	else
@@ -207,6 +273,7 @@ int Response::sendResponse(int const &clientSocket)
 		if (write(clientSocket, DefaultErrorPage(statusCode).c_str(),
 			DefaultErrorPage(statusCode).length()) < 0)
 			throw std::runtime_error("Error writing to socket");
+		close(fd);
 		return (0);
 	}
 	return (-1);
