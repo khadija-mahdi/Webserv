@@ -1,5 +1,6 @@
 #ifndef READEVENTHANDLER_HPP
 #define READEVENTHANDLER_HPP
+
 #include <vector>
 #include <map>
 #include <sys/socket.h>
@@ -11,8 +12,8 @@
 #include "EventHandler.hpp"
 #include <sstream>
 #include <unistd.h>
-#include "Request.hpp"
-#include "Response.hpp"
+#include "../customServer/Response.hpp"
+#include "../customServer/Request.hpp"
 
 class EventHandler;
 

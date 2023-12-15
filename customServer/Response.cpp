@@ -240,6 +240,7 @@ std::string listDir2(const std::string &path) {
 
 int Response::sendResponse(int const &clientSocket)
 {
+	
 	if (!isRed){
     	std::string headerRe = "HTTP/1.1 " + SSRT(301) + " " + StatusCodes[301] + "\r\n"
                            "Location: " + RedirectionPath + " \r\n\r\n";
@@ -265,12 +266,21 @@ int Response::sendResponse(int const &clientSocket)
 	}
 	else
 	{
+	try
+	{
 		DEBUGOUT(1, COLORED("response in Erro pages : \n" << DefaultErrorPage(statusCode), Magenta));
 		if (write(clientSocket, DefaultErrorPage(statusCode).c_str(),
 			DefaultErrorPage(statusCode).length()) < 0)
 			throw std::runtime_error("Error writing to socket");
 		close(fd);
 		return (0);
+		/* code */
+	}
+	catch (const ThrowErrorCode &ex) {
+		// Catch the exception
+		std::cout << "Caught exception with status code: " << ex.getStatus() << std::endl;
+		std::cout << "Error Message: " << ex.what() << " - " << std::endl;
+	}
 	}
 	return (-1);
 }
