@@ -22,6 +22,7 @@ int HttpEventHandler::Read()
 		return 0;
 
 	ss.write(buffer, bytes);
+
 	requestParser.RequestHandler(ss.str(), response);
 	response.setRequest(requestParser.headerData.Path);
 	this->response_now = true;

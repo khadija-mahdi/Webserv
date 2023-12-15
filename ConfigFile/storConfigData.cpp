@@ -276,6 +276,14 @@ void singleData(ConfServer & ConfServer, std::string &ConfServerBlock){
 			if (errs.size())
 				ConfServer.setError_pages(errs);
 		}
+		else if(it->first == "index")
+		{
+			std::string key = it->second;
+			std::istringstream iss(key);
+			std::string word;
+			while (iss >> word)
+				ConfServer.setIndex(word);
+		}
 		else
 			throw std::runtime_error("server wrong key : " + it->first);
 	}

@@ -13,6 +13,7 @@ class ConfServer
 
 	std::vector<std::string>	ConfServer_names;
 	std::map<int, std::string>	error_pages;
+	std::vector<std::string>	index;
 	std::vector<Location>		Locations;
 	std::string					host;
 	std::string					listen;
@@ -23,8 +24,9 @@ class ConfServer
 public:
 	ConfServer();
 	std::map<int, std::string>	getError_pages() const;
-	std::vector<Location>		getLocations() const;
 	std::vector<std::string>	getConfServer_names() const;
+	std::vector<std::string>	getIndex() const;
+	std::vector<Location>		getLocations() const;
 	std::string					getHost() const;
 	std::string 				getListen() const;
 	std::string 				getRoot() const;
@@ -32,6 +34,7 @@ public:
 	int							getDefaultLocation() const;
 
 	void						setHost(std::string const &);
+	void						setIndex(std::string const &_name);
 	void						setDefaultLocation(int const &);
 	void						setListen(std::string const &);
 	void						setRoot(std::string const &);

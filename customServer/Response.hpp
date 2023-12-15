@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Webserv.hpp"
-// #include "Request.hpp"
+#include "Request.hpp"
 
 // class Request;
 class Response
@@ -15,7 +15,7 @@ private:
 	int fd;
 	bool Headers_Stage;
 	std::string Path;
-	int isRed;
+	int 	RESPONSE_TYPE;
 
 public:
 	std::string RedirectionPath;
@@ -34,6 +34,7 @@ public:
 	int sendChunkResponse(int const &);
 	void clearResponseBuffer();
 	void getContentType(std::string const &);
+	void setResponseType();
 
 	std::string& httpheader(int const &statusCode);
 	int sendResponse(int const &statusCode);

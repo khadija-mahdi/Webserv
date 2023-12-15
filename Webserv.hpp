@@ -42,10 +42,11 @@ class ThrowErrorCode : public std::exception
 {
     std::map<int, std::string> StatusCodes;
     int status;
+    int type;
     std::string messagesError;
 
 public:
-	ThrowErrorCode(int const &st) { 
+	ThrowErrorCode(int const &st, int const &_type) { 
 			StatusCodes[100] = "Continue";
 			StatusCodes[101] = "Switching Protocols";
 			StatusCodes[200] = "OK";
@@ -89,8 +90,10 @@ public:
 			StatusCodes[505] = "HTTP Version Not Supported";
 		status = st;
 		messagesError = StatusCodes[status];
+		type = _type;
 	}
 	int getStatus() const { return status; }
+	int getType() const { return type; }
 	virtual ~ThrowErrorCode() throw(){};
 	virtual const char *what() const throw()
 	{

@@ -10,6 +10,7 @@ std::string                 ConfServer::getRoot() const{return root;}
 std::string                 ConfServer::getHost() const{return host;}
 std::string                 ConfServer::getListen() const{return listen;}
 int 						ConfServer::getDefaultLocation() const{return isDefaultLocation;}
+std::vector<std::string>    ConfServer::getIndex() const{return index;}
 
 
 void    ConfServer::setConfServer_names(std::string const & _name){ ConfServer_names.push_back(_name);}
@@ -20,6 +21,8 @@ void    ConfServer::setRedirection(std::string & _value, int _key){
     redirection.ReturnLocation = _value;
     redirection.statusCode = _key;
 }
+
+void    ConfServer::setIndex(std::string const & _index){index.push_back(_index);}
 
 void    ConfServer::setRoot(std::string const &_root){ root = _root;}
 

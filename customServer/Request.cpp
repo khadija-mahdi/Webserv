@@ -46,8 +46,8 @@ void Request::parseHeaderErrors(Response &response){
 		response.setStatusCode(501, 1);
 	else if (headerData.Method == "POST" && GetHeadersValue(headerData.Headers, "Transfer-Encoding").empty() && GetHeadersValue(headerData.Headers, "Content-Length").empty())
 		response.setStatusCode(400, 1);
-	// else if (!IsValidSetOfCharacter(Path))
-	// 	response.setStatusCode(400, 1);
+	else if (!IsValidSetOfCharacter(headerData.Path))
+		response.setStatusCode(400, 1);
 	else if (headerData.Path.length() > 2048)
 		response.setStatusCode(414, 1);
 	// if (response.getStatusCode() != 200) //-> add 4014 max body size
@@ -81,11 +81,25 @@ bool Request::processRedirectionAndAllowance(Response &response){
 
 
 void Request::handleDirectoryPath(Response &response) {
+	std::vector<std::string> indexes;
 	if (headerData.locationIndex == -1) { // only server
-		;// add index to the server and auto index ...
+		if (headerData.Path[0] == '/')
+			headerData.Path = headerData.Path.substr(1);
+		indexes = headerData.currentServer.getIndex();
+		for (int i = 0;  i < indexes.size() ; ++i){
+			std::string newPath = headerData.Path + indexes[i];
+			std::cout << "new path --> " << newPath << std::endl;
+			if (IsDirectory(newPath) == 2){
+				fd = open(newPath.c_str(), O_RDONLY, 0664);
+				response.setFD(fd);
+				return;
+			}
+			else
+				response.setStatusCode(404,1);
+		};// add index to the server and auto index ...
 	}
 	else {
-		std::vector<std::string> indexes = headerData.currentLocation.getIndex();
+		indexes = headerData.currentLocation.getIndex();
 		for (int i = 0;  i < indexes.size() ; ++i){
 			std::string newPath = headerData.Path + indexes[i];
 			if (IsDirectory(newPath) == 2){
@@ -105,10 +119,47 @@ void Request::handleDirectoryPath(Response &response) {
 	}
 }
 
+bool Request::checkErrorPage(int const &error, std::map<int, std::string> &error_pages, Response &response){
+
+	std::map<int, std::string>::iterator it = error_pages.begin();
+		std::cout << "size ---> :" << error_pages.size() << std::endl;
+	for (; it != error_pages.end(); ++it)
+	{
+		std::cout << "first :" << it->first << std::endl;
+		if (it->first == error)
+		{
+			std::cout << " path in error -- > " << it->second << std::endl;
+			if (IsDirectory(it->second) == 2){
+				fd = open(it->second.c_str(), O_RDONLY, 0664);
+				std::cout << "fd is : " << fd << std::endl;
+				response.setStatusCode(error,1);
+				response.setFD(fd);
+				return true;
+			}
+		}
+		std::cout << "error loc : " << it->first << " => " << it->second << "\n";
+	}
+	response.setStatusCode(error,3);
+	return false;
+}
+
+void Request::checkInHttp(int const &error, Response &response){
+	std::map<int, std::string> error_pages = headerData.currentLocation.getError_pages();
+	
+	if (!checkErrorPage(error, error_pages, response)){
+		error_pages = headerData.currentServer.getError_pages();
+		if (!checkErrorPage(error, error_pages, response)){
+			error_pages = Configurations::http.getError_pages();
+			if (!checkErrorPage(error, error_pages, response));
+		}
+	}
+	
+}
 
 bool Request::methodParser(Response &response){
 	DEBUGOUT(1, COLORED(" check for Method : [" << headerData.Method << "]\n", Red));
-	if (headerData.Method == "GET" && IsDirectory(headerData.Path) == 1){
+	std::cout << "check path is : " << headerData.Path <<  "the last char : " << headerData.Path[headerData.Path.length() - 1] << std::endl;
+	if (headerData.Method == "GET"){
 		if (headerData.Path[headerData.Path.length() - 1] == '/'){
 			handleDirectoryPath(response);
 			return true;
@@ -123,8 +174,12 @@ bool Request::methodParser(Response &response){
 	}
 	return false;
 }
+
 void Request::processRequest(Response &response)
 {
+	Configurations::http.printErrorPages();
+	headerData.currentServer.printErrorPages();
+	headerData.currentLocation.printErrorPages();
 	response.setStatusCode(200, 1);
 	DEBUGOUT(1, COLORED("\n the current Server is  : " << headerData.currentServer.getListen() << "\n", Cyan));
 	DEBUGOUT(1, COLORED("\n the current Location is  : " << headerData.currentLocation.getPath() << "\n", Cyan));
@@ -132,13 +187,12 @@ void Request::processRequest(Response &response)
 
 	if (processRedirectionAndAllowance(response)) // check for allowed method and return first;
 		return;
-	if (IsDirectory(headerData.Path) <=  0)
-		response.setStatusCode(404,1);
+	else if (IsDirectory(headerData.Path) <=  0)
+		checkInHttp(404, response);
 	else if (IsDirectory(headerData.Path) == 2){
 		fd = open(headerData.Path.c_str(), O_RDONLY, 0664);
 		std::cout << "fd is : " << fd << std::endl;
 		response.setFD(fd);
-		ThrowErrorCode(200);
 	}
 	else
 	{
@@ -147,14 +201,11 @@ void Request::processRequest(Response &response)
 		parseHeaderErrors(response);
 	}
 	//-> need to handle errors pages from config file 
-	/*
-		ConfServer confServer = Configurations::http.getConfServes()[serverIndex];
-		Location confLocation = confServer.getLocations()[locationIndex];
-		confServer.printErrorPages();
-		if (response.getStatusCode() != 200){
-			if (confServer.get)
-		}
-	*/
+	// /*
+		// if (response.getStatusCode() != 200){
+		// 	if (confServer.get)
+		// }
+	// */
 REQUEST_STATE = REQUEST_HANDLER_STAGE;
 }
 

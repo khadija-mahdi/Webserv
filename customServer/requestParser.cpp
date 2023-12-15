@@ -66,7 +66,7 @@ void RequestParser::fillHeaderData(HeaderData &headers)
 
 	std::istringstream requestLineStream(requestLine);
 	requestLineStream >> headers.Method >>headers.Path;
-	if (int pos =headers.Path.find(" ") != std::string::npos)
+	if (int pos =headers.Path.find("/") != std::string::npos)
 		headers.Path = headers.Path.substr(pos);
 	urlDecoding(headers.Path);
 	headers.url = headers.Path;
@@ -117,7 +117,7 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation,
 {
 	size_t i = 0;
 	int start = 0 ,end = 0;
-	// headerData.Path = "/" + headerData.Path;
+	headerData.Path = "/" + headerData.Path;
 	if (headerData.Path == "/")
 		headerData.locationIndex = headerData.currentServer.getDefaultLocation();
 	else{

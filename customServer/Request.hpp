@@ -11,7 +11,7 @@ class Response;
 enum
 {
 	HEADERS_STAGE = 1,
-	REQUEST_HANDLER_STAGE = 0
+	REQUEST_HANDLER_STAGE = 0,
 };
 
 class Request {
@@ -31,6 +31,8 @@ public:
 	void	handleDirectoryPath(Response &);
 	bool	methodParser(Response &);
 	bool	processRedirectionAndAllowance(Response &);
+	bool	checkErrorPage(int const &, std::map<int, std::string>& , Response &);
+	void	checkInHttp(int const & , Response &);
 };
 
 #endif

@@ -46,7 +46,7 @@ Response::Response()
 	StatusCodes[505] = "HTTP Version Not Supported";
 	fd = -1;
 	Headers_Stage = 1;
-	isRed = -1;
+	RESPONSE_TYPE = -1;
 
 	
 }
@@ -103,7 +103,7 @@ void Response::clearResponseBuffer(){responseBuffer = "";}
 
 void Response::setStatusCode(int const &st, int flag){ 
 	statusCode = st;
-	isRed = flag;
+	RESPONSE_TYPE = flag;
 }
 
 int Response::getStatusCode() const{return statusCode;}
@@ -238,18 +238,19 @@ std::string listDir2(const std::string &path) {
     return response.str();
 }
 
+
 int Response::sendResponse(int const &clientSocket)
 {
 	
-	if (!isRed){
-    	std::string headerRe = "HTTP/1.1 " + SSRT(301) + " " + StatusCodes[301] + "\r\n"
+	if (!RESPONSE_TYPE){
+    	std::string headerRe = "HTTP/1.1 " + SSRT(statusCode) + " " + StatusCodes[statusCode] + "\r\n"
                            "Location: " + RedirectionPath + " \r\n\r\n";
 		DEBUGOUT(1, COLORED("response in REDIRECTION: \n" << headerRe, Magenta));
 		if (write(clientSocket, headerRe.c_str(), headerRe.length()) < 0)
 			throw std::runtime_error("Error writing to socket");
 		return 0;
 	}
-	else if (isRed == 2){
+	else if (RESPONSE_TYPE == 2){
 		std::string res = listDir(RedirectionPath); 
 		if (res != ""){
 			DEBUGOUT(1, COLORED("response in lis list Directory : \n" << res, Magenta));
@@ -259,28 +260,20 @@ int Response::sendResponse(int const &clientSocket)
 		return 0;
 
 	}
-	else if (statusCode == 200)
+	else if (RESPONSE_TYPE == 1)
 	{
 		if (fd > 0)
 			return sendChunkResponse(clientSocket);
 	}
 	else
 	{
-	try
-	{
+
 		DEBUGOUT(1, COLORED("response in Erro pages : \n" << DefaultErrorPage(statusCode), Magenta));
 		if (write(clientSocket, DefaultErrorPage(statusCode).c_str(),
 			DefaultErrorPage(statusCode).length()) < 0)
 			throw std::runtime_error("Error writing to socket");
 		close(fd);
 		return (0);
-		/* code */
-	}
-	catch (const ThrowErrorCode &ex) {
-		// Catch the exception
-		std::cout << "Caught exception with status code: " << ex.getStatus() << std::endl;
-		std::cout << "Error Message: " << ex.what() << " - " << std::endl;
-	}
 	}
 	return (-1);
 }
