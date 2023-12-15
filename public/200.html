@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>200 - OK</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #3498db;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .success-container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .success-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .success-message {
+            background-color: #2980b9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
+        }
+
+        h1 {
+            color: #2ecc71;
+        }
+
+        p {
+            font-size: 18px;
+        }
+
+        a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s ease-in-out;
+        }
+
+        a:hover {
+            text-decoration: underline;
+            color: #ecf0f1;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 15px;
+            background-color: #2ecc71;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .cta-button:hover {
+            background-color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <img class="success-image" src="https://placekitten.com/800/400" alt="Happy Cat Image">
+        <div class="success-message">
+            <h1>200 - OK</h1>
+            <p>Congratulations! Everything is working perfectly.</p>
+            <p>Our team of expert cats is thrilled with the success.</p>
+            <p>Feel free to <a href="/">explore more</a> or celebrate with a <a href="http://localhost:3000/">party</a>.</p>
+            <a class="cta-button" href="http://localhost:3000/path/">Take Me Home</a>
+        </div>
+    </div>
+</body>
+</html>

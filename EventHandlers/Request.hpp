@@ -55,7 +55,7 @@ public:
 		DEBUGOUT(1, COLORED("Path [" << this->Path << "]\n", Yellow));
 		DEBUGOUT(1, COLORED("Method [" << this->Method << "]\n", Yellow));
 		for (; it != Headers.end(); ++it)
-		DEBUGOUT(1, COLORED(it->first << " = " << it->second << " . ", Yellow));
+		DEBUGOUT(1, COLORED(it->first << "----> " << it->second << " . \n\n", Yellow));
 
 	}
 };

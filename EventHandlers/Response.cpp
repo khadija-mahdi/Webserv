@@ -9,7 +9,7 @@ Response::Response()
 	StatusCodes[201] = "Created";
 	StatusCodes[202] = "Accepted";
 	StatusCodes[203] = "Non-Authoritative Information";
-	StatusCodes[204] = "No Content";
+	StatusCodes[204] = "No Content"; 
 	StatusCodes[205] = "Reset Content";
 	StatusCodes[206] = "Partial Content";
 	StatusCodes[300] = "Multiple Choices";
@@ -198,7 +198,6 @@ std::string Response::listDir(const std::string &path) {
         perror("opendir");
         return dirList;
     }
-
     chunk << "HTTP/1.1 " + SSRT(statusCode) + " "  + StatusCodes[statusCode] + "\r\n"
           << "Content-Type: text/html\r\n\r\n"
           << "<html><body><h1>Directory Listing</h1><ul>";
@@ -242,20 +241,17 @@ std::string listDir2(const std::string &path) {
 int Response::sendResponse(int const &clientSocket)
 {
 	if (!isRed){
-		std::cout << RedirectionPath;
-		std::cout << RedirectionPath << std::endl; 
     	std::string headerRe = "HTTP/1.1 " + SSRT(301) + " " + StatusCodes[301] + "\r\n"
                            "Location: " + RedirectionPath + " \r\n\r\n";
-		DEBUGOUT(1, COLORED("response in error: " << headerRe, Magenta));
+		DEBUGOUT(1, COLORED("response in REDIRECTION: \n" << headerRe, Magenta));
 		if (write(clientSocket, headerRe.c_str(), headerRe.length()) < 0)
 			throw std::runtime_error("Error writing to socket");
 		return 0;
 	}
-	if (isRed == 2){
+	else if (isRed == 2){
 		std::string res = listDir(RedirectionPath); 
-		std::cout << RedirectionPath << std::endl;
 		if (res != ""){
-			DEBUGOUT(1, COLORED("response in lis dir : " << res, Magenta));
+			DEBUGOUT(1, COLORED("response in lis list Directory : \n" << res, Magenta));
 			if (write(clientSocket, res.c_str(), res.length()) < 0)
 				throw std::runtime_error("Error writing to socket");
 		}
@@ -269,7 +265,7 @@ int Response::sendResponse(int const &clientSocket)
 	}
 	else
 	{
-		DEBUGOUT(1, COLORED("response in error: " << DefaultErrorPage(statusCode), Magenta));
+		DEBUGOUT(1, COLORED("response in Erro pages : \n" << DefaultErrorPage(statusCode), Magenta));
 		if (write(clientSocket, DefaultErrorPage(statusCode).c_str(),
 			DefaultErrorPage(statusCode).length()) < 0)
 			throw std::runtime_error("Error writing to socket");

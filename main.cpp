@@ -2,6 +2,7 @@
 #include <vector>
 #include <signal.h>
 #include "Webserv.hpp"
+#include "ConfigFile/ParseConfig.hpp"
 
 std::string read_file_content(const std::string& path) {
     std::ifstream file(path.c_str());
@@ -23,18 +24,18 @@ void HandleSigPip(int signal)
 
 int main(int ac, char **av)
 {
-
+	ParseConfig parseConfig;
 	std::vector<std::string> taken_ports;
 	if (ac != 2)
 	{
-		std::cout << "Please Provide a Conf file" << std::endl;
+		DEBUGOUT(1, COLORED("\n Please Provide a Conf file \n", LightGreen));
 		exit(1);
 	}
 	signal(SIGPIPE, HandleSigPip);
 	Server server;
 	try
 	{
-		pacingConfigFile();
+		parseConfig.pacingConfigFile(av[1]);
 
 		std::vector<ConfServer> conf_servers = Configurations::http.getConfServes();
 

@@ -1,13 +1,57 @@
-#include "Configurations.hpp"
-#include "../Webserv.hpp"
+#include "ParseConfig.hpp"
 
-bool isDigitStr(std::string &value){
-	for (int i = 0; i < value.length() ; i++)
-	{
-		if (!std::isdigit(value[i]))
-			return 0;
-	}
-	return true;
+void processErrorPage(const std::string& line, std::string &value, int& errorCode) {
+        std::istringstream iss(line);
+        std::string firstWord, secondWord;
+        iss >> firstWord;
+        if (!isDigitStr(firstWord)) 
+            throw std::runtime_error("Error: The first word is not a digit.");
+		errorCode = atoi(firstWord.c_str());
+        iss >> secondWord;
+
+        std::string remaining;
+        iss >> remaining;
+        if (!remaining.empty())
+            throw std::runtime_error("Error: More than two words found in the input.");
+		value  = secondWord;
+}
+
+std::map<std::string, std::string> extractKeyValuesIN(const std::string& Block) {
+    std::map<std::string, std::string> keyValues;
+    std::istringstream BlockStream(Block);
+    std::string line;
+    int i = 0;
+
+    while (std::getline(BlockStream, line)) {
+        std::vector<std::string> parts;
+        std::istringstream lineStream(line);
+        std::string part;
+
+        while (lineStream >> part)
+            parts.push_back(part);
+        if (parts[0] == "{" || parts[0] == "}")
+            continue;
+        else if (parts.size() >= 2) {
+            std::string key;
+            for (size_t i = 1; i < parts.size(); i++)
+                key += parts[i] + " ";
+            key.erase(0, key.find_first_not_of(" \t"));
+            key.erase(key.find_last_not_of(" \t") + 1);
+
+            if (!key.empty() && key[key.size() - 1] == ';')
+                key.resize(key.length() - 1);
+
+            std::string values = parts[0];
+            std::istringstream keyStream(key);
+            std::string individualKey;
+            while (std::getline(keyStream, individualKey, ' '))
+                keyValues[individualKey] = values;
+        }
+        else 
+            throw std::runtime_error("syntax error values value : " + Block);
+    }
+
+    return keyValues;
 }
 
 bool processRedirection(std::string& path, int &status, std::string &key){
@@ -59,7 +103,7 @@ bool processErrors(std::string& path, int &status, std::string &key){
 	return 0;
 } ///? it's does not wor 
 
-std::map<std::string, std::string> extractKeyValues(const std::string& Block) {
+std::map<std::string, std::string> extractKeyValues(const std::string& Block, std::map<int, std::string> &errors) {
 	std::map<std::string, std::string> keyValues;
 	std::istringstream BlockStream(Block);
 	std::string line;
@@ -89,6 +133,12 @@ std::map<std::string, std::string> extractKeyValues(const std::string& Block) {
 
 			if (!value.empty() && value[value.size() -1]== ';') {
 				value.resize(value.length() - 1);
+			}
+			if (key == "error_page"){
+				std::string path = "";
+				int status = 0;
+				processErrorPage(value,path, status);
+				errors[status] = path;
 			}
 			keyValues[key] = value;
 		} else {
@@ -186,11 +236,14 @@ std::vector<std::string> BlocksExtra(const std::string &lines, const std::string
 
 void singleData(ConfServer & ConfServer, std::string &ConfServerBlock){
 	std::map<std::string, std::string> values;
+	std::map<int , std::string> errs;
+	std::istringstream BlockStream(ConfServerBlock);
+	std::string line = "";
 	int flag = 0;
 	int st;
 	std::string path = "";
 
-	values = extractKeyValues(ConfServerBlock);
+	values = extractKeyValues(ConfServerBlock,errs);
 	std::map<std::string, std::string>::iterator it = values.begin();
 	for (; it != values.end(); ++it) {
 		if(it->first == "listen" && isDigit(it->second)){
@@ -216,14 +269,12 @@ void singleData(ConfServer & ConfServer, std::string &ConfServerBlock){
 				ConfServer.setConfServer_names(word);
 			}
 		}
-		else if(it->first == "return" && processRedirection(path, st, it->second)){
+		else if(it->first == "return" && processRedirection(path, st, it->second))
 			ConfServer.setRedirection(path, st);
-			std::cout << "path in red : " << path << "and status is  : " << st << std::endl;
-		}
-		else if (it->first == "error_page" && processErrors(path, st, it->second))
+		else if (it->first == "error_page")
 		{
-
-			// ConfServer.setError_pages(path, st);
+			if (errs.size())
+				ConfServer.setError_pages(errs);
 		}
 		else
 			throw std::runtime_error("server wrong key : " + it->first);
@@ -236,11 +287,11 @@ void singleData(ConfServer & ConfServer, std::string &ConfServerBlock){
 
 void locationValues(Location &location, std::string &locationBlock){
 	std::map<std::string, std::string> values;
+	std::map<int , std::string> errs;
 	int st;
 	std::string path = "";
 	int flag = 0;
-
-	values = extractKeyValues(locationBlock);
+	values = extractKeyValues(locationBlock, errs);
 	if (values.size() == 0)
 		return;
 	std::map<std::string, std::string>::iterator it = values.begin();
@@ -293,19 +344,17 @@ void locationValues(Location &location, std::string &locationBlock){
 			flag++;
 			location.setUpload_stor(it->second.c_str());
 		}
-		else if(it->first == "return" && processRedirection(path, st, it->second)){
+		else if(it->first == "return" && processRedirection(path, st, it->second))
 			location.setRedirection(path, st);
-			std::cout << "path in red : " << path << "and status is  : " << st << std::endl;
+		else if (it->first == "error_page")
+		{
+			if (errs.size())
+				location.setError_pages(errs);
 		}
-		else if (it->first == "error_page" && processErrors(path, st, it->second))
-			location.setError_pages(path, st);
 		else
 			throw std::runtime_error("location wrong key : " + it->first);
 	}
 	// if (flag != 3)
 	//     throw std::runtime_error("the obligation keys not found"); //? need to set obligation values
 }
-
-
-
 

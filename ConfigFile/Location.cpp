@@ -20,10 +20,9 @@ std::string                 Location::getUpload() const{return upload;}
 std::string                 Location::getUpload_stor() const{return upload_stor;}
 
 
-
 void    Location::setIndex(std::string const & _index){index.push_back(_index);}
 
-void    Location::setError_pages(std::string & _value, int _key){error_pages[_key] = _value;;}
+void    Location::setError_pages(std::map<int , std::string>& maperr){error_pages = maperr;}
 
 void    Location::setRedirection(std::string & _value, int _key){
     redirection.ReturnLocation = _value;

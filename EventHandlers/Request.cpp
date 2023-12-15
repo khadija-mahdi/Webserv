@@ -158,15 +158,11 @@ void Request::getCurrentServer(std::vector<ConfServer> &confServers)
 			if (confServers[i].getListen() == Port)
 			{
 				serverIndex = i;
-				std::cout << "is found in server  : " << i << std::endl;
 				break;
 			}
 		}
 		else if (confServers[i].getListen() == Port)
-		{
 			serverIndex = i;
-			std::cout << "is found in server with just the port : " << i << std::endl;
-		}
 	}
 }
 
@@ -183,7 +179,6 @@ int getCurrentLocationIndex(std::vector<Location> &confLocation, std::string &Pa
         if (pos != std::string::npos){
             return i;
         }
-        std::cout << "pos path in loc " << pos << "path is : " << confLocation[i].getPath() << std::endl;
     }
     return -1;
 }
@@ -191,22 +186,24 @@ int getCurrentLocationIndex(std::vector<Location> &confLocation, std::string &Pa
 
 int Request::getCurrentLocation(std::vector<ConfServer> &confServers, Response &response){
 	std::vector<Location> confLocation = confServers[serverIndex].getLocations();
+	confServers[serverIndex].printErrorPages();
 	std::string newPath;
 	int pos1 = 0;
 	Path = "/" + Path;
-	if (Path == "/"){
-		std::cout << "DefaultLocation() " << confServers[serverIndex].getDefaultLocation() << std::endl; 
+
+	if (Path == "/")
 		locationIndex = confServers[serverIndex].getDefaultLocation();
-	}
 	else
 		locationIndex =  getCurrentLocationIndex(confLocation, Path, pos1);
-
-	if (confLocation.size() > 0 && confLocation[locationIndex].getRedirection().ReturnLocation != ""){
-		response.RedirectionPath = confLocation[locationIndex].getRedirection().ReturnLocation; 
-		response.setStatusCode(confLocation[locationIndex].getRedirection().statusCode , 0);
-		return 1;
-	}
-	else if (locationIndex != -1){
+	if (locationIndex != -1){
+		std::cout << "     the location error pages: " << Path << std::endl; 
+		confLocation[locationIndex].printErrorPages();
+		DEBUGOUT(1, COLORED("\n the current Location is  : " << serverIndex << "\n", Cyan));
+		if (confLocation.size() > 0 && !confLocation[locationIndex].getRedirection().ReturnLocation.empty()){
+			response.RedirectionPath = confLocation[locationIndex].getRedirection().ReturnLocation; 
+			response.setStatusCode(confLocation[locationIndex].getRedirection().statusCode , 0);
+			return 1;
+		}
 		std::vector<std::string> allowMethod = confLocation[locationIndex].getAllow();
 		int allow = std::find(allowMethod.begin(), allowMethod.end(), Method) != allowMethod.end();
 		if(!allow)
@@ -221,7 +218,6 @@ int Request::getCurrentLocation(std::vector<ConfServer> &confServers, Response &
 			Path = confLocation[locationIndex].getRoot()  + root;
 		else if (!confServers[serverIndex].getRoot().empty())
 			Path = confServers[serverIndex].getRoot() + root ;
-		DEBUGOUT(1, COLORED("THE root is : " << root << ", the path is " << Path,  Green));
 	}
 	return 0;
 }
@@ -230,7 +226,7 @@ int Request::ParseUrl(Response &response) {
 	std::vector<ConfServer> confServers = Configurations::http.getConfServes();
 
 	getCurrentServer(confServers);
-	std::cout << "location size : " << confServers[serverIndex].getLocations().size() << std::endl;
+	DEBUGOUT(1, COLORED("\n the current Server is  : " << serverIndex << "\n", Cyan));
 	if (confServers[serverIndex].getLocations().size() == 0){
 		if (!confServers[serverIndex].getRoot().empty())
 			Path = confServers[serverIndex].getRoot();
@@ -239,7 +235,7 @@ int Request::ParseUrl(Response &response) {
 		if (getCurrentLocation(confServers, response))
 			return 1;
 	}
-	DEBUGOUT(1, COLORED("THE Path after Location is : " << Path, Red));
+	DEBUGOUT(1, COLORED("THE New Path : " << Path << "\n" , Green));
 	return 0;
 }
 
@@ -253,7 +249,6 @@ void Request::handleDirectoryPath(Response &response) {
 		Location confLocation = confServers[serverIndex].getLocations()[locationIndex];
 		std::vector<std::string> indexes = confLocation.getIndex();
 		for (int i = 0;  i < indexes.size() ; ++i){
-			DEBUGOUT(1, COLORED("indexes : " << indexes[i] << "\n", Green));
 			std::string newPath = Path + indexes[i];
 			if (IsDirectory(newPath) == 2){
 				fd = open(newPath.c_str(), O_RDONLY, 0664);
@@ -261,7 +256,6 @@ void Request::handleDirectoryPath(Response &response) {
 				return;
 			}
 		}
-		std::cout << "aouto index is : [" << confLocation.getAutoindex() << "]" << std::endl;
 		if (confLocation.getAutoindex() == "off"){
 			response.setStatusCode(403,1);
 		}
@@ -280,7 +274,7 @@ void Request::ParseHeaders(Response &response)
 	printHeaderdata();
 	if (ParseUrl(response))
 		return;
-	else if (IsDirectory(Path) <=  0)
+	if (IsDirectory(Path) <=  0)
 		response.setStatusCode(404,1);
 	else if (IsDirectory(Path) == 2){
 		fd = open(Path.c_str(), O_RDONLY, 0664);
@@ -290,25 +284,30 @@ void Request::ParseHeaders(Response &response)
 	else
 	{
 		if (IsDirectory(Path) == 1 && Method == "GET"){
-			std::cout << "check if have / in the end " << Path[Path.length() - 1] << std::endl;
 			if (Path[Path.length() - 1] == '/'){
-				std::cout << "it's ok is a directory and have this in the end / \n";
 				handleDirectoryPath(response);
 				return ;
-
 			}
 			else
 			{
 				response.setStatusCode(301, 0);
 				response.RedirectionPath = url + "/";
-				std::cout << "it's not ok is a directory and isn't have this in the end / \n";
+				DEBUGOUT(1, COLORED("\n This is a directory and doesn't have a slash '/' at the end : [" << this->Path << "]\n", Red));
 				return ;	
 			}
 		}
 		parseHeaderErrors(response);
-		std::cout << "fd is " << fd << std::endl;
 	}
-	REQUEST_STATE = REQUEST_HANDLER_STAGE;
+	//-> need to handle errors pages from config file 
+	/*
+		ConfServer confServer = Configurations::http.getConfServes()[serverIndex];
+		Location confLocation = confServer.getLocations()[locationIndex];
+		confServer.printErrorPages();
+		if (response.getStatusCode() != 200){
+			if (confServer.get)
+		}
+	*/
+REQUEST_STATE = REQUEST_HANDLER_STAGE;
 }
 
 int Request::methodParser(Response &response){
@@ -335,13 +334,12 @@ DEBUGOUT(1, COLORED(" check for Method : [" << this->Method << "]\n", Red));
 bool Request::RequestParser(std::string Data, Response &response)
 {
 	this->Buffer += Data;
-	DEBUGOUT(1, COLORED(this->Buffer, Yellow));
 	switch (REQUEST_STATE)
 	{
 	case HEADERS_STAGE:
 		if (this->Buffer.find("\r\n\r\n") != std::string::npos)
 		{
-			DEBUGOUT(1, this->Buffer);
+			DEBUGOUT(1, COLORED(this->Buffer, Cyan));
 			ParseHeaders(response);
 		}
 		// fall through

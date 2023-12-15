@@ -28,12 +28,12 @@
 #include <fcntl.h>
 #include <algorithm>
 #include <dirent.h>
+#include "ConfigFile/ParseConfig.hpp"
 
 class Location;
 class ConfServer;
 class Configurations;
 class Http;
-class Values;
 
 struct Data
 {
@@ -80,6 +80,15 @@ typedef enum Colors
 	Cyan = 36,
 	White = 37,
 	Reset = 0,
+	Orange = 38,
+    Pink = 95,
+    LightGreen = 102,
+    LightBlue = 104,
+    LightCyan = 106,
+    Gray = 90,      
+    DarkGray = 100, 
+    Brown = 52,     
+    Purple = 54,    
 } t_colors;
 
 #define COLORED(str, color) "\033[1;" << color << "m" << str << "\033[0m"
