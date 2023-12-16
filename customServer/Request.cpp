@@ -200,13 +200,7 @@ void Request::processRequest(Response &response)
 			return;
 		parseHeaderErrors(response);
 	}
-	//-> need to handle errors pages from config file 
-	// /*
-		// if (response.getStatusCode() != 200){
-		// 	if (confServer.get)
-		// }
-	// */
-REQUEST_STATE = REQUEST_HANDLER_STAGE;
+	REQUEST_STATE = REQUEST_HANDLER_STAGE;
 }
 
 
