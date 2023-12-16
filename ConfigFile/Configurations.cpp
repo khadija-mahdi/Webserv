@@ -1,4 +1,5 @@
 #include "Configurations.hpp"
+#include "../Webserv.hpp"
 
 //---------------------------------Events class -------------------------------
 int		Configurations::Events::worker_connections = 0;
@@ -25,10 +26,37 @@ void	    						Http::addServer(ConfServer const &loc){ConfServers.push_back(loc)
 
 //------------------------------------------Values class --------------------------------------------
 
+void checkValues(const std::string &lines) {
+    std::stringstream errorMessage;
+    std::istringstream lineStream(lines);
+    std::string line;
+    size_t lineNumber = 0;
+    int nextLine = 0;
+
+    while (std::getline(lineStream, line)) {
+
+        if (nextLine == 1) {
+            size_t openBrace = line.find('{');
+            size_t closeBrace = line.find('}');
+
+            if (openBrace == std::string::npos && closeBrace == std::string::npos) {
+                errorMessage << "\033[1;31mError: Syntax error. Please add The Value inside Braces " << "\033[0m" << std::endl;
+                throw std::runtime_error(errorMessage.str());
+            }
+
+            nextLine = 0;
+        }
+
+        size_t openBrace = line.find('}');
+        if (openBrace != std::string::npos)
+            nextLine = 1;
+    }
+}
+
 std::vector<std::pair<std::string, std::pair<int, int> > >& Values::BlocksS(const std::string &lines, const std::string &blockName)
 {
 	int pos = 0;
-
+	checkValues(lines);
 	while (pos < lines.length())
 	{
 		int start = lines.find(blockName, pos);
@@ -46,14 +74,11 @@ std::vector<std::pair<std::string, std::pair<int, int> > >& Values::BlocksS(cons
 		int bracesCount = 1;
 		while (bracesCount > 0 && closeBrace < lines.length())
 		{
-			if (lines[closeBrace] == '{')
-			{
+			if (lines[closeBrace] == '{'){
 				bracesCount++;
 			}
 			else if (lines[closeBrace] == '}')
-			{
 				bracesCount--;
-			}
 			closeBrace++;
 		}
 		if (bracesCount == 0)
@@ -63,9 +88,7 @@ std::vector<std::pair<std::string, std::pair<int, int> > >& Values::BlocksS(cons
 			pos = closeBrace;
 		}
 		else
-		{
 			break;
-		}
 	}
 	return extractedBlocks;
 }

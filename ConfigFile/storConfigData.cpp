@@ -1,18 +1,23 @@
 #include "ParseConfig.hpp"
+std::stringstream	errorMessage;
 
 void processErrorPage(const std::string& line, std::string &value, int& errorCode) {
         std::istringstream iss(line);
         std::string firstWord, secondWord;
         iss >> firstWord;
-        if (!isDigitStr(firstWord)) 
-            throw std::runtime_error("Error: The first word is not a digit.");
+        if (!isDigitStr(firstWord)){
+			errorMessage << "\033[1;" << Red << "mError: " << "The status code not correct !" << "\033[0m" << std::endl;
+        	throw std::runtime_error(errorMessage.str());
+		}
 		errorCode = atoi(firstWord.c_str());
         iss >> secondWord;
 
         std::string remaining;
         iss >> remaining;
-        if (!remaining.empty())
-            throw std::runtime_error("Error: More than two words found in the input.");
+        if (!remaining.empty()){
+			errorMessage << "\033[1;" << Red << "mError: " << "Need just the status code and Path , Nothing More !" << "\033[0m" << std::endl;
+        	throw std::runtime_error(errorMessage.str());
+		}
 		value  = secondWord;
 }
 
@@ -73,8 +78,10 @@ bool processRedirection(std::string& path, int &status, std::string &key){
 	}
 	if (i == 1 || (i == 2) && status >= 100 && status <= 599)
 		return true;
-	else
-		throw std::runtime_error("not a true redirection syntax: " + key);
+	else{
+			errorMessage << "\033[1;" << Red << "mError: " << "Please Correct The Redirection Syntax !"<< key << "\033[0m" << std::endl;
+        	throw std::runtime_error(errorMessage.str());
+	}
 	return 0;
 }
 
@@ -101,7 +108,7 @@ bool processErrors(std::string& path, int &status, std::string &key){
 	else
 		throw std::runtime_error("not a true error pages syntax: " + key);
 	return 0;
-} ///? it's does not wor 
+} //? it's does not wor 
 
 std::map<std::string, std::string> extractKeyValues(const std::string& Block, std::map<int, std::string> &errors) {
 	std::map<std::string, std::string> keyValues;
@@ -142,7 +149,8 @@ std::map<std::string, std::string> extractKeyValues(const std::string& Block, st
 			}
 			keyValues[key] = value;
 		} else {
-			throw std::runtime_error("syntax error key value. [" + line + "]");
+			errorMessage << "\033[1;" << Red << "mError: " << "Syntax Error in  :" << line <<  "\033[0m" << std::endl;
+        	throw std::runtime_error(errorMessage.str());
 		}
 	}
 	return keyValues;
@@ -152,8 +160,10 @@ std::map<std::string, std::string> extractKeyValues(const std::string& Block, st
 void   splitKeyValue(std::string &block, std::string &key, std::string &value, std::string word, int flag){
 	std::string keyValue = "";
 	size_t pos = block.find(word);
-	if (pos == std::string::npos && flag == 1)
-		throw std::runtime_error("block error : " + block);
+	if (pos == std::string::npos && flag == 1){
+			errorMessage << "\033[1;" << Red << "mError: " << "Block " << block << "\033[0m" << std::endl;
+        	throw std::runtime_error(errorMessage.str());
+	}
 	size_t end = block.find("}");
 	// if(pos = std::string::npos)
 	//     return;
@@ -246,13 +256,18 @@ void singleData(ConfServer & ConfServer, std::string &ConfServerBlock){
 	values = extractKeyValues(ConfServerBlock,errs);
 	std::map<std::string, std::string>::iterator it = values.begin();
 	for (; it != values.end(); ++it) {
-		if(it->first == "listen" && isDigit(it->second)){
+		if(it->first == "listen"){
 			flag++;
-			int value = atoi(it->second.c_str());
-			if (value > 0 && value <= 65536)
-				ConfServer.setListen(SSRT(value));
-			else
-				throw std::runtime_error("not a valid port : " + it->second);
+			int value;
+			if (isDigitStr(it->second)){
+				int value = atoi(it->second.c_str());
+				if (value > 0 && value <= 65536)
+					ConfServer.setListen(SSRT(value));
+			}
+			else{
+				errorMessage << "\033[1;" << Red << "mError: " << "Not a Valid Port : " << it->second <<  "\033[0m" << std::endl;
+        		throw std::runtime_error(errorMessage.str());
+			}
 		}
 		else if(it->first == "host"){
 			flag++;
@@ -284,11 +299,15 @@ void singleData(ConfServer & ConfServer, std::string &ConfServerBlock){
 			while (iss >> word)
 				ConfServer.setIndex(word);
 		}
-		else
-			throw std::runtime_error("server wrong key : " + it->first);
+		else{
+			errorMessage << "\033[1;" << Red << "mError: " << "Server Block Wrong Key found !" << "\033[0m" << std::endl;
+        	throw std::runtime_error(errorMessage.str());
+		}
 	}
-	if (flag != 2)
-		throw std::runtime_error("the obligation keys not found");
+	if (flag != 2){
+			errorMessage << "\033[1;" << Red << "mError: " << "Server Block obligation Keys Not Found !" << "\033[0m" << std::endl;
+        	throw std::runtime_error(errorMessage.str());
+	}
 }
 
 
@@ -318,8 +337,10 @@ void locationValues(Location &location, std::string &locationBlock){
 			flag++;
 			if (it->second == "on" || it->second == "off")
 				location.setAutoindex(it->second);
-			else
-				 throw std::runtime_error("location wrong value : " + it->first + " = " + it->second);
+			else{
+				errorMessage << "\033[1;" << Red << "mError: " << "Location Block : " << it->first <<  "\033[0m" << std::endl;
+        		throw std::runtime_error(errorMessage.str());
+			}
 		}
 		else if(it->first == "allow"){
 			std::string method = it->second;
@@ -336,8 +357,10 @@ void locationValues(Location &location, std::string &locationBlock){
 					else
 						location.setAllow(methodName);
 				}
-				else
-					throw std::runtime_error("No method called : " + methodName);
+				else{
+					errorMessage << "\033[1;" << Red << "NO Method called : "<< methodName << "\033[0m" << std::endl;
+        			throw std::runtime_error(errorMessage.str());
+				}
 			}
 			location.setAllow(it->second.c_str());
 		}
@@ -345,8 +368,10 @@ void locationValues(Location &location, std::string &locationBlock){
 			flag++;
 			if (it->second == "on" || it->second == "off")
 				location.setUpload(it->second);
-			else
-				throw std::runtime_error("location wrong value : " + it->first + " = " + it->second);
+			else{
+				errorMessage << "\033[1;" << Red << "mError: " << "Location Block Wrong Value : "<< it->first << " = " << it->second << "\033[0m" << std::endl;
+        		throw std::runtime_error(errorMessage.str());
+			}
 		}
 		else if(it->first == "upload_stor"){
 			flag++;
@@ -359,8 +384,10 @@ void locationValues(Location &location, std::string &locationBlock){
 			if (errs.size())
 				location.setError_pages(errs);
 		}
-		else
-			throw std::runtime_error("location wrong key : " + it->first);
+		else{
+			errorMessage << "\033[1;" << Red << "mError: " << "Location Block Wrong Key Found :" << it->first << "\033[0m" << std::endl;
+        	throw std::runtime_error(errorMessage.str());
+		}
 	}
 	// if (flag != 3)
 	//     throw std::runtime_error("the obligation keys not found"); //? need to set obligation values

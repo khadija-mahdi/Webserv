@@ -46,25 +46,34 @@ std::string &skepComment(std::string &line) {
 
 std::string locationSyntax(std::string word){
     std::string locWord = "";
+	std::stringstream errorMessage;
+
     int i;
     for(i = 0; word[i] &&( word[i] == ' ' || word[i] == '\t'); i++);
     for(; word[i] && word[i] != ' '; i++)
         locWord += word[i];
     for(; word[i] &&( word[i] == ' ' || word[i] == '\t'); i++);
-    if (!word[i])
-        throw std::runtime_error("syntax error in :" + word);
+	
+    if (!word[i]){
+        errorMessage << "\033[1;31mError: Syntax error in : " << word << "\033[0m" << std::endl;
+		throw std::runtime_error(errorMessage.str());
+	}
     if (locWord == "location")
         return locWord;
-    throw std::runtime_error("syntax error in :" + locWord);
+	errorMessage << "\033[1;31mError: Syntax error in : " << word << "\033[0m" << std::endl;
+	throw std::runtime_error(errorMessage.str());
     return NULL;
 }
 
 bool isInFormat(std::string& word, std::string& line) {
+	std::stringstream errorMessage;
 	ConfServer ConfServer;
     if (word == "events " || word == "http " 
         || word == "	server " ||word ==  locationSyntax(word)){
-        if (word + "{" != line)
-            throw std::runtime_error("syntax error in :" + line);
+        if (word + "{" != line){
+			errorMessage << "\033[1;31mError: Syntax error in : " << line << "\033[0m" << std::endl;
+			throw std::runtime_error(errorMessage.str());
+		}
     }
     return true;
 }

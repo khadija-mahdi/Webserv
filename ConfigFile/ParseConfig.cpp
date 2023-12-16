@@ -29,8 +29,10 @@ void ParseConfig::includeMimeTypes(std::string &_file){
         for (; it != keyValues.end(); ++it)
             Configurations::http.setIncludes(it->second , it->first);
     }
-    else
-        throw std::runtime_error("Error: could not open file.");
+    else{
+		errorMessage << "\033[1;" << Red << "mError: " << "m\ncould not open file." << "\033[0m" << std::endl;
+		throw std::runtime_error(errorMessage.str());
+	}
 
 }
 
@@ -49,7 +51,10 @@ void ParseConfig::ParseConfig::syntaxForm(std::string &line){
     }
     if(!flag) {
         if (line[line.size() - 1] != ';')
-            throw std::runtime_error("syntax error in no ; in end of line :" + line);
+		{
+			errorMessage << "\033[1;" << Red << "mError: " << "syntax error in no ; in end of line :"  <<  line << "\033[0m" << std::endl;
+        	throw std::runtime_error(errorMessage.str());
+		}
     }
 }
 
@@ -68,7 +73,7 @@ void ParseConfig::readConfigFile(std::string const&file){
         conf.open("config/config_file.conf", std::ios::in);
         
         if (!conf.is_open()) {
-			errorMessage << "\033[1;" << Red << "mError: " << "could not open file." << "\033[0m" << std::endl;
+			errorMessage << "\033[1;" << Red << "mError: " << "m\ncould not open file." << "\033[0m" << std::endl;
         	throw std::runtime_error(errorMessage.str());
         }
     }
@@ -96,7 +101,7 @@ void ParseConfig::CurlyBrackets(){
             CloseBrackets--;
     }
     if (CloseBrackets || !openBrackets){
-		errorMessage << "\033[1;" << Red << "syntax error in curly Brackets." << "\033[0m" << std::endl;
+		errorMessage << "\033[1;" << Red << "mError: " << "syntax error in curly Brackets." << "\033[0m" << std::endl;
         throw std::runtime_error(errorMessage.str());
 	}
 }
@@ -164,7 +169,10 @@ void ParseConfig::ServerInHttp(std::string &httpBlock, Http &httpConfig){
     
     extractedBlocks = serv.BlocksS(httpBlock,"server");
     if(extractedBlocks.size() < 1)
-        throw std::runtime_error("block server not found ");
+	{
+		errorMessage << "\033[1;" << Red <<  "mError: " << "Block server not found ." << "\033[0m" << std::endl;
+        throw std::runtime_error(errorMessage.str());
+	}
     for (size_t i = 0; i < extractedBlocks.size(); ++i) {
         server = parseServerBlock(extractedBlocks[i].first);
         httpConfig.addServer(server);
@@ -187,18 +195,21 @@ void ParseConfig::parseHttpBlock(std::string &httpBlock) {
     values = extractKeyValues(httpBlock, errs);
     std::map<std::string, std::string>::iterator it = values.begin();
     for (; it != values.end(); ++it) {
+		std::cout << "value in http : "<<  it->first << std::endl;
         if (it->first == "include")
-            includeMimeTypes(it->second); //? open mime.types and set this values in map inside the http class
+            includeMimeTypes(it->second);
         else if(it->first == "default_type")
-            Configurations::http.setDefault_type(it->second);// set the default path ;
+            Configurations::http.setDefault_type(it->second);
         else if(it->first == "client_max_body_size")
         Configurations::http.setMax_body_size(it->second);
         else if (it->first == "error_page"){
 			if (errs.size())
 				Configurations::http.setError_pages(errs);
         }
-        else 
-            throw std::runtime_error("http wrong key !");
+        else{
+			errorMessage << "\033[1;" << Red << "mError: " << " Http wrong key ! .\n" << "\033[0m" << std::endl;
+       		throw std::runtime_error(errorMessage.str());
+		}
     }
     // Configurations::http.printErrorPages();
 
@@ -211,8 +222,10 @@ void ParseConfig::parsingValues() {
     size_t pos = lines.find("events");
     if (pos != std::string::npos){
         std::vector<std::string> events = BlocksExtra(lines, "events");
-        if (events.size() != 1)
-            throw std::runtime_error("events Blocks duplicate");
+        if (events.size() != 1){
+				errorMessage << "\033[1;" << Red << "mError: " << "Events Block Duplicate !" << "\033[0m" << std::endl;
+        		throw std::runtime_error(errorMessage.str());
+		}
         std::string event = events[0];
         parseEventsBlock(event);
         pos = 0;
@@ -220,13 +233,17 @@ void ParseConfig::parsingValues() {
     pos = lines.find("http");
     if (pos != std::string::npos) {
         std::vector<std::string> https = BlocksExtra(lines, "http");
-        if (https.size() != 1)
-            throw std::runtime_error("http Block duplicate");
+        if (https.size() != 1){
+			errorMessage << "\033[1;" << Red << "mError: " << "Http Block Duplicate !" << "\033[0m" << std::endl;
+        	throw std::runtime_error(errorMessage.str());
+		}
         std::string httpBlock = https[0];
         parseHttpBlock(httpBlock);
     }
-    else
-        throw std::runtime_error("http Block not exist");
+    else{
+			errorMessage << "\033[1;" << Red << "mError: " << "NO Http Block Found !" << "\033[0m" << std::endl;
+        	throw std::runtime_error(errorMessage.str());
+	}
 }
 
 void ParseConfig::pacingConfigFile(char *_file){
