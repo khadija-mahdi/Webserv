@@ -15,6 +15,7 @@ struct HeaderData
 	ConfServer							currentServer;
 	std::string							newRoot;
 	std::string							url;
+	bool								REDIRECTION_STAGE;
 };
 
 class Request;
@@ -31,6 +32,7 @@ public:
 	void	fillHeaderData(HeaderData &);
 	void  	printHeaderdata(HeaderData &headerData);
 	int		ParseUrl(HeaderData &headerData);
+	bool	redirectionType(std::vector<Location>&, HeaderData &);
 };
 
 #endif

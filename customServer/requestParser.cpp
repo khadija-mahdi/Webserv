@@ -1,6 +1,7 @@
 #include "RequestParser.hpp"
 
-RequestParser::RequestParser(/* args */){}
+RequestParser::RequestParser(/* args */){
+}
 
 RequestParser::~RequestParser(){}
 
@@ -66,11 +67,10 @@ void RequestParser::fillHeaderData(HeaderData &headers)
 
 	std::istringstream requestLineStream(requestLine);
 	requestLineStream >> headers.Method >>headers.Path;
-	if (int pos =headers.Path.find(" ") != std::string::npos)
+	if (int pos =headers.Path.find("/") != std::string::npos)
 		headers.Path = headers.Path.substr(pos);
 	urlDecoding(headers.Path);
 	headers.url = headers.Path;
-
 	std::string header;
 	while (std::getline(BufferStream, header) && !header.empty())
 	{
@@ -113,18 +113,25 @@ void RequestParser::getCurrentServer(std::vector<ConfServer> &confServers,Header
 	}
 }
 
+bool RequestParser::redirectionType(std::vector<Location> &confLocation, HeaderData &headerData){
+	for (size_t i = 0;i < confLocation.size(); i++)
+	{
+		if (confLocation[i].getPath() ==headerData.currentLocation.getRedirection().ReturnLocation)
+			return 0;
+	}
+	return 1;
+}
 void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation, HeaderData &headerData)
 {
 	size_t i = 0;
 	int start = 0 ,end = 0;
-	headerData.Path = "/" + headerData.Path;
 	if ((headerData.Path ) == "/"){
 		headerData.locationIndex = headerData.currentServer.getDefaultLocation();
 	}
 	else{
 		for (;i < confLocation.size(); i++)
 		{
-			if (confLocation[i].getPath() == " ")
+			if (confLocation[i].getPath() == "/")
 				continue;
 			std::string locPath = confLocation[i].getPath();
 			size_t lastCharPos = locPath[locPath.length() + 1];
@@ -135,10 +142,23 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation,
 			}
 		}
 	}
+	std::cout << "locationIndex is : " << headerData.locationIndex << std::endl;
+	std::cout << "locationIndex path is : " << headerData.Path << std::endl;
 	if (headerData.locationIndex != -1){
-			end = confLocation[headerData.locationIndex].getPath().length();
-			headerData.newRoot =headerData.Path.substr(start + end);
+		end = confLocation[headerData.locationIndex].getPath().length();
+		headerData.newRoot = headerData.Path.substr(start  + end);
 		headerData.currentLocation= confLocation[headerData.locationIndex];
+		if (!headerData.currentLocation.getRedirection().ReturnLocation.empty()){
+			headerData.Path = headerData.currentLocation.getRedirection().ReturnLocation;
+			if (!redirectionType(confLocation, headerData)){
+				getCurrentLocationIndex(confLocation, headerData);
+			}
+			else{
+				headerData.REDIRECTION_STAGE = true;
+				std::cout << "wak wak a 3ibad lah \n";
+				headerData.url = headerData.currentLocation.getRedirection().ReturnLocation; 
+			}
+		}
 	}
 }
 
@@ -146,14 +166,14 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation,
 int RequestParser::ParseUrl(HeaderData &headerData) {
 	int pos1 = 0;
 
-	DEBUGOUT(1, COLORED("\n the current Server locations size is  : " << headerData.currentServer.getLocations().size() << "\n", Cyan));
 	if (headerData.currentServer.getLocations().size() == 0){
 		if (!headerData.currentServer.getRoot().empty()){
+			headerData.Path = "/" + headerData.Path;
 			size_t lastSlashPos = headerData.Path.find_last_of("/");
 			if (lastSlashPos != std::string::npos) {
        			std::string newRoot = headerData.Path.substr(lastSlashPos);
 				headerData.Path = headerData.currentServer.getRoot() + newRoot;
-				DEBUGOUT(1, COLORED("\n the current Location is  : " << headerData.Path << "\n", Cyan));
+				DEBUGOUT(1, COLORED("\n the current Location is  parse url: " << headerData.Path << "\n", Cyan));
 			}
 		}
 		return 1;
@@ -172,11 +192,10 @@ void RequestParser::ParseRequest(HeaderData &headerData){
 	fillHeaderData(headerData);
 	printHeaderdata(headerData);
 	std::vector<ConfServer> confServers = Configurations::http.getConfServes();
+	headerData.Path = "/" + headerData.Path;
 	getCurrentServer(confServers, headerData);
 	std::vector<Location> confLocation = headerData.currentServer.getLocations();
 	getCurrentLocationIndex(confLocation, headerData);
-	if (ParseUrl(headerData)){
-		DEBUGOUT(1, COLORED("THE New Path : " << headerData.Path << "\n" , Green));
-		return;
-	}
+	if (!headerData.REDIRECTION_STAGE)
+		ParseUrl(headerData);
 }
