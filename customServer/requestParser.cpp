@@ -66,7 +66,7 @@ void RequestParser::fillHeaderData(HeaderData &headers)
 
 	std::istringstream requestLineStream(requestLine);
 	requestLineStream >> headers.Method >>headers.Path;
-	if (int pos =headers.Path.find("/") != std::string::npos)
+	if (int pos =headers.Path.find(" ") != std::string::npos)
 		headers.Path = headers.Path.substr(pos);
 	urlDecoding(headers.Path);
 	headers.url = headers.Path;
@@ -118,12 +118,13 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation,
 	size_t i = 0;
 	int start = 0 ,end = 0;
 	headerData.Path = "/" + headerData.Path;
-	if (headerData.Path == "/")
+	if ((headerData.Path ) == "/"){
 		headerData.locationIndex = headerData.currentServer.getDefaultLocation();
+	}
 	else{
 		for (;i < confLocation.size(); i++)
 		{
-			if (confLocation[i].getPath() == "/")
+			if (confLocation[i].getPath() == " ")
 				continue;
 			std::string locPath = confLocation[i].getPath();
 			size_t lastCharPos = locPath[locPath.length() + 1];
@@ -141,21 +142,29 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation,
 	}
 }
 
+
 int RequestParser::ParseUrl(HeaderData &headerData) {
 	int pos1 = 0;
 
-	DEBUGOUT(1, COLORED("\n the current Server is  : " << headerData.currentServer.getListen() << "\n", Cyan));
+	DEBUGOUT(1, COLORED("\n the current Server locations size is  : " << headerData.currentServer.getLocations().size() << "\n", Cyan));
 	if (headerData.currentServer.getLocations().size() == 0){
-		if (!headerData.currentServer.getRoot().empty())
-			headerData.Path = headerData.currentServer.getRoot();
+		if (!headerData.currentServer.getRoot().empty()){
+			size_t lastSlashPos = headerData.Path.find_last_of("/");
+			if (lastSlashPos != std::string::npos) {
+       			std::string newRoot = headerData.Path.substr(lastSlashPos);
+				headerData.Path = headerData.currentServer.getRoot() + newRoot;
+				DEBUGOUT(1, COLORED("\n the current Location is  : " << headerData.Path << "\n", Cyan));
+			}
+		}
+		return 1;
 	}
 	else{
 		if (!headerData.currentLocation.getRoot().empty())
 			headerData.Path = headerData.currentLocation.getRoot()  + headerData.newRoot;
 		else if (!headerData.currentServer.getRoot().empty())
 			headerData.Path = headerData.currentServer.getRoot() + headerData.newRoot ;
+			return 1;
 	}
-	DEBUGOUT(1, COLORED("THE New Path : " << headerData.Path << "\n" , Green));
 	return 0;
 }
 
@@ -166,5 +175,8 @@ void RequestParser::ParseRequest(HeaderData &headerData){
 	getCurrentServer(confServers, headerData);
 	std::vector<Location> confLocation = headerData.currentServer.getLocations();
 	getCurrentLocationIndex(confLocation, headerData);
-	ParseUrl(headerData);
+	if (ParseUrl(headerData)){
+		DEBUGOUT(1, COLORED("THE New Path : " << headerData.Path << "\n" , Green));
+		return;
+	}
 }

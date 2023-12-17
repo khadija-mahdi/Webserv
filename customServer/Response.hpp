@@ -19,7 +19,7 @@ private:
 
 public:
 	std::string RedirectionPath;
-	void		setStatusCode(int const &res, int flag);
+	void		setStatusCode(int const &res, int const &flag);
 	void		setRequest(std::string const &req){Path = req;}
 	void		setFD(int const &res){fd = res;};
 	void		setResponseBuffer(std::string const &res);

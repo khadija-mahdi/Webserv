@@ -101,7 +101,7 @@ std::string Response::getResponseHeader()const {return responseHeader;}
 
 void Response::clearResponseBuffer(){responseBuffer = "";}
 
-void Response::setStatusCode(int const &st, int flag){ 
+void Response::setStatusCode(int const &st, int const & flag){ 
 	statusCode = st;
 	RESPONSE_TYPE = flag;
 }
@@ -265,7 +265,7 @@ int Response::sendResponse(int const &clientSocket)
 		if (fd > 0)
 			return sendChunkResponse(clientSocket);
 	}
-	else
+	else if (RESPONSE_TYPE == 3)
 	{
 
 		DEBUGOUT(1, COLORED("response in Erro pages : \n" << DefaultErrorPage(statusCode), Magenta));

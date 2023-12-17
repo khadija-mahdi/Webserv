@@ -27,12 +27,14 @@ public:
 
 	bool	RequestHandler(std::string , Response& );
 	void	processRequest(Response& );
-	void	parseHeaderErrors(Response &);
+	bool	parseHeaderErrors(Response &);
 	void	handleDirectoryPath(Response &);
 	bool	methodParser(Response &);
 	bool	processRedirectionAndAllowance(Response &);
-	bool	checkErrorPage(int const &, std::map<int, std::string>& , Response &);
-	void	checkInHttp(int const & , Response &);
+	bool	checkErrorPage(Response &, int const &, std::map<int, std::string>& , int);
+	bool	checkInHttp(Response & , int const &, int);
+	bool	GetMethod(Response &);
+
 };
 
 #endif
