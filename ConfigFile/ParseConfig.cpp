@@ -195,7 +195,6 @@ void ParseConfig::parseHttpBlock(std::string &httpBlock) {
     values = extractKeyValues(httpBlock, errs);
     std::map<std::string, std::string>::iterator it = values.begin();
     for (; it != values.end(); ++it) {
-		std::cout << "value in http : "<<  it->first << std::endl;
         if (it->first == "include")
             includeMimeTypes(it->second);
         else if(it->first == "default_type")

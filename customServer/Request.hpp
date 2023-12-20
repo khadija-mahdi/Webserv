@@ -14,6 +14,15 @@ enum
 	REQUEST_HANDLER_STAGE = 0,
 };
 
+enum
+{
+	DIRE = 1,
+	VALID_PATH = 2,
+	NOT_DIR = 0,
+	NOT_VALID_PATH = -1,
+	FORBIDDEN_READ = 4,
+};
+
 class Request {
 	int									serverIndex;
 	int									fd;
@@ -29,12 +38,15 @@ public:
 	void	processRequest(Response& );
 	bool	parseHeaderErrors(Response &);
 	void	handleDirectoryPath(Response &);
+	bool	GetMethod(Response &);
 	bool	methodParser(Response &);
 	bool	processRedirectionAndAllowance(Response &);
 	bool	checkErrorPage(Response &, int const &, std::map<int, std::string>& , int);
 	bool	checkInHttp(Response & , int const &, int);
-	bool	GetMethod(Response &);
 
 };
+
+int directoryStatus(const std::string& path);
+int fileStatus(const std::string& path);
 
 #endif

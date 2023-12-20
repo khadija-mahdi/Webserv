@@ -5,8 +5,8 @@ void processErrorPage(const std::string& line, std::string &value, int& errorCod
         std::istringstream iss(line);
         std::string firstWord, secondWord;
         iss >> firstWord;
-        if (!isDigitStr(firstWord)){
-			errorMessage << "\033[1;" << Red << "mError: " << "The status code not correct !" << "\033[0m" << std::endl;
+		if (!isDigitStr(firstWord) || (atoi(firstWord.c_str()) < 100 || atoi(firstWord.c_str()) > 599)){
+			errorMessage << "\033[1;" << Red << "mError: " << "The status code not correct  : " << atoi(firstWord.c_str()) << "\033[0m" << std::endl;
         	throw std::runtime_error(errorMessage.str());
 		}
 		errorCode = atoi(firstWord.c_str());
@@ -75,6 +75,13 @@ bool processRedirection(std::string& path, int &status, std::string &key){
 			i++;
 			path = word;
 		}
+	}
+	if ( i == 1 && status != 0){
+		errorMessage << "\033[1;" << Red << "mError: " << "Please Correct The Redirection Syntax , Add Path!"<< "\033[0m" << std::endl;
+		throw std::runtime_error(errorMessage.str());
+	}
+	if (i == 1){
+		status = 301;
 	}
 	if (i == 1 || (i == 2) && status >= 100 && status <= 599)
 		return true;

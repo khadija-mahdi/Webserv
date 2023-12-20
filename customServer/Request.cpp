@@ -27,10 +27,10 @@ std::string GetHeadersValue(std::map<std::string, std::string> &headers, std::st
 	return (it->second);
 }
 
-int IsDirectory(const std::string& path) {
+
+int directoryStatus(const std::string& path) {
     struct stat directoryInfo;
     if (stat(path.c_str(), &directoryInfo) == 0) {
-        // Check if it is a directory
         if (S_ISDIR(directoryInfo.st_mode))
 			return 1; // is a directory
 		else if (S_ISREG(directoryInfo.st_mode))
@@ -40,16 +40,43 @@ int IsDirectory(const std::string& path) {
 	return -1; // is not exist
 }
 
+int fileStatus(const std::string& path) {
+    struct stat fileInfo;
+
+    // Use stat to get information about the file
+    if (stat(path.c_str(), &fileInfo) == 0) {
+        // Check if it's a regular file
+        if (S_ISREG(fileInfo.st_mode)) {
+            // Check for read permission
+            if (fileInfo.st_mode & S_IRUSR) {
+                return 3; // Read permission is granted for a regular file
+            } else {
+                return 4; // No read permission for a regular file
+            }
+        } else {
+            // Handle non-regular files (directories, symbolic links, etc.) here
+            return 0; // Not a regular file
+        }
+    } else {
+        // Handle error accessing file information
+        std::cerr << "Error accessing file information for " << path << std::endl;
+        return -1; // Error code (you may want to choose a more meaningful value)
+    }
+}
 
 void Request::handleDirectoryPath(Response &response) {
 	std::vector<std::string> indexes;
+	if (headerData.currentLocation.getAutoindex() == "off"){
+		checkInHttp(response, 403,1);
+		return;
+	}
 	if (headerData.locationIndex == -1) { // only server
 		indexes = headerData.currentServer.getIndex();
 		std::cout << "hi i'm here \n";
 		if (indexes.size() > 0){
 			for (int i = 0;  i < indexes.size() ; ++i){
 				std::string newPath = headerData.Path + indexes[i];
-				if (IsDirectory(newPath) == 2){
+				if (directoryStatus(newPath) == 2){
 					fd = open(newPath.c_str(), O_RDONLY, 0664);
 					response.setFD(fd);
 					return;
@@ -61,20 +88,21 @@ void Request::handleDirectoryPath(Response &response) {
 	}
 	indexes = headerData.currentLocation.getIndex();
 	for (int i = 0;  i < indexes.size() ; ++i){
+		std::cout << "index [" << i << "] = " << indexes[i] << std::endl;
 		std::string newPath = headerData.Path + indexes[i];
-		if (IsDirectory(newPath) == 2){
+		if (directoryStatus(newPath) == 2){
+			std::cout << "hee \n";
 			fd = open(newPath.c_str(), O_RDONLY, 0664);
 			response.setFD(fd);
 			return;
 		}
-	}
-	if (headerData.currentLocation.getAutoindex() == "off"){
-		checkInHttp(response, 403,1);
+		checkInHttp(response, 404,1);
 		return;
 	}
 	response.setStatusCode(200, 2);
 	response.RedirectionPath = headerData.Path;
 }
+
 
 bool Request::parseHeaderErrors(Response &response){
 	if (!GetHeadersValue(headerData.Headers, "Transfer-Encoding").empty() && GetHeadersValue(headerData.Headers, "Transfer-Encoding") != "chunked")
@@ -101,11 +129,8 @@ bool Request::processRedirectionAndAllowance(Response &response){
 		int allow = std::find(allowMethod.begin(), allowMethod.end(), headerData.Method) != allowMethod.end();
 		if(!allow)
 			return checkInHttp(response,405, 1);
-		std::cout << "we here alkheraa 3awtani:{\n";
 		if (headerData.REDIRECTION_STAGE){
-			std::cout << "here !! \n";
 			response.RedirectionPath = headerData.Path; 
-			std::cout << "status code here is : " << headerData.currentLocation.getRedirection().statusCode << std::endl;
 			response.setStatusCode(headerData.currentLocation.getRedirection().statusCode , 0);
 			return true;
 		}
@@ -121,9 +146,8 @@ bool Request::checkErrorPage(Response &response, int const &error, std::map<int,
 	{
 		if (it->first == error)
 		{
-			if (IsDirectory(it->second) == 2){
+			if (directoryStatus(it->second) == 2){
 				fd = open(it->second.c_str(), O_RDONLY, 0664);
-				std::cout << "fd is : " << fd << std::endl;
 				response.setStatusCode(error, respType);
 				response.setFD(fd);
 				return true;
@@ -133,6 +157,7 @@ bool Request::checkErrorPage(Response &response, int const &error, std::map<int,
 	response.setStatusCode(error,3);
 	return false;
 }
+
 
 bool Request::checkInHttp( Response &response, int const &error, int respType){
 	std::map<int, std::string> error_pages = headerData.currentLocation.getError_pages();
@@ -148,21 +173,22 @@ bool Request::checkInHttp( Response &response, int const &error, int respType){
 	return true;
 }
 
+
 bool Request::GetMethod(Response &response){
-	if (IsDirectory(headerData.Path) == 2){
+	if (directoryStatus(headerData.Path) == VALID_PATH){
+		if(fileStatus(headerData.Path) == FORBIDDEN_READ)
+			return checkInHttp(response, 403, 1);
 		fd = open(headerData.Path.c_str(), O_RDONLY, 0664);
 		response.setFD(fd);
 		response.setStatusCode(200, 1);
 		return true;
 	}
-	if (headerData.Path[headerData.Path.length() - 1] == '/'){
+	if (directoryStatus(headerData.Path) == DIRE && headerData.Path[headerData.Path.length() - 1] == '/'){
 		handleDirectoryPath(response);
 		return true;
 	}
 	response.setStatusCode(301, 0);
-	response.RedirectionPath = headerData.url  + "/";
-	std::cout << "new root: " << headerData.newRoot << std::endl;
-	DEBUGOUT(1, COLORED("\n This is a directory and doesn't have a slash '/' at the end : [" << headerData.Path << "]\n", Red));
+	response.RedirectionPath = headerData.url + "/" ;
 	return true;	
 }
 
@@ -179,21 +205,17 @@ bool Request::methodParser(Response &response){
 void Request::processRequest(Response &response)
 {
 	response.setStatusCode(200, 1);
-	DEBUGOUT(1, COLORED("\n the Path that working on it is in pros-->   : " << headerData.Path << "\n", Red));
 	if(parseHeaderErrors(response))
 		return;
-		std::cout << "we here alkheraa :{\n";
-	if (processRedirectionAndAllowance(response)){ // check for allowed method and return first;
-		std::cout << "we here alkheraa 3awtani:{\n";
+	if (processRedirectionAndAllowance(response))
 		return;
-	}
 	if (!headerData.REDIRECTION_STAGE){
-		if (IsDirectory(headerData.Path) <=  0){
-			std::cout << "here 404!! \n";
-			checkInHttp(response, 404, 1);
+		if (directoryStatus(headerData.Path) >  0){
+			std::cout << "hi is a dir :\n";
+			if (methodParser(response))
+				return;
 		}
-		else if (methodParser(response))
-			return;
+		checkInHttp(response, 404, 1);
 	}
 	REQUEST_STATE = REQUEST_HANDLER_STAGE;
 }
@@ -209,9 +231,9 @@ bool Request::RequestHandler(std::string Data, Response &response)
 		if (headerData.Buffer.find("\r\n\r\n") != std::string::npos){
 			DEBUGOUT(1, headerData.Buffer);
 			requestParser.ParseRequest(headerData);
-			DEBUGOUT(1, COLORED("\n Redirection Stage   : " << headerData.REDIRECTION_STAGE << "\n", Magenta));
 			DEBUGOUT(1, COLORED("\n the current Server is  : " << headerData.currentServer.getListen() << "\n", Cyan));
 			DEBUGOUT(1, COLORED("\n the current Location is  : " << headerData.currentLocation.getPath() << "\n", Cyan));
+			DEBUGOUT(1, COLORED("\n the Path that working on it is in pros-->   : " << headerData.Path << "\n", Red));
 		}
 	case REQUEST_HANDLER_STAGE:
 		processRequest(response);
