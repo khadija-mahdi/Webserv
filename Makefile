@@ -1,23 +1,17 @@
 NAME = webserv
 
-SRC = $(wildcard *.cpp) $(wildcard **/*.cpp)
-INC = $(wildcard *.hpp) $(wildcard **/*.hpp)
-
-OBJ= $(SRC:.cpp=.o)
+SRC = $(shell find . -name '*.cpp')
+INC = $(shell find . -name '*.hpp')
 
 OBJ_DIR = objects
-
-OBJ= $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
+OBJ = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
 CPP = g++-11
-
-# CPPFLAGS = -Wall -Wextra -Werror -std=c++98
-CPPFLAGS = -std=c++98 -fsanitize=address -g
+CPPFLAGS = -std=c++98
 
 GREEN = \033[0;32m
 RED = \033[0;31m
 NC = \033[0m
-
 RM = rm -f
 
 all: $(NAME)
@@ -25,6 +19,8 @@ all: $(NAME)
 $(OBJ_DIR)/%.o: %.cpp $(INC)
 	@mkdir -p $(dir $@)
 	@$(CPP) ${CPPFLAGS} -c $< -o $@
+
+-include $(OBJ:.o=.d)
 
 $(NAME): $(OBJ)
 	@echo "$(GREEN)Compiling...$(NC)"

@@ -4,21 +4,23 @@
 #include "Webserv.hpp"
 #include "ConfigFile/ParseConfig.hpp"
 
-std::string read_file_content(const std::string& path) {
-    std::ifstream file(path.c_str());
-    if (!file.is_open()) {
-        std::cerr << "Error opening file: " << path << std::endl;
-        return "";
-    }
-    std::ostringstream content;
-    content << file.rdbuf();
-    file.close();
-    return content.str();
+std::string read_file_content(const std::string &path)
+{
+	std::ifstream file(path.c_str());
+	if (!file.is_open())
+	{
+		std::cerr << "Error opening file: " << path << std::endl;
+		return "";
+	}
+	std::ostringstream content;
+	content << file.rdbuf();
+	file.close();
+	return content.str();
 }
 
 void HandleSigPip(int signal)
 {
-	std::string msg = "SigPip " + SSRT(signal) + "\n";
+	std::string msg = "SigPip " + SSTR(signal) + "\n";
 	write(1, msg.c_str(), msg.size());
 }
 

@@ -2,43 +2,45 @@
 
 #include "../Webserv.hpp"
 #include "Request.hpp"
+#include "RequestParser.hpp"
 
-// class Request;
+
+enum
+{
+	REDIRECTION = 0,
+	LISTEN_DIR = 2,
+	CHUNKED	= 1,
+	DEFAULT_ERRORS = 3,
+};
+
 class Response
 {
 private:
-	std::string responseBuffer;
-	std::string ContentType;
-	std::string responseHeader;
-	std::map<int, std::string> StatusCodes;
-	int statusCode;
-	int fd;
-	bool Headers_Stage;
-	std::string Path;
-	int 	RESPONSE_TYPE;
+	std::map<int, std::string>	StatusCodes;
+	std::string					responseBuffer;
+	std::string					ContentType;
+	std::string					responseHeader;
+	std::string					Path;
+	bool						Headers_Stage;
+	HeaderData					*headerData;
 
 public:
-	std::string RedirectionPath;
-	void		setStatusCode(int const &res, int const &flag);
-	void		setRequest(std::string const &req){Path = req;}
-	void		setFD(int const &res){fd = res;};
-	void		setResponseBuffer(std::string const &res);
-	std::string getResponseBuffer() const;
-	void 		setResponseHeader(std::string const &res);
-	std::string getResponseHeader() const;
-	int			getStatusCode() const;
-	int			getFD() const{return fd;};
-	std::string DefaultErrorPage(int code);
-
-	int PrepareNextChunk();
-	int sendChunkResponse(int const &);
-	void clearResponseBuffer();
-	void getContentType(std::string const &);
-	void setResponseType();
-
-	std::string& httpheader(int const &statusCode);
-	int sendResponse(int const &statusCode);
-	std::string listDir(const std::string &path);
-	Response(/* args */);
+	Response(){};
+	Response(HeaderData	*headerData);
 	~Response(){};
+
+	std::string&	httpheader(int const &);
+	std::string 	getResponseBuffer() const;
+	std::string		getResponseHeader() const;
+	std::string		DefaultErrorPage(int );
+	std::string		listenDirectory(const std::string &);
+
+	void 			setResponseHeader(std::string const &);
+	void			setResponseBuffer(std::string const &);
+	void			clearResponseBuffer();
+	void			getContentType(std::string const &);
+	int				PrepareNextChunk();
+	int				sendChunkResponse(int const &);
+	int				sendResponse(int const &);
+	bool			Write(std::string const &, int const &);
 };

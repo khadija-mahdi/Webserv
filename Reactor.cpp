@@ -15,7 +15,7 @@ void Reactor::RegisterSocket(int socketFd, EventHandler *eventHandler)
 		return;
 	DEBUGOUT(1, COLORED("Regester New "
 							<< (dynamic_cast<AcceptEventHandler *>(eventHandler) != NULL ? "Server " : "Client ")
-							<< "Socket " << SSRT(socketFd) << "\n",
+							<< "Socket " << SSTR(socketFd) << "\n",
 						Blue));
 	event.events = EPOLLRDNORM | EPOLLWRNORM;
 	event.data.fd = eventHandler->GetSocketFd();
@@ -29,7 +29,7 @@ void Reactor::UnRegisterSocket(int SocketFd)
 {
 	std::string Type = dynamic_cast<AcceptEventHandler *>(this->clients[SocketFd]) != NULL ? "Server " : "Client ";
 	DEBUGOUT(1, COLORED("UnRegister " << Type << "Socket "
-									  << SSRT(SocketFd) << "\n",
+									  << SSTR(SocketFd) << "\n",
 						Red));
 	if (epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, SocketFd, NULL) < 0)
 		throw std::runtime_error("epoll_ctl() `EPOLL_CTL_DEL` failed");

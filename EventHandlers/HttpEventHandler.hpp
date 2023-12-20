@@ -38,11 +38,11 @@ public:
 	const int &GetSocketFd() const;
 
 private:
+	HeaderData* headerData;
 	Request requestParser;
 	Response response;
 	Client client;
 	int fd;
-	bool response_now;
 };
 
 #endif

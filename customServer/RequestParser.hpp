@@ -4,6 +4,12 @@
 #include "../Webserv.hpp"
 
 
+struct ResponseData{
+	std::string							Location;
+	int									StatusCode;
+	int									ResponseType;
+	int    								fileFd;
+};
 struct HeaderData
 {
 	int									locationIndex;
@@ -16,9 +22,10 @@ struct HeaderData
 	std::string							newRoot;
 	std::string							url;
 	bool								REDIRECTION_STAGE;
-};
+	ResponseData						response;
+	bool								RESPONSE__STATE;
 
-class Request;
+};
 
 class RequestParser
 {

@@ -1,10 +1,11 @@
 #include "HttpEventHandler.hpp"
 
-HttpEventHandler::HttpEventHandler(int SocketFd, struct sockaddr_storage address, socklen_t address_len) : EventHandler(SocketFd)
+HttpEventHandler::HttpEventHandler(int SocketFd, struct sockaddr_storage address, socklen_t address_len) : EventHandler(SocketFd), 
+			headerData(new HeaderData), requestParser(headerData) , response(headerData)
 {
 	this->client.address = address;
 	this->client.address_len = address_len;
-	this->response_now = false;
+	this->headerData->RESPONSE__STATE = false;
 }
 
 HttpEventHandler::HttpEventHandler() : EventHandler(-1)
@@ -14,24 +15,22 @@ HttpEventHandler::HttpEventHandler() : EventHandler(-1)
 
 int HttpEventHandler::Read()
 {
-	std::ostringstream ss;
+	std::ostringstream request;
 	char buffer[1024];
 	memset(buffer, 0, 1024);
 	int bytes = read(this->SocketFd, buffer, 1024);
 	if (bytes <= 0)
 		return 0;
 
-	ss.write(buffer, bytes);
-
-	requestParser.RequestHandler(ss.str(), response);
-	response.setRequest(requestParser.headerData.Path);
-	this->response_now = true;
+	request.write(buffer, bytes);
+	requestParser.RequestHandler(request.str());
+	this->headerData->RESPONSE__STATE = true;
 	return (-1);
 }
 
 int HttpEventHandler::Write()
 {
-	if (!response_now)
+	if (!headerData->RESPONSE__STATE)
 		return (-1);
 	response.clearResponseBuffer();
 	return response.sendResponse(this->GetSocketFd());
@@ -49,4 +48,5 @@ const int &HttpEventHandler::GetSocketFd() const
 
 HttpEventHandler::~HttpEventHandler()
 {
+	delete headerData;
 }

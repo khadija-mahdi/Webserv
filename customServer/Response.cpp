@@ -1,6 +1,6 @@
 #include "Response.hpp"
 
-Response::Response()
+Response::Response(HeaderData *Data):headerData(Data)
 {
 	responseBuffer = "";
 	StatusCodes[100] = "Continue";
@@ -44,9 +44,9 @@ Response::Response()
 	StatusCodes[503] = "Service Unavailable";
 	StatusCodes[504] = "Gateway Timeout";
 	StatusCodes[505] = "HTTP Version Not Supported";
-	fd = -1;
+	headerData->response.fileFd = -1;
 	Headers_Stage = 1;
-	RESPONSE_TYPE = -1;
+	headerData->response.ResponseType = -1;
 
 	
 }
@@ -58,7 +58,7 @@ std::string Response::DefaultErrorPage(int code)
                             "<head>\n"
                             "    <meta charset=\"UTF-8\">\n"
                             "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                            "    <title> " + SSRT(statusCode) + " " + StatusCodes[statusCode] + "</title>\n"
+                            "    <title> " + SSTR(headerData->response.StatusCode) + " " + StatusCodes[headerData->response.StatusCode] + "</title>\n"
                             "    <style>\n"
                             "        body {\n"
                             "            font-family: 'Arial', sans-serif;\n"
@@ -79,13 +79,13 @@ std::string Response::DefaultErrorPage(int code)
                             "    </style>\n"
                             "</head>\n"
                             "<body>\n"
-                            "    <h1>  " + SSRT(statusCode) + " " + StatusCodes[statusCode] + "  </h1>\n"
+                            "    <h1>  " + SSTR(headerData->response.StatusCode) + " " + StatusCodes[headerData->response.StatusCode] + "  </h1>\n"
                             "    <p> Oops! Something went wrong.</p>\n"
                             "</body>\n"
                             "</html>\n";
-	ErrorPage = "HTTP/1.1 " + SSRT(statusCode) + " " + StatusCodes[statusCode] + "\r\n"
+	ErrorPage = "HTTP/1.1 " + SSTR(headerData->response.StatusCode) + " " + StatusCodes[headerData->response.StatusCode] + "\r\n"
 					+ "Content-Type: " + ContentType + "\r\n"
-					+ "Content-Length: " + SSRT(ErrorPage.length()) + "\r\n"
+					+ "Content-Length: " + SSTR(ErrorPage.length()) + "\r\n"
 					+ "\r\n"
 					+ ErrorPage;
 	return ErrorPage;
@@ -101,12 +101,8 @@ std::string Response::getResponseHeader()const {return responseHeader;}
 
 void Response::clearResponseBuffer(){responseBuffer = "";}
 
-void Response::setStatusCode(int const &st, int const & flag){ 
-	statusCode = st;
-	RESPONSE_TYPE = flag;
-}
 
-int Response::getStatusCode() const{return statusCode;}
+// int Response::getStatusCode() const{return statusCode;}
 
 int isDirectory(const std::string& path) {
     struct stat directoryInfo;
@@ -138,9 +134,9 @@ void Response::getContentType(std::string const &contentPath) {
     
 }
 
-std::string& Response::httpheader(int const& statusCode) {
+std::string& Response::httpheader(int const& StatusCode) {
 	getContentType(Path);
-	responseHeader = "HTTP/1.1 " + SSRT(statusCode) + " " + StatusCodes[statusCode] + "\r\n"
+	responseHeader = "HTTP/1.1 " + SSTR(StatusCode) + " " + StatusCodes[StatusCode] + "\r\n"
 				+ "Content-Type: " + ContentType + "\r\n"
 				+ "Transfer-Encoding: chunked\r\n\r\n";
 
@@ -152,13 +148,13 @@ int Response::PrepareNextChunk() {
     char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
 
-    int bytesRead = read(fd, buffer, sizeof(buffer));
+    int bytesRead = read(headerData->response.fileFd, buffer, sizeof(buffer));
     if (bytesRead < 0) {
         throw std::runtime_error("Error reading from file descriptor");
     } else if (bytesRead == 0) {
         chunk << "0\r\n\r\n";
         responseBuffer = chunk.str();
-		close(fd);
+		close(headerData->response.fileFd);
         return 0;
     }
     chunk << std::hex << bytesRead << "\r\n";
@@ -172,7 +168,7 @@ int Response::sendChunkResponse(int const& clientSocket){
 	int bytes = -1;
 	if (Headers_Stage)
 	{
-		responseBuffer = httpheader(statusCode);
+		responseBuffer = httpheader(headerData->response.StatusCode);
 		if (write(clientSocket, responseBuffer.c_str(), responseBuffer.length()) < 0) 
 			throw std::runtime_error("Error writing to socket in header stage");
 		Headers_Stage = false;
@@ -187,9 +183,9 @@ int Response::sendChunkResponse(int const& clientSocket){
 	return bytes;
 }
 
-std::string Response::listDir(const std::string &path) {
+std::string Response::listenDirectory(const std::string &path) {
     std::stringstream chunk;
-    std::string dirList = "";
+    std::string dirList;
     struct dirent *entry;
     DIR *dp;
 
@@ -198,7 +194,7 @@ std::string Response::listDir(const std::string &path) {
         perror("opendir");
         return dirList;
     }
-    chunk << "HTTP/1.1 " + SSRT(statusCode) + " "  + StatusCodes[statusCode] + "\r\n"
+    chunk << "HTTP/1.1 " + SSTR(headerData->response.StatusCode) + " "  + StatusCodes[headerData->response.StatusCode] + "\r\n"
           << "Content-Type: text/html\r\n\r\n"
           << "<html><body><h1>Directory Listing</h1><ul>";
 
@@ -213,67 +209,38 @@ std::string Response::listDir(const std::string &path) {
     return dirList;
 }
 
-std::string listDir2(const std::string &path) {
-    std::stringstream response;
-    struct dirent *entry;
-    DIR *dp;
 
-    dp = opendir(path.c_str());
-    if (dp == NULL) {
-        perror("opendir");
-        return response.str();
-    }
-
-    response << "HTTP/1.1 200 OK\r\n"
-             << "Content-Type: text/html\r\n\r\n"
-             << "<html><body><h1>Directory Listing</h1><ul>";
-
-    while ((entry = readdir(dp))) {
-        response << "<li><a href=\"" << entry->d_name << "\">" << entry->d_name << "</a></li>";
-    }
-
-    response << "</ul></body></html>";
-    closedir(dp);
-
-    return response.str();
+bool Response::Write(std::string const &response, int const &clientSocket){
+	DEBUGOUT(1, COLORED("response is : \n" << response, Magenta));
+	if (!response.empty()) {
+		if (write(clientSocket, response.c_str(), response.length()) < 0)
+			throw std::runtime_error("Error writing to socket");
+	}
+	if (headerData->response.fileFd != -1)
+		close (headerData->response.fileFd);
+	return 0;
 }
-
 
 int Response::sendResponse(int const &clientSocket)
 {
-	
-	if (!RESPONSE_TYPE){
-    	std::string headerRe = "HTTP/1.1 " + SSRT(statusCode) + " " + StatusCodes[statusCode] + "\r\n"
-                           "Location: " + RedirectionPath + " \r\n\r\n";
-		DEBUGOUT(1, COLORED("response in REDIRECTION: \n" << headerRe, Magenta));
-		if (write(clientSocket, headerRe.c_str(), headerRe.length()) < 0)
-			throw std::runtime_error("Error writing to socket");
-		return 0;
-	}
-	else if (RESPONSE_TYPE == 2){
-		std::string res = listDir(RedirectionPath); 
-		if (res != ""){
-			DEBUGOUT(1, COLORED("response in lis list Directory : \n" << res, Magenta));
-			if (write(clientSocket, res.c_str(), res.length()) < 0)
-				throw std::runtime_error("Error writing to socket");
+	switch (headerData->response.ResponseType) {
+		case REDIRECTION:
+		{
+			std::string headerRe = "HTTP/1.1 " + SSTR(headerData->response.StatusCode) + " " + StatusCodes[headerData->response.StatusCode] + "\r\n"
+								"Location: " + headerData->response.Location + " \r\n\r\n";
+			return Write(headerRe, clientSocket);
 		}
-		return 0;
-
+		case LISTEN_DIR:
+			return Write(listenDirectory(headerData->response.Location), clientSocket);
+		case CHUNKED:
+			if (headerData->response.fileFd > 0)
+				return sendChunkResponse(clientSocket);
+			break;
+		case DEFAULT_ERRORS:
+			return Write(DefaultErrorPage(headerData->response.StatusCode), clientSocket);
+		default:
+			return -1;
+			break;
 	}
-	else if (RESPONSE_TYPE == 1)
-	{
-		if (fd > 0)
-			return sendChunkResponse(clientSocket);
-	}
-	else if (RESPONSE_TYPE == 3)
-	{
-
-		DEBUGOUT(1, COLORED("response in Erro pages : \n" << DefaultErrorPage(statusCode), Magenta));
-		if (write(clientSocket, DefaultErrorPage(statusCode).c_str(),
-			DefaultErrorPage(statusCode).length()) < 0)
-			throw std::runtime_error("Error writing to socket");
-		close(fd);
-		return (0);
-	}
-	return (-1);
+	return -1;
 }
