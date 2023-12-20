@@ -18,10 +18,10 @@ class Request {
 	int									serverIndex;
 	int									REQUEST_STATE;
 	RequestParser						requestParser;
-
-public:
 	HeaderData							*headerData;
 	MethodGet 							getMethod;
+
+public:
 	Request();
 	Request(HeaderData	*headerData);
 	~Request();

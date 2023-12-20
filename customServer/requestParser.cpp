@@ -181,7 +181,6 @@ int RequestParser::ParseUrl(HeaderData &headerData) {
 		return 1;
 	}
 	else{
-		std::cout << "hi from url parser new root is : " << headerData.newRoot <<  std::endl;
 		if (!headerData.currentLocation.getRoot().empty())
 			headerData.Path = headerData.currentLocation.getRoot()  + headerData.newRoot;
 		else if (!headerData.currentServer.getRoot().empty())

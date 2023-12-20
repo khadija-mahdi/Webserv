@@ -33,12 +33,12 @@ public:
 	RequestParser(/* args */);
 	~RequestParser();
 
-	void	getCurrentServer(std::vector<ConfServer> &, HeaderData &headerData);
-	void	getCurrentLocationIndex(std::vector<Location> &, HeaderData &headerData);
-	void	ParseRequest(HeaderData &headerData);
+	void	getCurrentServer(std::vector<ConfServer> &, HeaderData &);
+	void	getCurrentLocationIndex(std::vector<Location> &, HeaderData &);
+	void	ParseRequest(HeaderData &);
 	void	fillHeaderData(HeaderData &);
-	void  	printHeaderdata(HeaderData &headerData);
-	int		ParseUrl(HeaderData &headerData);
+	void  	printHeaderdata(HeaderData &);
+	int		ParseUrl(HeaderData &);
 	bool	redirectionType(std::vector<Location>&, HeaderData &);
 };
 

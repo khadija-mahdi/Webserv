@@ -81,7 +81,6 @@ bool MethodGet::handleDirectoryPath() {
 		return checkInHttp(403,1);
 	if (headerData->locationIndex == -1) { // only server
 		indexes = headerData->currentServer.getIndex();
-		std::cout << "hi i'm here \n";
 		if (indexes.size() > 0){
 			for (int i = 0;  i < indexes.size() ; ++i){
 				std::string newPath = headerData->Path + indexes[i];
@@ -95,10 +94,8 @@ bool MethodGet::handleDirectoryPath() {
 	}
 	indexes = headerData->currentLocation.getIndex();
 	for (int i = 0;  i < indexes.size() ; ++i){
-		std::cout << "index [" << i << "] = " << indexes[i] << std::endl;
 		std::string newPath = headerData->Path + indexes[i];
 		if (directoryStatus(newPath) == 2){
-			std::cout << "hee \n";
 			fd = open(newPath.c_str(), O_RDONLY, 0664);
 			return headerData->response.fileFd = fd;
 		}
@@ -109,7 +106,6 @@ bool MethodGet::handleDirectoryPath() {
 	headerData->response.Location = headerData->Path;
 	return false;
 }
-
 
 bool MethodGet::GetMethodHandler(){
 	if (directoryStatus(headerData->Path) == VALID_PATH){

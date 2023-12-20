@@ -28,7 +28,6 @@ public:
 	bool	checkInHttp(int const &, int);
 };
 
-int directoryStatus(const std::string& path);
-int fileStatus();
+int directoryStatus(const std::string& );
 
 #endif
