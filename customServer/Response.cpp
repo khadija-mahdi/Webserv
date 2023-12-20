@@ -102,7 +102,6 @@ std::string Response::getResponseHeader()const {return responseHeader;}
 void Response::clearResponseBuffer(){responseBuffer = "";}
 
 
-// int Response::getStatusCode() const{return statusCode;}
 
 int isDirectory(const std::string& path) {
     struct stat directoryInfo;

@@ -7,7 +7,7 @@ Request::Request(){
 	headerData->REDIRECTION_STAGE = false;
 }
 
-Request::Request(HeaderData	*Data) :headerData(Data), getMethod(headerData){
+Request::Request(HeaderData	*Data) :headerData(Data), getMethod(headerData), deleteMethod(headerData){
 	REQUEST_STATE = HEADERS_STAGE;
 	serverIndex = -1;
 	headerData->locationIndex = -1;
@@ -67,33 +67,35 @@ bool Request::processRedirectionAndAllowance(){
 	return false;
 }
 
+
 bool Request::methodParser(){
 	DEBUGOUT(1, COLORED(" check for Method : [" << headerData->Method << "]" <<  ", Path is : " << headerData->Path  << "\n", Red));
 	if (headerData->Method == "GET")
 		return getMethod.GetMethodHandler();
+	if (headerData->Method == "DELETE")
+		return deleteMethod.DeleteMethodHandler();
 	if (headerData->Method == "POST")
 		; //? post methos need implement 
-	if (headerData->Method == "DELETE")
-		; //? Delete method need implement 
 	return false;
 }
 
-void Request::processRequest()
+bool Request::processRequest()
 {
 	headerData->response.StatusCode = 200;
 	headerData->response.ResponseType =  1;
 	if(parseHeaderErrors())
-		return;
+		return true;
 	if (processRedirectionAndAllowance())
-		return;
+		return true;
 	if (!headerData->REDIRECTION_STAGE){
 		if (directoryStatus(headerData->Path) >  0){
-			if (methodParser())
-				return;
+			if ( methodParser())
+				return true;
 		}
 		getMethod.checkInHttp(404, 1);
 	}
 	REQUEST_STATE = REQUEST_HANDLER_STAGE;
+	return false;
 }
 
 

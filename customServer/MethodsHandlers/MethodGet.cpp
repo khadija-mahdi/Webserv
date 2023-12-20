@@ -108,6 +108,7 @@ bool MethodGet::handleDirectoryPath() {
 }
 
 bool MethodGet::GetMethodHandler(){
+	DEBUGOUT(1 , COLORED("GET Method Handler : " , Blue));
 	if (directoryStatus(headerData->Path) == VALID_PATH){
 		if(fileStatus(headerData->Path) == FORBIDDEN_READ)
 			return checkInHttp(403, 1);

@@ -3,6 +3,15 @@
 
 #include "../Webserv.hpp"
 
+enum
+{
+	IS_DIRECTORY = 0,
+	IS_FILE = 0,
+	VALID_PATH1 = 0,
+	READ_PERMEATIONS = 0,
+	WRITE_PERMEATIONS = 0,
+	EXECUTE_PERMEATIONS = 0
+};
 
 struct ResponseData{
 	std::string							Location;
@@ -41,5 +50,7 @@ public:
 	int		ParseUrl(HeaderData &);
 	bool	redirectionType(std::vector<Location>&, HeaderData &);
 };
+
+int directoryStatus(const std::string& );
 
 #endif

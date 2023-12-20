@@ -3,9 +3,11 @@
 #define REQUEST_HPP
 
 #include "MethodsHandlers/MethodGet.hpp"
+#include "MethodsHandlers/MethodDelete.hpp"
 
 
 class MethodGet;
+class MethodDelete;
 
 enum
 {
@@ -20,6 +22,7 @@ class Request {
 	RequestParser						requestParser;
 	HeaderData							*headerData;
 	MethodGet 							getMethod;
+	MethodDelete 						deleteMethod;
 
 public:
 	Request();
@@ -27,7 +30,7 @@ public:
 	~Request();
 
 	bool	RequestHandler(std::string);
-	void	processRequest();
+	bool	processRequest();
 	bool	parseHeaderErrors();
 	bool	methodParser();
 	bool	processRedirectionAndAllowance();

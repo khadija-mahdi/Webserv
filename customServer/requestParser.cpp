@@ -175,7 +175,7 @@ int RequestParser::ParseUrl(HeaderData &headerData) {
 			if (lastSlashPos != std::string::npos) {
        			std::string newRoot = headerData.Path.substr(lastSlashPos);
 				headerData.Path = headerData.currentServer.getRoot() + newRoot;
-				DEBUGOUT(1, COLORED("\n the current Location is  parse url: " << headerData.Path << "\n", Cyan));
+				DEBUGOUT(1, COLORED("\n the current Location is  parse url: " << newRoot << "\n", Cyan));
 			}
 		}
 		return 1;

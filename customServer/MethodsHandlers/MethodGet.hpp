@@ -1,6 +1,6 @@
 
-#ifndef METHODGET_H
-#define METHODGET_H
+#ifndef METHODGET_HPP
+#define METHODGET_HPP
 
 #include "../RequestParser.hpp"
 
