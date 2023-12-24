@@ -140,7 +140,7 @@ bool processErrors(std::string &path, int &status, std::string &key)
 	return 0;
 } //? it's does not wor
 
-std::map<std::string, std::string> extractKeyValues(const std::string &Block, std::map<int, std::string> &errors)
+std::map<std::string, std::string> extractKeyValues(const std::string &Block, std::map<int, std::string> &errors, std::map<std::string, std::string> &cgi)
 {
 	std::map<std::string, std::string> keyValues;
 	std::istringstream BlockStream(Block);
@@ -183,6 +183,19 @@ std::map<std::string, std::string> extractKeyValues(const std::string &Block, st
 				int status = 0;
 				processErrorPage(value, path, status);
 				errors[status] = path;
+			}
+			if (key == "cgi")
+			{
+				std::istringstream iss(value);
+				std::string accept, cgi_path;
+				iss >> accept >> cgi_path;
+				if (accept == "" || cgi_path == "")
+				{
+					errorMessage << "\033[1;" << Red << "mError: "
+								<< "Location Block Wrong Key Found :" << key + "\t" + value << "\033[0m" << std::endl;
+					throw std::runtime_error(errorMessage.str());
+				}
+				cgi[accept] = cgi_path;
 			}
 			keyValues[key] = value;
 		}
@@ -280,13 +293,9 @@ std::vector<std::string> BlocksExtra(const std::string &lines, const std::string
 		while (bracesCount > 0 && closeBrace < lines.length())
 		{
 			if (lines[closeBrace] == '{')
-			{
 				bracesCount++;
-			}
 			else if (lines[closeBrace] == '}')
-			{
 				bracesCount--;
-			}
 			closeBrace++;
 		}
 		if (bracesCount == 0)
@@ -295,9 +304,7 @@ std::vector<std::string> BlocksExtra(const std::string &lines, const std::string
 			pos = closeBrace;
 		}
 		else
-		{
 			break;
-		}
 	}
 	return extractedBlocks;
 }
@@ -306,13 +313,14 @@ void singleData(ConfServer &ConfServer, std::string &ConfServerBlock)
 {
 	std::map<std::string, std::string> values;
 	std::map<int, std::string> errs;
+	std::map<std::string, std::string> cgi;
 	std::istringstream BlockStream(ConfServerBlock);
 	std::string line = "";
 	int flag = 0;
 	int st;
 	std::string path = "";
 
-	values = extractKeyValues(ConfServerBlock, errs);
+	values = extractKeyValues(ConfServerBlock, errs, cgi);
 	std::map<std::string, std::string>::iterator it = values.begin();
 	for (; it != values.end(); ++it)
 	{
@@ -386,10 +394,11 @@ void locationValues(Location &location, std::string &locationBlock)
 {
 	std::map<std::string, std::string> values;
 	std::map<int, std::string> errs;
+	std::map<std::string, std::string> cgi;
 	int st;
 	std::string path = "";
 	int flag = 0;
-	values = extractKeyValues(locationBlock, errs);
+	values = extractKeyValues(locationBlock, errs, cgi);
 	if (values.size() == 0)
 		return;
 	std::map<std::string, std::string>::iterator it = values.begin();
@@ -462,6 +471,11 @@ void locationValues(Location &location, std::string &locationBlock)
 		}
 		else if (it->first == "return" && processRedirection(path, st, it->second))
 			location.setRedirection(path, st);
+		else if (it->first == "cgi")
+		{
+			if (cgi.size())
+				location.setCgiAccept(cgi);
+		}
 		else if (it->first == "error_page")
 		{
 			if (errs.size())

@@ -3,6 +3,8 @@
 
 #include "../Webserv.hpp"
 
+typedef std::map<std::string, std::string> HeadersType;
+
 enum
 {
 	IS_DIRECTORY = 0,
@@ -13,14 +15,22 @@ enum
 	EXECUTE_PERMEATIONS = 0
 };
 
+
 struct ResponseData{
 	std::string							Location;
 	int									StatusCode;
 	int									ResponseType;
 	int    								fileFd;
+	std::string							contentType;
 };
+
+
 struct HeaderData
 {
+    int									ResponseStatus; // NO-NO
+    HeadersType							cgiHeaders; 
+    std::string							Query; // example : ?name=ayoub &pass=***** / steel empty
+
 	int									locationIndex;
 	std::map<std::string, std::string>	Headers;
 	std::string							Buffer;
@@ -32,23 +42,30 @@ struct HeaderData
 	std::string							url;
 	bool								REDIRECTION_STAGE;
 	ResponseData						response;
-	bool								RESPONSE__STATE;
 
 };
 
+
 class RequestParser
 {
+	// Request		*request;
+	HeaderData	*headerData;
 public:
 	RequestParser(/* args */);
+	RequestParser(HeaderData *);
 	~RequestParser();
 
-	void	getCurrentServer(std::vector<ConfServer> &, HeaderData &);
-	void	getCurrentLocationIndex(std::vector<Location> &, HeaderData &);
-	void	ParseRequest(HeaderData &);
-	void	fillHeaderData(HeaderData &);
-	void  	printHeaderdata(HeaderData &);
-	int		ParseUrl(HeaderData &);
-	bool	redirectionType(std::vector<Location>&, HeaderData &);
+	void	getCurrentServer(std::vector<ConfServer> &);
+	void	getCurrentLocationIndex(std::vector<Location> &);
+	void	ParseRequest();
+	void	fillHeaderData();
+	void  	printHeaderdata();
+	int		ParseUrl();
+	bool	redirectionType(std::vector<Location>&);
+
+
+	bool	checkInHttp(int const &, int);
+	bool	checkErrorPage(int const &, std::map<int, std::string>& , int);
 };
 
 int directoryStatus(const std::string& );

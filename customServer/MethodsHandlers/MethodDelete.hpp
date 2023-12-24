@@ -2,9 +2,11 @@
 #ifndef METHODDELETE_HPP
 #define METHODDELETE_HPP
 
-#include "../RequestParser.hpp"
+// #include "../RequestParser.hpp"
+#include "../Request.hpp"
 
-class MethodDelete
+class Request;
+class MethodDelete : public Request
 {
 private:
 	HeaderData		*headerData;
@@ -14,11 +16,11 @@ public:
 	MethodDelete(HeaderData *headerData);
 	~MethodDelete();
 
-	bool	checkErrorPage(int const &, std::map<int, std::string>& , int);
-	bool	checkInHttp(int const &, int);
 	bool	DeleteMethodHandler();
 	bool	DeleteDirectoryHandler();
 	bool	DeleteFileHandler();
+	virtual bool	processRequest();
+
 };
 
 

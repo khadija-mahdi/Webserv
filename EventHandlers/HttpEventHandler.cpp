@@ -23,7 +23,7 @@ int HttpEventHandler::Read()
 		return 0;
 
 	request.write(buffer, bytes);
-	requestParser.RequestHandler(request.str());
+	requestParser.HandlerRequest(request.str());
 	this->headerData->RESPONSE__STATE = true;
 	return (-1);
 }

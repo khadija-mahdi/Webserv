@@ -13,7 +13,7 @@
 #include <sstream>
 #include <unistd.h>
 #include "../customServer/Response.hpp"
-#include "../customServer/Request.hpp"
+#include "../customServer/RequestHandler.hpp"
 
 class EventHandler;
 
@@ -39,7 +39,7 @@ public:
 
 private:
 	HeaderData* headerData;
-	Request requestParser;
+	RequestHandler requestParser;
 	Response response;
 	Client client;
 	int fd;

@@ -7,8 +7,9 @@ MethodGet::~MethodGet(){}
 int directoryStatus(const std::string& path) {
     struct stat directoryInfo;
     if (stat(path.c_str(), &directoryInfo) == 0) {
-        if (S_ISDIR(directoryInfo.st_mode))
+        if (S_ISDIR(directoryInfo.st_mode)){
 			return 1; // is a directory
+		}
 		else if (S_ISREG(directoryInfo.st_mode))
 			return 2; //is path exist;
 		return 0; //is not
@@ -40,45 +41,10 @@ int fileStatus(const std::string& path) {
     }
 }
 
-bool MethodGet::checkErrorPage(int const &error, std::map<int, std::string> &error_pages, int respType){
-
-	std::map<int, std::string>::iterator it = error_pages.begin();
-	for (; it != error_pages.end(); ++it)
-	{
-		if (it->first == error)
-		{
-			if (directoryStatus(it->second) == 2){
-				fd = open(it->second.c_str(), O_RDONLY, 0664);
-				headerData->response.StatusCode = error;
-				headerData->response.ResponseType = respType;
-				headerData->response.fileFd = fd;
-				return true;
-			}
-		}
-	}
-	headerData->response.StatusCode = error;
-	headerData->response.ResponseType = 3;
-	return false;
-}
-
-bool MethodGet::checkInHttp(int const &error, int respType){
-	std::map<int, std::string> error_pages = headerData->currentLocation.getError_pages();
-	
-	if (!checkErrorPage(error, error_pages, respType)){
-		error_pages = headerData->currentServer.getError_pages();
-		if (!checkErrorPage(error, error_pages, respType)){
-			error_pages = Configurations::http.getError_pages();
-			if (!checkErrorPage(error, error_pages, respType))
-				return false;
-		}
-	}
-	return true;
-}
-
 bool MethodGet::handleDirectoryPath() {
 	std::vector<std::string> indexes;
 	if (headerData->currentLocation.getAutoindex() == "off")
-		return checkInHttp(403,1);
+		return requestParser.checkInHttp(403,1);
 	if (headerData->locationIndex == -1) { // only server
 		indexes = headerData->currentServer.getIndex();
 		if (indexes.size() > 0){
@@ -89,7 +55,7 @@ bool MethodGet::handleDirectoryPath() {
 					return headerData->response.fileFd = fd;
 				}
 			};
-			return checkInHttp(404,1);
+			return requestParser.checkInHttp(404,1);
 		}
 	}
 	indexes = headerData->currentLocation.getIndex();
@@ -99,26 +65,125 @@ bool MethodGet::handleDirectoryPath() {
 			fd = open(newPath.c_str(), O_RDONLY, 0664);
 			return headerData->response.fileFd = fd;
 		}
-		return checkInHttp(404,1);
 	}
 	headerData->response.StatusCode = 200;
 	headerData->response.ResponseType =  2;
 	headerData->response.Location = headerData->Path;
-	return false;
+	return true;
 }
 
-bool MethodGet::GetMethodHandler(){
-	DEBUGOUT(1 , COLORED("GET Method Handler : " , Blue));
-	if (directoryStatus(headerData->Path) == VALID_PATH){
-		if(fileStatus(headerData->Path) == FORBIDDEN_READ)
-			return checkInHttp(403, 1);
-		fd = open(headerData->Path.c_str(), O_RDONLY, 0664);
-		headerData->response.fileFd = fd;
-		headerData->response.StatusCode = 200;
-		headerData->response.ResponseType =  1;
-		return true;
+
+char **FromVectorToArray(std::vector<std::string> vec)
+{
+    char **Array = new char *[vec.size() + 1];
+    for (size_t i = 0; i < (vec.size()); i++)
+    {
+        Array[i] = new char[vec.at(i).length() + 1];
+        std::strcpy(Array[i], vec.at(i).c_str());
+    }
+    Array[vec.size()] = NULL;
+    return (Array);
+}
+std::string GetFileName(std::string FilePath)
+{
+    size_t index;
+
+    if (FilePath.empty())
+        return (FilePath);
+    if ((index = FilePath.find_last_of("/")) == std::string::npos)
+        return (FilePath);
+    return (FilePath.substr(index + 1));
+}
+void MethodGet::FillCgiData()
+{
+    arguments.push_back("public/file.php");
+    arguments.push_back("/bin/ls");
+
+    env.push_back("REDIRECT_STATUS=1");
+    env.push_back("REQUEST_METHOD=" + headerData->Method);
+    env.push_back("SCRIPT_FILENAME=public/file.php");
+    env.push_back("HTTP_COOKIE=" + headerData->Headers["Cookie"]);
+    env.push_back("QUERY_STRING=" + NULL);
+
+    if (headerData->Method == "POST")
+    {
+        env.push_back("CONTENT_LENGTH=" + headerData->Headers["Content-Length"]);
+        env.push_back("CONTENT_TYPE=" + headerData->Headers["Content-Type"]);
+    }
+}
+
+bool MethodGet::CGIHandler(){
+
+	// FillCgiData();
+
+	// pid_t pid = fork();
+
+	// if (pid == -1) {
+	// 	perror("fork");
+	// 	return false;
+	// } else if (pid == 0) {
+	// 	int fd = open("output.txt", O_WRONLY | O_CREAT | O_TRUNC, 0666);
+
+	// 	if (fd == -1) {
+	// 		perror("open");
+	// 		_exit(EXIT_FAILURE);
+	// 	}
+
+	// 	if (dup2(fd, STDOUT_FILENO) == -1) {
+	// 		perror("dup2");
+	// 		close(fd);
+	// 		_exit(EXIT_FAILURE);
+	// 	}
+	// 	close(fd);
+
+	// 	// Specify the correct path to the CGI script
+	// 	execve("public/file.php", FromVectorToArray(arguments), FromVectorToArray(env));
+	// 	perror("execve");
+	// 	_exit(EXIT_FAILURE);
+	// } else {
+	// 	int status;
+	// 	waitpid(pid, &status, 0);
+	// 	int fd = open(headerData->Path.c_str(), O_RDONLY, 0664);
+	// 	headerData->response.fileFd = fd;
+	// 	headerData->response.ResponseType = 1;
+
+	// 	return true;
+	// }
+
+	return true;
+}
+
+bool MethodGet::GetFileHandler(){
+	size_t pos = headerData->Path.find(".");
+	if (pos != std::string::npos){
+		std::string extention = headerData->Path.substr(pos);
+		std::map<std::string, std::string> cgi = headerData->currentLocation.getCgiAccept();
+		if(cgi.size() > 0){
+			std::map<std::string, std::string>::iterator it = cgi.begin();
+			for(it; it != cgi.end(); ++it){
+				if (extention == it->first)
+				{
+					std::cout << "is found in cgi " << it->first << std::endl;
+					headerData->CGI__STAGE = true;
+					headerData->cgiData.cgiPath = it->second;
+					break;
+				}
+			}
+		}
 	}
+	// if (headerData->CGI__STAGE)
+	// 	return CGIHandler();
+	if(fileStatus(headerData->Path) == FORBIDDEN_READ)
+		return requestParser.checkInHttp(403, 1);
+	fd = open(headerData->Path.c_str(), O_RDONLY, 0664);
+	headerData->response.fileFd = fd;
+	headerData->response.ResponseType =  1;
+	return true;
+}
+
+bool MethodGet::GetDirectoryHandler(){
 	if (directoryStatus(headerData->Path) == DIRE && headerData->Path[headerData->Path.length() - 1] == '/'){
+		DEBUGOUT(1 , COLORED("listen Dir : " , Blue));
 		handleDirectoryPath();
 		return true;
 	}
@@ -126,4 +191,20 @@ bool MethodGet::GetMethodHandler(){
 	headerData->response.ResponseType =  0;
 	headerData->response.Location = headerData->url + "/" ;
 	return true;	
+}
+
+bool MethodGet::GetMethodHandler(){
+	DEBUGOUT(1 , COLORED("GET Method Handler : " , Blue));
+	DEBUGOUT(1 , COLORED("path  : " << headerData->Path << " , IS DIR : " << directoryStatus(headerData->Path) , Blue));
+	if (directoryStatus(headerData->Path) == VALID_PATH)
+		return GetFileHandler();
+	return GetDirectoryHandler();
+}
+
+bool MethodGet::processRequest()
+{
+	std::cout << "hi from Get\n";
+	REQUEST_STATE = REQUEST_HANDLER_STAGE;
+	return GetMethodHandler();
+	
 }

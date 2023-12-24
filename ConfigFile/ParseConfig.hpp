@@ -27,7 +27,7 @@ public:
 };
 
 std::map<std::string, std::string>	extractKeyValuesIN(const std::string&);
-std::map<std::string, std::string>	extractKeyValues(const std::string &,std::map<int , std::string> &);
+std::map<std::string, std::string>	extractKeyValues(const std::string &,std::map<int , std::string> &,std::map<std::string , std::string> &);
 std::vector<std::string>			BlocksExtra(const std::string &, const std::string &);
 std::string							&skepComment(std::string &);
 std::string							Blocks(const std::string &, const std::string &);

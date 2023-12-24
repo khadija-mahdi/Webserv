@@ -2,9 +2,7 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
-#include "MethodsHandlers/MethodGet.hpp"
-#include "MethodsHandlers/MethodDelete.hpp"
-
+#include "RequestParser.hpp"
 
 class MethodGet;
 class MethodDelete;
@@ -15,26 +13,38 @@ enum
 	REQUEST_HANDLER_STAGE = 0,
 };
 
-
 class Request {
+protected:
 	int									serverIndex;
 	int									REQUEST_STATE;
 	RequestParser						requestParser;
 	HeaderData							*headerData;
-	MethodGet 							getMethod;
-	MethodDelete 						deleteMethod;
 
 public:
 	Request();
 	Request(HeaderData	*headerData);
 	~Request();
 
-	bool	RequestHandler(std::string);
-	bool	processRequest();
-	bool	parseHeaderErrors();
-	bool	methodParser();
-	bool	processRedirectionAndAllowance();
+	void prints(){
+		std::cout << " -----------> path = " <<  headerData->Path << std::endl;
+	}
+	virtual bool	processRequest() = 0;
+};
 
+
+class RequestDefault : public Request{
+protected:
+	int									serverIndex;
+	int									REQUEST_STATE;
+	RequestParser						requestParser;
+	HeaderData							*headerData;
+
+public:
+	RequestDefault();
+	RequestDefault(HeaderData	*headerData);
+	~RequestDefault();
+
+	virtual bool	processRequest();
 };
 
 #endif

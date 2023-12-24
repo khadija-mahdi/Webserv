@@ -189,10 +189,11 @@ void ParseConfig::parseHttpBlock(std::string &httpBlock) {
 	int status = 0;
     std::string path = "";
 	std::map<int , std::string> errs;
+	std::map<std::string , std::string> cgi;
     std::map<std::string, std::string> values;
     ServerInHttp(httpBlock,Configurations::http); //! Parse "server" blocks
     std::istringstream BlockStream(httpBlock);
-    values = extractKeyValues(httpBlock, errs);
+    values = extractKeyValues(httpBlock, errs, cgi);
     std::map<std::string, std::string>::iterator it = values.begin();
     for (; it != values.end(); ++it) {
         if (it->first == "include")
