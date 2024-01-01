@@ -21,16 +21,22 @@ struct ResponseData{
 	int									StatusCode;
 	int									ResponseType;
 	int    								fileFd;
-	std::string							contentType;
+	int									contentType;
 };
+
+struct CGI_DATA
+{
+	std::string cgiPath;
+};
+
 
 
 struct HeaderData
 {
     int									ResponseStatus; // NO-NO
     HeadersType							cgiHeaders; 
-    std::string							Query; // example : ?name=ayoub &pass=***** / steel empty
-
+    std::string							Query; // example : ?name=ayoub&pass=*****
+	
 	int									locationIndex;
 	std::map<std::string, std::string>	Headers;
 	std::string							Buffer;
@@ -42,6 +48,9 @@ struct HeaderData
 	std::string							url;
 	bool								REDIRECTION_STAGE;
 	ResponseData						response;
+	bool								RESPONSE__STATE;
+	bool								CGI__STAGE;
+	CGI_DATA 							cgiData;
 
 };
 
