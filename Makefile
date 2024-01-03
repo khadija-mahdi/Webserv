@@ -15,7 +15,7 @@ RED = \033[0;31m
 NC = \033[0m
 RM = rm -f
 
-all: $(NAME)
+all: Start
 
 $(OBJ_DIR)/%.o: %.cpp $(INC)
 	@mkdir -p $(dir $@)
@@ -37,5 +37,9 @@ fclean: clean
 	@$(RM) $(NAME)
 	@$(RM) -rf $(OBJ_DIR)
 	@echo "$(RED)Removed executable!$(NC)"
+
+Start: $(NAME)
+	clear && ./$(NAME) conf/serv.conf
+
 
 re: fclean all

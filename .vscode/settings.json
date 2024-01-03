@@ -1,6 +1,20 @@
 {
 	"files.associations": {
 		"string": "cpp",
-		"ostream": "cpp"
-	}
+		"fstream": "cpp",
+		"iosfwd": "cpp",
+		"stdexcept": "cpp",
+		"ostream": "cpp",
+		"iostream": "cpp",
+		"sstream": "cpp",
+		"vector": "cpp"
+	},
+	"cSpell.words": [
+		"ACCEPTEVENTHANDLER",
+		"CBFTSTR",
+		"CGICONTROLLER",
+		"EVENTHANDLER",
+		"HTTPERROR",
+		"READEVENTHANDLER"
+	]
 }
