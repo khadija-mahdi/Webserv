@@ -42,13 +42,5 @@ public:
 	void						setRedirection(std::string &, int );
 	void						setError_pages(std::map<int , std::string>&);
 	void						addLocation(Location const &);
-	void						printErrorPages()
-	{
-		std::map<int, std::string>::iterator it = error_pages.begin();
-		for (; it != error_pages.end(); ++it)
-		{
-			std::cout << "ConfServer error : " << it->first << " => " << it->second << "\n";
-		}
-	}
 };
 

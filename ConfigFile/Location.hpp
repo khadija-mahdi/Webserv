@@ -49,12 +49,4 @@ public:
 	void 	setAllow(std::string const &);
 	void 	setUpload(std::string const &);
 	void 	setUpload_stor(std::string const &);
-	void	printErrorPages()
-	{
-		std::map<int, std::string>::iterator it = error_pages.begin();
-		for (; it != error_pages.end(); ++it)
-		{
-			std::cout << "error loc : " << it->first << " => " << it->second << "\n";
-		}
-	}
 };

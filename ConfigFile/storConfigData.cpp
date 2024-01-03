@@ -89,10 +89,10 @@ bool processRedirection(std::string &path, int &status, std::string &key)
 			path = word;
 		}
 	}
-	if (i == 1 && status != 0)
+	if (status !=  301 && status !=  302)
 	{
 		errorMessage << "\033[1;" << Red << "mError: "
-					 << "Please Correct The Redirection Syntax , Add Path!"
+					 << "Please Correct The Redirection Syntax ! entree 301 or 302 in " << status << " " << path 
 					 << "\033[0m" << std::endl;
 		throw std::runtime_error(errorMessage.str());
 	}
@@ -324,6 +324,12 @@ void singleData(ConfServer &ConfServer, std::string &ConfServerBlock)
 	std::map<std::string, std::string>::iterator it = values.begin();
 	for (; it != values.end(); ++it)
 	{
+		if (it->second == "")
+		{
+			errorMessage << "\033[1;" << Red << "mError: "
+				<< "Not a Valid value : " << it->second << "\033[0m" << std::endl;
+			throw std::runtime_error(errorMessage.str());
+		}
 		if (it->first == "listen")
 		{
 			flag++;
@@ -342,10 +348,7 @@ void singleData(ConfServer &ConfServer, std::string &ConfServerBlock)
 			}
 		}
 		else if (it->first == "host")
-		{
-			flag++;
 			ConfServer.setHost(it->second.c_str());
-		}
 		else if (it->first == "root")
 			ConfServer.setRoot(it->second.c_str());
 		else if (it->first == "server_names")
@@ -354,9 +357,7 @@ void singleData(ConfServer &ConfServer, std::string &ConfServerBlock)
 			std::istringstream iss(key);
 			std::string word;
 			while (iss >> word)
-			{
 				ConfServer.setConfServer_names(word);
-			}
 		}
 		else if (it->first == "return" && processRedirection(path, st, it->second))
 			ConfServer.setRedirection(path, st);
@@ -381,7 +382,7 @@ void singleData(ConfServer &ConfServer, std::string &ConfServerBlock)
 			throw std::runtime_error(errorMessage.str());
 		}
 	}
-	if (flag != 2)
+	if (flag != 1)
 	{
 		errorMessage << "\033[1;" << Red << "mError: "
 					 << "Server Block obligation Keys Not Found !"
@@ -397,13 +398,13 @@ void locationValues(Location &location, std::string &locationBlock)
 	std::map<std::string, std::string> cgi;
 	int st;
 	std::string path = "";
-	int flag = 0;
 	values = extractKeyValues(locationBlock, errs, cgi);
 	if (values.size() == 0)
 		return;
 	std::map<std::string, std::string>::iterator it = values.begin();
 	for (; it != values.end(); ++it)
 	{
+
 		if (it->first == "root")
 			location.setRoot(it->second.c_str());
 		else if (it->first == "index")
@@ -416,7 +417,6 @@ void locationValues(Location &location, std::string &locationBlock)
 		}
 		else if (it->first == "autoindex")
 		{
-			flag++;
 			if (it->second == "on" || it->second == "off")
 				location.setAutoindex(it->second);
 			else
@@ -454,7 +454,6 @@ void locationValues(Location &location, std::string &locationBlock)
 		}
 		else if (it->first == "upload")
 		{
-			flag++;
 			if (it->second == "on" || it->second == "off")
 				location.setUpload(it->second);
 			else
@@ -465,10 +464,7 @@ void locationValues(Location &location, std::string &locationBlock)
 			}
 		}
 		else if (it->first == "upload_stor")
-		{
-			flag++;
 			location.setUpload_stor(it->second.c_str());
-		}
 		else if (it->first == "return" && processRedirection(path, st, it->second))
 			location.setRedirection(path, st);
 		else if (it->first == "cgi")
@@ -488,6 +484,4 @@ void locationValues(Location &location, std::string &locationBlock)
 			throw std::runtime_error(errorMessage.str());
 		}
 	}
-	// if (flag != 3)
-	//     throw std::runtime_error("the obligation keys not found"); //? need to set obligation values
 }

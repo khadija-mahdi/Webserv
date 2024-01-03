@@ -134,6 +134,5 @@ bool MethodDelete::DeleteMethodHandler(){
 
 bool MethodDelete::HandleRequest(std::string &data)
 {
-	std::cout << "hi from delete method\n";
 	return DeleteMethodHandler();
 }

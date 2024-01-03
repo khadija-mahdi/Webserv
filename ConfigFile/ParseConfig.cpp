@@ -4,7 +4,6 @@ ParseConfig::ParseConfig(){
 	BLOCK_FORMAT = false;
 }
 
-
 void ParseConfig::includeMimeTypes(std::string &_file){
     std::map<std::string, std::string> keyValues;
     std::string line = "";
@@ -145,11 +144,15 @@ void ParseConfig::locationInServer(std::string &ServerBlock, ConfServer &ConfSer
         ConfServerConfig.addLocation(location);
 		if (location.getPath() == "/")
 			ConfServerConfig.setDefaultLocation(i);	
+		if (location.getAllow().empty()){
+			errorMessage << "\033[1;" << Red << "mError: "
+				<< "Location Block  " <<  location.getPath() <<" should have 1 method at least :"  << "\033[0m" << std::endl;
+			throw std::runtime_error(errorMessage.str());
+		}
         start = extractedBlocks[0].second.first;
         end = extractedBlocks[i].second.second;
     }
     ServerBlock = ServerBlock.substr(0, start) + ServerBlock.substr(end+1);
-	// ConfServerConfig.printErrorPages();
 }
 
 ConfServer ParseConfig::parseServerBlock(std::string &serverBlock) {
@@ -157,7 +160,6 @@ ConfServer ParseConfig::parseServerBlock(std::string &serverBlock) {
     std::istringstream BlockStream(serverBlock);
     locationInServer(serverBlock, server);
     singleData(server,serverBlock);
-    // server.printErrorPages();
     return server;
 }
 
@@ -191,7 +193,7 @@ void ParseConfig::parseHttpBlock(std::string &httpBlock) {
 	std::map<int , std::string> errs;
 	std::map<std::string , std::string> cgi;
     std::map<std::string, std::string> values;
-    ServerInHttp(httpBlock,Configurations::http); //! Parse "server" blocks
+    ServerInHttp(httpBlock,Configurations::http);
     std::istringstream BlockStream(httpBlock);
     values = extractKeyValues(httpBlock, errs, cgi);
     std::map<std::string, std::string>::iterator it = values.begin();
@@ -211,7 +213,6 @@ void ParseConfig::parseHttpBlock(std::string &httpBlock) {
        		throw std::runtime_error(errorMessage.str());
 		}
     }
-    // Configurations::http.printErrorPages();
 
 }
 

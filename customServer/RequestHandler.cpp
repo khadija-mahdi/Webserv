@@ -64,10 +64,8 @@ bool RequestHandler::processRedirectionAndAllowance()
 		int allow = std::find(allowMethod.begin(), allowMethod.end(), headerData->Method) != allowMethod.end();
 		if (!allow)
 			return requestParser.checkInHttp(405, 1);
-		std::cout << "hi red : " << headerData->REDIRECTION_STAGE <<  "\n\n";
 		if (headerData->REDIRECTION_STAGE)
 		{
-			std::cout << "hi \n\n";
 			headerData->response.Location = headerData->Path;
 			headerData->response.StatusCode = headerData->currentLocation.getRedirection().statusCode;
 			headerData->response.ResponseType = 0;
@@ -108,8 +106,7 @@ bool RequestHandler::HandlerRequest1(std::string Data)
 		if (parseHeaderErrors())
 			return true;
 		if (processRedirectionAndAllowance())
-			return true;
-		std::cout << "index : " << headerData->locationIndex; 
+			return true; 
 		if (request != NULL)
 			return request->HandleRequest(Data);
 		delete request;

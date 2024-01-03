@@ -24,11 +24,6 @@ public:
 	Request();
 	Request(DataPool	*headerData);
 	~Request();
-
-	void prints(){
-		std::cout << " -----------> path = " <<  headerData->Path << std::endl;
-	}
-	// virtual bool	HandleRequest(std::string &data) = 0;
 	virtual bool HandleRequest(std::string &data) = 0;
 
 };

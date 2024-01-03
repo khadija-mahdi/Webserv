@@ -164,15 +164,14 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation)
 	}
 	if (headerData->locationIndex != -1){
 		headerData->currentLocation= confLocation[headerData->locationIndex];
-		if (!headerData->currentLocation.getRedirection().ReturnLocation.empty()){
+		if (!headerData->currentLocation.getRedirection().ReturnLocation.empty() && headerData->Method == "GET"){
 			headerData->Path = headerData->currentLocation.getRedirection().ReturnLocation;
-			if (!redirectionType(confLocation) && headerData->Method == "GET"){
+			if (!redirectionType(confLocation)){
 				headerData->url = headerData->currentLocation.getRedirection().ReturnLocation; 
 				getCurrentLocationIndex(confLocation);
 			}
-			else{
+			else
 				headerData->REDIRECTION_STAGE = true;
-			}
 		}
 		if (!headerData->REDIRECTION_STAGE){
 			end = confLocation[headerData->locationIndex].getPath().length();

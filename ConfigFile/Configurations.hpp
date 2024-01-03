@@ -30,13 +30,6 @@ public:
 	std::string							getMax_body_size();
 	std::string							getDefault_type();
 	std::map<int, std::string>			getError_pages();
-
-	void printErrorPages()
-	{
-		std::map<int, std::string>::iterator it = error_pages.begin();
-		for (; it != error_pages.end(); ++it)
-			std::cout << "http error : " << it->first << " => " << it->second << "\n";
-	}
 };
 
 class Configurations
