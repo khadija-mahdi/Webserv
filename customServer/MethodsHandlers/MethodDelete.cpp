@@ -1,6 +1,6 @@
 #include "MethodDelete.hpp"
 
-MethodDelete::MethodDelete(HeaderData *Data): headerData(Data){}
+MethodDelete::MethodDelete(DataPool *Data): headerData(Data){}
 
 MethodDelete::MethodDelete(/* args */){}
 
@@ -132,7 +132,7 @@ bool MethodDelete::DeleteMethodHandler(){
 	return false;
 }
 
-bool MethodDelete::processRequest()
+bool MethodDelete::HandleRequest(std::string &data)
 {
 	std::cout << "hi from delete method\n";
 	return DeleteMethodHandler();

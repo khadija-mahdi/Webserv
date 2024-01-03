@@ -22,11 +22,11 @@ private:
 	std::string					responseHeader;
 	std::string					Path;
 	bool						Headers_Stage;
-	HeaderData					*headerData;
+	DataPool					*headerData;
 
 public:
 	Response(){};
-	Response(HeaderData	*headerData);
+	Response(DataPool	*headerData);
 	~Response(){};
 
 	std::string&	httpheader(int const &);

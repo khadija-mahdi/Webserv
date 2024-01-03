@@ -1,6 +1,6 @@
 #include "Response.hpp"
 
-Response::Response(HeaderData *Data):headerData(Data)
+Response::Response(DataPool *Data):headerData(Data)
 {
 	responseBuffer = "";
 	StatusCodes[100] = "Continue";
@@ -84,7 +84,7 @@ std::string Response::DefaultErrorPage(int code)
                             "</body>\n"
                             "</html>\n";
 	ErrorPage = "HTTP/1.1 " + SSTR(headerData->response.StatusCode) + " " + StatusCodes[headerData->response.StatusCode] + "\r\n"
-					+ "Content-Type: " + ContentType + "\r\n"
+					+ "Content-Type: " + headerData->response.contentType + "\r\n"
 					+ "Content-Length: " + SSTR(ErrorPage.length()) + "\r\n"
 					+ "\r\n"
 					+ ErrorPage;
@@ -116,27 +116,10 @@ int isDirectory(const std::string& path) {
 	return -1; // is not exist
 }
 
-void Response::getContentType(std::string const &contentPath) {
-    int pos = contentPath.find(".");
-    if (isDirectory(contentPath) == 1) {
-        ContentType = "dir/html";
-    } else if (pos != std::string::npos) {
-        std::string extention = contentPath.substr(pos + 1, contentPath.length());
-        std::map<std::string, std::string> Types = Configurations::http.getIncludes();
-        
-        
-        if (Types.find(extention) != Types.end()) {
-            ContentType = Types[extention];
-        } else 
-            ContentType = Configurations::http.getDefault_type();
-    }
-    
-}
 
 std::string& Response::httpheader(int const& StatusCode) {
-	getContentType(Path);
 	responseHeader = "HTTP/1.1 " + SSTR(StatusCode) + " " + StatusCodes[StatusCode] + "\r\n"
-				+ "Content-Type: " + ContentType + "\r\n"
+				+ "Content-Type: " + headerData->response.contentType + "\r\n"
 				+ "Transfer-Encoding: chunked\r\n\r\n";
 
     return responseHeader;
@@ -182,6 +165,7 @@ int Response::sendChunkResponse(int const& clientSocket){
 	return bytes;
 }
 
+
 std::string Response::listenDirectory(const std::string &path) {
     std::stringstream chunk;
     std::string dirList;
@@ -189,16 +173,29 @@ std::string Response::listenDirectory(const std::string &path) {
     DIR *dp;
 
     dp = opendir(path.c_str());
-    if (dp == NULL) {
-        perror("opendir");
+    if (dp == NULL)
         return dirList;
-    }
-    chunk << "HTTP/1.1 " + SSTR(headerData->response.StatusCode) + " "  + StatusCodes[headerData->response.StatusCode] + "\r\n"
-          << "Content-Type: text/html\r\n\r\n"
-          << "<html><body><h1>Directory Listing</h1><ul>";
+    chunk << "HTTP/1.1 " + SSTR(headerData->response.StatusCode) + " " + StatusCodes[headerData->response.StatusCode] + "\r\n"
+          << "Content-Type: text/html; charset=utf-8\r\n\r\n"
+          << "<html><head><style>"
+          << "body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 20px; }"
+          << "h1 { color: #333; }"
+          << ".folder { color: #0096FF; }"
+          << ".file { color: #24A745; }"
+          << ".icon { font-size: 28px; }"
+          << "</style></head><body>"
+          << "<h1>Directory Listing</h1><ul>";
 
     while ((entry = readdir(dp))) {
-        chunk << "<li><a href=\"" << entry->d_name << "\">" << entry->d_name << "</a></li>";
+        if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+            chunk << "<a href=\"" << entry->d_name << "\">";
+            if (isDirectory(path + "/" + entry->d_name) == 1) {
+                chunk << "<p <span class='folder'> 📁 </span> " << entry->d_name  << "</p>";
+            } else {
+                chunk << " <p <span class='file'> 📄 </span> " << entry->d_name  << "</p>";
+            }
+            chunk << "</a></li>";
+        }
     }
 
     chunk << "</ul></body></html>";

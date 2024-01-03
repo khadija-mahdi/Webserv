@@ -3,22 +3,18 @@
 RequestHandler::RequestHandler(/* args */)
 {
 	REQUEST_STATE = HEADERS_STAGE;
-	serverIndex = -1;
 	headerData->locationIndex = -1;
 	headerData->REDIRECTION_STAGE = false;
 	headerData->response.StatusCode = 200;
 	headerData->response.ResponseType = 1;
-	request = new RequestDefault(headerData);
 }
-RequestHandler::RequestHandler(HeaderData *data) :headerData(data) , requestParser(headerData)
+RequestHandler::RequestHandler(DataPool *data) :headerData(data) , requestParser(headerData)
 {
 	REQUEST_STATE = HEADERS_STAGE;
-	serverIndex = -1;
 	headerData->locationIndex = -1;
 	headerData->REDIRECTION_STAGE = false;
 	headerData->response.StatusCode = 200;
 	headerData->response.ResponseType = 1;
-	request = new RequestDefault(headerData);
 
 }
 RequestHandler::~RequestHandler()
@@ -52,6 +48,8 @@ bool RequestHandler::parseHeaderErrors()
 		return requestParser.checkInHttp(414, 1);
 	// if (max body size with body length from post method) //-> add 4014 max body size
 	// 	return requestParser.checkInHttp(414, 1);
+	if (directoryStatus(headerData->Path) < 1 && !headerData->REDIRECTION_STAGE)
+			return  requestParser.checkInHttp(404, 1);
 	return false;
 }
 bool RequestHandler::processRedirectionAndAllowance()
@@ -66,12 +64,13 @@ bool RequestHandler::processRedirectionAndAllowance()
 		int allow = std::find(allowMethod.begin(), allowMethod.end(), headerData->Method) != allowMethod.end();
 		if (!allow)
 			return requestParser.checkInHttp(405, 1);
-		std::cout << "hi \n\n";
+		std::cout << "hi red : " << headerData->REDIRECTION_STAGE <<  "\n\n";
 		if (headerData->REDIRECTION_STAGE)
 		{
+			std::cout << "hi \n\n";
 			headerData->response.Location = headerData->Path;
 			headerData->response.StatusCode = headerData->currentLocation.getRedirection().statusCode;
-			headerData->response.ResponseType = 1;
+			headerData->response.ResponseType = 0;
 			return true;
 		}
 	}
@@ -89,7 +88,7 @@ Request *RequestHandler::handlerRequestMethods()
 	return request;
 }
 
-bool RequestHandler::HandlerRequest(std::string Data)
+bool RequestHandler::HandlerRequest1(std::string Data)
 {
 	headerData->Buffer += Data;
 	switch (REQUEST_STATE)
@@ -103,14 +102,16 @@ bool RequestHandler::HandlerRequest(std::string Data)
 			DEBUGOUT(1, COLORED("\n the current Server is  : " << headerData->currentServer.getListen() << "\n", Cyan));
 			DEBUGOUT(1, COLORED("\n the current Location is  : " << headerData->currentLocation.getPath() << "\n", Cyan));
 			DEBUGOUT(1, COLORED("\n the Path : " << headerData->Path << ", dir status : " << directoryStatus(headerData->Path) << "\n", Green));
+			DEBUGOUT(1, COLORED("\n REDIRECTION_STAGE " << headerData->REDIRECTION_STAGE  << "\n", Green));
 		}
 	case REQUEST_HANDLER_STAGE:
 		if (parseHeaderErrors())
 			return true;
 		if (processRedirectionAndAllowance())
 			return true;
+		std::cout << "index : " << headerData->locationIndex; 
 		if (request != NULL)
-			return request->processRequest();
+			return request->HandleRequest(Data);
 		delete request;
 		break;
 	default:

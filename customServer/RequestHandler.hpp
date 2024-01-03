@@ -14,19 +14,19 @@ class RequestParser;
 class RequestHandler
 {
 private:
-	HeaderData	*headerData;
+	DataPool 	*headerData;
 	int			serverIndex;
 	int			REQUEST_STATE;
 	Request		*request;
 	RequestParser requestParser;
 public:
 	RequestHandler(/* args */);
-	RequestHandler(HeaderData *);
+	RequestHandler(DataPool *);
 	~RequestHandler();
 
 	bool	processRedirectionAndAllowance();
 	bool	parseHeaderErrors();
-	bool	HandlerRequest(std::string);
+	bool	HandlerRequest1(std::string);
 	Request *handlerRequestMethods();
 
 };

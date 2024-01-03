@@ -38,7 +38,7 @@ public:
 	const int &GetSocketFd() const;
 
 private:
-	HeaderData* headerData;
+	DataPool* headerData;
 	RequestHandler requestParser;
 	Response response;
 	Client client;

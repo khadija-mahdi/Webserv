@@ -27,12 +27,12 @@ enum
 class MethodGet : public Request
 {
 private:
-	HeaderData					*headerData;
+	DataPool					*headerData;
 	int							fd;
 	std::vector<std::string>	env;
 	std::vector<std::string>	arguments;
 public:
-	MethodGet(HeaderData *headerData);
+	MethodGet(DataPool *headerData);
 	MethodGet(){}
 	~MethodGet();
 	bool	handleDirectoryPath();
@@ -41,7 +41,7 @@ public:
 	bool	GetFileHandler();
 	bool	CGIHandler();
 	void	FillCgiData();
-	virtual bool	processRequest();
+	virtual bool	HandleRequest(std::string &data);
 };
 
 int directoryStatus(const std::string& );

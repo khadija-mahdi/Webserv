@@ -9,17 +9,17 @@ class Request;
 class MethodDelete : public Request
 {
 private:
-	HeaderData		*headerData;
+	DataPool		*headerData;
 	int				fd;
 public:
 	MethodDelete();
-	MethodDelete(HeaderData *headerData);
+	MethodDelete(DataPool *headerData);
 	~MethodDelete();
 
 	bool	DeleteMethodHandler();
 	bool	DeleteDirectoryHandler();
 	bool	DeleteFileHandler();
-	virtual bool	processRequest();
+	virtual bool	HandleRequest(std::string &data);
 
 };
 

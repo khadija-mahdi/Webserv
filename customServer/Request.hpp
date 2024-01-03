@@ -18,33 +18,22 @@ protected:
 	int									serverIndex;
 	int									REQUEST_STATE;
 	RequestParser						requestParser;
-	HeaderData							*headerData;
+	DataPool 							*headerData;
 
 public:
 	Request();
-	Request(HeaderData	*headerData);
+	Request(DataPool	*headerData);
 	~Request();
 
 	void prints(){
 		std::cout << " -----------> path = " <<  headerData->Path << std::endl;
 	}
-	virtual bool	processRequest() = 0;
+	// virtual bool	HandleRequest(std::string &data) = 0;
+	virtual bool HandleRequest(std::string &data) = 0;
+
 };
 
 
-class RequestDefault : public Request{
-protected:
-	int									serverIndex;
-	int									REQUEST_STATE;
-	RequestParser						requestParser;
-	HeaderData							*headerData;
 
-public:
-	RequestDefault();
-	RequestDefault(HeaderData	*headerData);
-	~RequestDefault();
-
-	virtual bool	processRequest();
-};
 
 #endif

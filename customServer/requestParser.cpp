@@ -1,14 +1,10 @@
 #include "RequestParser.hpp"
 
-RequestParser::RequestParser(HeaderData *headerData){
-	// request = new RequestDefault(headerData);
+RequestParser::RequestParser(DataPool *headerData){
 	this->headerData = headerData;
 }
 
-RequestParser::RequestParser(){
-	// request = new RequestDefault(headerData);
-	// this->headerData = headerData;
-}
+RequestParser::RequestParser(){}
 
 RequestParser::~RequestParser(){}
 
@@ -63,6 +59,21 @@ void  	RequestParser::printHeaderdata(){
 	DEBUGOUT(1, COLORED("Method [" << headerData->Method << "]\n", Yellow));
 	for (; it != headerData->Headers.end(); ++it)
 		DEBUGOUT(1, COLORED(it->first << "----> " << it->second << " . \n\n", Yellow));
+}
+
+void RequestParser::getContentType() 
+{
+    int pos = headerData->Path.find(".");
+    if (pos != std::string::npos) {
+        std::string extention = headerData->Path.substr(pos + 1, headerData->Path.length());
+        std::map<std::string, std::string> Types = Configurations::http.getIncludes();
+        
+        
+        if (Types.find(extention) != Types.end())
+            headerData->response.contentType = Types[extention];
+        else
+            headerData->response.contentType = Configurations::http.getDefault_type();
+    }
 }
 
 void RequestParser::fillHeaderData()
@@ -128,6 +139,7 @@ bool RequestParser::redirectionType(std::vector<Location> &confLocation){
 	}
 	return 1;
 }
+
 void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation)
 {
 	size_t i = 0;
@@ -150,13 +162,11 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation)
 			}
 		}
 	}
-	std::cout << "locationIndex is : " << headerData->locationIndex << std::endl;
-	std::cout << "locationIndex path is : " << headerData->Path << std::endl;
 	if (headerData->locationIndex != -1){
 		headerData->currentLocation= confLocation[headerData->locationIndex];
 		if (!headerData->currentLocation.getRedirection().ReturnLocation.empty()){
 			headerData->Path = headerData->currentLocation.getRedirection().ReturnLocation;
-			if (!redirectionType(confLocation)){
+			if (!redirectionType(confLocation) && headerData->Method == "GET"){
 				headerData->url = headerData->currentLocation.getRedirection().ReturnLocation; 
 				getCurrentLocationIndex(confLocation);
 			}
@@ -164,15 +174,12 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation)
 				headerData->REDIRECTION_STAGE = true;
 			}
 		}
-		DEBUGOUT(1, COLORED("\n Redirection Stage   : " << headerData->REDIRECTION_STAGE << "\n", Magenta));
 		if (!headerData->REDIRECTION_STAGE){
 			end = confLocation[headerData->locationIndex].getPath().length();
 			headerData->newRoot = headerData->Path.substr(start  + end);
-			std::cout << "new root is : " <<  headerData->newRoot << "path : " << headerData->Path << std::endl;
 		}
 	}
 }
-
 
 int RequestParser::ParseUrl() {
 	int pos1 = 0;
@@ -183,8 +190,8 @@ int RequestParser::ParseUrl() {
 			if (lastSlashPos != std::string::npos) {
        			std::string newRoot = headerData->Path.substr(lastSlashPos);
 				headerData->Path = headerData->currentServer.getRoot() + newRoot;
-				DEBUGOUT(1, COLORED("\n the current Location is  parse url: " << newRoot << "\n", Cyan));
 			}
+			DEBUGOUT(1, COLORED("\n the current Location is  parse url: " << headerData->Path << "\n", Cyan));
 		}
 		return 1;
 	}
@@ -194,7 +201,6 @@ int RequestParser::ParseUrl() {
 		headerData->Path = headerData->currentServer.getRoot() + headerData->newRoot ;	
 	return 0;
 }
-
 
 bool RequestParser::checkErrorPage(int const &error, std::map<int, std::string> &error_pages, int respType){
 
@@ -217,7 +223,6 @@ bool RequestParser::checkErrorPage(int const &error, std::map<int, std::string> 
 }
 
 bool RequestParser::checkInHttp(int const &error, int respType){
-	std::cout << "er " << headerData->locationIndex << std::endl;
 	std::map<int, std::string> error_pages = headerData->currentLocation.getError_pages();
 	if (!checkErrorPage(error, error_pages, respType)){
 		error_pages = headerData->currentServer.getError_pages();
@@ -230,7 +235,6 @@ bool RequestParser::checkInHttp(int const &error, int respType){
 	return true;
 }
 
-
 void RequestParser::ParseRequest(){
 	fillHeaderData();
 	printHeaderdata();
@@ -239,10 +243,8 @@ void RequestParser::ParseRequest(){
 	std::vector<Location> confLocation = headerData->currentServer.getLocations();
 	if (confLocation.size() > 0)
 		getCurrentLocationIndex(confLocation);
-	DEBUGOUT(1, COLORED("\n the new root here: " << headerData->newRoot << "\n", Cyan));
-	DEBUGOUT(1, COLORED("\n Redirection Stage   : " << headerData->REDIRECTION_STAGE << "\n", Magenta));
 	if (!headerData->REDIRECTION_STAGE)
 		ParseUrl();
-	if (directoryStatus(headerData->Path.substr(1)) == 2 && headerData->Path[0] == '/')
+	if (directoryStatus(headerData->Path.substr(1)) >= 1 && headerData->Path[0] == '/')
 		headerData->Path = headerData->Path.substr(1);
 }

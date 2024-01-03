@@ -21,7 +21,7 @@ struct ResponseData{
 	int									StatusCode;
 	int									ResponseType;
 	int    								fileFd;
-	int									contentType;
+	std::string							contentType;
 };
 
 struct CGI_DATA
@@ -31,7 +31,7 @@ struct CGI_DATA
 
 
 
-struct HeaderData
+struct DataPool
 {
     int									ResponseStatus; // NO-NO
     HeadersType							cgiHeaders; 
@@ -49,24 +49,22 @@ struct HeaderData
 	bool								REDIRECTION_STAGE;
 	ResponseData						response;
 	bool								RESPONSE__STATE;
-	bool								CGI__STAGE;
-	CGI_DATA 							cgiData;
 
 };
 
 
 class RequestParser
 {
-	// Request		*request;
-	HeaderData	*headerData;
+	DataPool 	*headerData;
 public:
 	RequestParser(/* args */);
-	RequestParser(HeaderData *);
+	RequestParser(DataPool *);
 	~RequestParser();
 
 	void	getCurrentServer(std::vector<ConfServer> &);
 	void	getCurrentLocationIndex(std::vector<Location> &);
 	void	ParseRequest();
+	void	getContentType();
 	void	fillHeaderData();
 	void  	printHeaderdata();
 	int		ParseUrl();

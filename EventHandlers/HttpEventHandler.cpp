@@ -1,7 +1,7 @@
 #include "HttpEventHandler.hpp"
 
 HttpEventHandler::HttpEventHandler(int SocketFd, struct sockaddr_storage address, socklen_t address_len) : EventHandler(SocketFd), 
-			headerData(new HeaderData), requestParser(headerData) , response(headerData)
+			headerData(new	DataPool), requestParser(headerData) , response(headerData)
 {
 	this->client.address = address;
 	this->client.address_len = address_len;
@@ -23,7 +23,7 @@ int HttpEventHandler::Read()
 		return 0;
 
 	request.write(buffer, bytes);
-	requestParser.HandlerRequest(request.str());
+	requestParser.HandlerRequest1(request.str());
 	this->headerData->RESPONSE__STATE = true;
 	return (-1);
 }
