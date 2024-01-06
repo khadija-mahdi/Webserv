@@ -1,6 +1,6 @@
 #include "Include/MethodDelete.hpp"
 
-MethodDelete::MethodDelete(DataPool *Data) : Request(*Data), headerData(Data) {}
+MethodDelete::MethodDelete(DataPool &Data) : Request(Data) {}
 
 MethodDelete::~MethodDelete() {}
 
@@ -59,22 +59,22 @@ bool deleteFolderContents(const std::string &folderPath)
 
 bool MethodDelete::DeleteDirectoryHandler()
 {
-	DEBUGMSGT(1, COLORED("Delete Method the Path Is a Directory : " << headerData->Path, Green));
-	if (headerData->Path[headerData->Path.length() - 1] != '/')
+	DEBUGMSGT(1, COLORED("Delete Method the Path Is a Directory : " << dataPool.Path, Green));
+	if (dataPool.Path[dataPool.Path.length() - 1] != '/')
 	{
 		DEBUGMSGT(1, COLORED("Delete Method 409  dir without / ", Green));
 		throw HTTPError(409);
 	}
 	else
 	{
-		if (deleteFolderContents(headerData->Path))
+		if (deleteFolderContents(dataPool.Path))
 		{
 			DEBUGMSGT(1, COLORED("success remove all Directory content : ", Green));
 			throw HTTPError(204);
 		}
 		else
 		{
-			if (hasWritePermission(headerData->Path))
+			if (hasWritePermission(dataPool.Path))
 				throw HTTPError(500);
 			throw HTTPError(403);
 		}
@@ -84,8 +84,8 @@ bool MethodDelete::DeleteDirectoryHandler()
 
 bool MethodDelete::DeleteFileHandler()
 {
-	DEBUGMSGT(1, COLORED("Delete Method the Path Is a File : " << headerData->Path, Green));
-	if (std::remove(headerData->Path.c_str()) == 0)
+	DEBUGMSGT(1, COLORED("Delete Method the Path Is a File : " << dataPool.Path, Green));
+	if (std::remove(dataPool.Path.c_str()) == 0)
 		throw HTTPError(204);
 	else
 		throw HTTPError(403);
@@ -95,9 +95,9 @@ bool MethodDelete::DeleteFileHandler()
 bool MethodDelete::DeleteMethodHandler()
 {
 	DEBUGMSGT(1, COLORED("Delete Method Handler : ", Blue));
-	if (directoryStatus(headerData->Path) == 1)
+	if (directoryStatus(dataPool.Path) == 1)
 		return DeleteDirectoryHandler();
-	if (directoryStatus(headerData->Path) == 2)
+	if (directoryStatus(dataPool.Path) == 2)
 		return DeleteFileHandler();
 	else
 		throw HTTPError(404);

@@ -1,11 +1,8 @@
 #include "Include/RequestParser.hpp"
 
-RequestParser::RequestParser(DataPool *headerData)
-{
-	this->headerData = headerData;
-}
+// RequestParser::RequestParser(DataPool &Data):headerData(Data){}
 
-RequestParser::RequestParser() {}
+RequestParser::RequestParser() {} 
 
 RequestParser::~RequestParser() {}
 
@@ -52,44 +49,44 @@ void urlDecoding(std::string &Path)
 	Path = decoded_ss.str();
 }
 
-void RequestParser::printHeaderdata()
+void RequestParser::printHeaderdata(DataPool &headerData)
 {
 	std::map<std::string, std::string>::iterator it;
-	it = headerData->Headers.begin();
-	DEBUGMSGT(1, COLORED("Path [" << headerData->Path << "]\n", Yellow));
-	DEBUGMSGT(1, COLORED("Method [" << headerData->Method << "]\n", Yellow));
-	for (; it != headerData->Headers.end(); ++it)
+	it = headerData.Headers.begin();
+	DEBUGMSGT(1, COLORED("Path [" << headerData.Path << "]\n", Yellow));
+	DEBUGMSGT(1, COLORED("Method [" << headerData.Method << "]\n", Yellow));
+	for (; it != headerData.Headers.end(); ++it)
 		DEBUGMSGT(1, COLORED(it->first << "----> " << it->second << " . \n\n", Yellow));
 }
 
-void RequestParser::getContentType()
+void RequestParser::getContentType(DataPool &headerData)
 {
-	int pos = headerData->Path.find(".");
+	int pos = headerData.Path.find(".");
 	if (pos != std::string::npos)
 	{
-		std::string extention = headerData->Path.substr(pos + 1, headerData->Path.length());
+		std::string extention = headerData.Path.substr(pos + 1, headerData.Path.length());
 		std::map<std::string, std::string> Types = Configurations::http.getMimeTypes();
 
 		if (Types.find(extention) != Types.end())
-			headerData->response.contentType = Types[extention];
+			headerData.response.contentType = Types[extention];
 		else
-			headerData->response.contentType = Configurations::http.getDefault_type();
+			headerData.response.contentType = Configurations::http.getDefault_type();
 	}
 }
 
-void RequestParser::fillHeaderData()
+void RequestParser::fillHeaderData(DataPool &headerData)
 {
 
-	std::istringstream BufferStream(headerData->Buffer);
+	std::istringstream BufferStream(headerData.Buffer);
 	std::string requestLine;
 	std::getline(BufferStream, requestLine);
 
 	std::istringstream requestLineStream(requestLine);
-	requestLineStream >> headerData->Method >> headerData->Path;
-	if (int pos = headerData->Path.find(" ") != std::string::npos)
-		headerData->Path = headerData->Path.substr(pos);
-	urlDecoding(headerData->Path);
-	headerData->url = headerData->Path;
+	requestLineStream >> headerData.Method >> headerData.Path;
+	if (int pos = headerData.Path.find(" ") != std::string::npos)
+		headerData.Path = headerData.Path.substr(pos);
+	urlDecoding(headerData.Path);
+	headerData.url = headerData.Path;
 	std::string header;
 	while (std::getline(BufferStream, header) && !header.empty())
 	{
@@ -101,16 +98,16 @@ void RequestParser::fillHeaderData()
 			size_t lastCharPos = value.find_last_not_of("\r\n");
 			if (lastCharPos != std::string::npos)
 				value.erase(lastCharPos + 1);
-			headerData->Headers[key] = value;
+			headerData.Headers[key] = value;
 		}
 	}
 }
 
-void RequestParser::getCurrentServer(std::vector<ConfServer> &confServers)
+void RequestParser::getCurrentServer(std::vector<ConfServer> &confServers, DataPool &headerData)
 {
-	size_t pos = headerData->Headers["Host"].find(":");
-	std::string server_name = headerData->Headers["Host"].substr(0, pos);
-	std::string Port = headerData->Headers["Host"].substr(pos + 1);
+	size_t pos = headerData.Headers["Host"].find(":");
+	std::string server_name = headerData.Headers["Host"].substr(0, pos);
+	std::string Port = headerData.Headers["Host"].substr(pos + 1);
 	std::vector<std::string> serverNames;
 
 	for (size_t i = 0; i < confServers.size(); i++)
@@ -121,38 +118,38 @@ void RequestParser::getCurrentServer(std::vector<ConfServer> &confServers)
 		{
 			if (confServers[i].getListen() == Port)
 			{
-				headerData->currentServer = confServers[i];
+				headerData.currentServer = confServers[i];
 				break;
 			}
 		}
 		else if (confServers[i].getListen() == Port)
 		{
-			headerData->currentServer = confServers[i];
+			headerData.currentServer = confServers[i];
 			break;
 		}
 	}
 }
 
-bool RequestParser::redirectionType(std::vector<Location> &confLocation)
+bool RequestParser::redirectionType(std::vector<Location> &confLocation, DataPool &headerData)
 {
 	for (size_t i = 0; i < confLocation.size(); i++)
 	{
-		if (confLocation[i].getPath() == headerData->currentLocation.getRedirection().ReturnLocation)
+		if (confLocation[i].getPath() == headerData.currentLocation.getRedirection().ReturnLocation)
 			return 0;
 	}
 	return 1;
 }
 
-void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation)
+void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation, DataPool &headerData)
 {
 	size_t i = 0;
 	int start = 0, end = 0;
-	if ((headerData->Path) == "/")
+	if ((headerData.Path) == "/")
 	{
-		headerData->url = headerData->url + "/";
-		start = headerData->Path.find(confLocation[i].getPath());
+		headerData.url = headerData.url + "/";
+		start = headerData.Path.find(confLocation[i].getPath());
 		if (start != std::string::npos)
-			headerData->locationIndex = headerData->currentServer.getDefaultLocation();
+			headerData.locationIndex = headerData.currentServer.getDefaultLocation();
 	}
 	else
 	{
@@ -160,58 +157,58 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation)
 		{
 			std::string locPath = confLocation[i].getPath();
 			size_t lastCharPos = locPath[locPath.length() + 1];
-			start = headerData->Path.find(confLocation[i].getPath());
+			start = headerData.Path.find(confLocation[i].getPath());
 			if (start != std::string::npos)
 			{
-				headerData->locationIndex = i;
+				headerData.locationIndex = i;
 				break;
 			}
 		}
 	}
-	if (headerData->locationIndex != -1)
+	if (headerData.locationIndex != -1)
 	{
-		headerData->currentLocation = confLocation[headerData->locationIndex];
-		if (!headerData->currentLocation.getRedirection().ReturnLocation.empty() && headerData->Method == "GET")
+		headerData.currentLocation = confLocation[headerData.locationIndex];
+		if (!headerData.currentLocation.getRedirection().ReturnLocation.empty() && headerData.Method == "GET")
 		{
-			headerData->Path = headerData->currentLocation.getRedirection().ReturnLocation;
-			if (!redirectionType(confLocation))
+			headerData.Path = headerData.currentLocation.getRedirection().ReturnLocation;
+			if (!redirectionType(confLocation, headerData))
 			{
-				headerData->url = headerData->currentLocation.getRedirection().ReturnLocation;
-				getCurrentLocationIndex(confLocation);
+				headerData.url = headerData.currentLocation.getRedirection().ReturnLocation;
+				getCurrentLocationIndex(confLocation, headerData);
 			}
 			else
-				headerData->REDIRECTION_STAGE = true;
+				headerData.REDIRECTION_STAGE = true;
 		}
-		if (!headerData->REDIRECTION_STAGE)
+		if (!headerData.REDIRECTION_STAGE)
 		{
-			end = confLocation[headerData->locationIndex].getPath().length();
-			headerData->newRoot = headerData->Path.substr(start + end);
+			end = confLocation[headerData.locationIndex].getPath().length();
+			headerData.newRoot = headerData.Path.substr(start + end);
 		}
 	}
 }
 
-int RequestParser::ParseUrl()
+int RequestParser::ParseUrl(DataPool &headerData)
 {
 	int pos1 = 0;
 
-	if (headerData->locationIndex == -1)
+	if (headerData.locationIndex == -1)
 	{
-		if (!headerData->currentServer.getRoot().empty())
+		if (!headerData.currentServer.getRoot().empty())
 		{
-			size_t lastSlashPos = headerData->Path.find_last_of("/");
+			size_t lastSlashPos = headerData.Path.find_last_of("/");
 			if (lastSlashPos != std::string::npos)
 			{
-				std::string newRoot = headerData->Path.substr(lastSlashPos);
-				headerData->Path = headerData->currentServer.getRoot() + newRoot;
+				std::string newRoot = headerData.Path.substr(lastSlashPos);
+				headerData.Path = headerData.currentServer.getRoot() + newRoot;
 			}
-			DEBUGMSGT(1, COLORED("\n the current Location is  parse url: " << headerData->Path << "\n", Cyan));
+			DEBUGMSGT(1, COLORED("\n the current Location is  parse url: " << headerData.Path << "\n", Cyan));
 		}
 		return 1;
 	}
-	if (!headerData->currentLocation.getRoot().empty())
-		headerData->Path = headerData->currentLocation.getRoot() + headerData->newRoot;
-	else if (!headerData->currentServer.getRoot().empty())
-		headerData->Path = headerData->currentServer.getRoot() + headerData->newRoot;
+	if (!headerData.currentLocation.getRoot().empty())
+		headerData.Path = headerData.currentLocation.getRoot() + headerData.newRoot;
+	else if (!headerData.currentServer.getRoot().empty())
+		headerData.Path = headerData.currentServer.getRoot() + headerData.newRoot;
 	return 0;
 }
 
@@ -225,17 +222,17 @@ std::string GetHeaderAttr(HeadersType &Headers, std::string name)
 	return ("");
 }
 
-void RequestParser::ParseRequest()
+void RequestParser::ParseRequest(DataPool &headerData)
 {
-	fillHeaderData();
-	printHeaderdata();
+	fillHeaderData(headerData);
+	printHeaderdata(headerData);
 	std::vector<ConfServer> confServers = Configurations::http.getConfServes();
-	getCurrentServer(confServers);
-	std::vector<Location> confLocation = headerData->currentServer.getLocations();
+	getCurrentServer(confServers, headerData);
+	std::vector<Location> confLocation = headerData.currentServer.getLocations();
 	if (confLocation.size() > 0)
-		getCurrentLocationIndex(confLocation);
-	if (!headerData->REDIRECTION_STAGE)
-		ParseUrl();
-	if (directoryStatus(headerData->Path.substr(1)) >= 1 && headerData->Path[0] == '/')
-		headerData->Path = headerData->Path.substr(1);
+		getCurrentLocationIndex(confLocation, headerData);
+	if (!headerData.REDIRECTION_STAGE)
+		ParseUrl(headerData);
+	if (directoryStatus(headerData.Path.substr(1)) >= 1 && headerData.Path[0] == '/')
+		headerData.Path = headerData.Path.substr(1);
 }

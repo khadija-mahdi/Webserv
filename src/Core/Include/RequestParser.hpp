@@ -20,21 +20,18 @@ enum
 
 class RequestParser
 {
-	DataPool *headerData;
-
 public:
 	RequestParser(/* args */);
-	RequestParser(DataPool *);
 	~RequestParser();
 
-	void getCurrentServer(std::vector<ConfServer> &);
-	void getCurrentLocationIndex(std::vector<Location> &);
-	void ParseRequest();
-	void getContentType();
-	void fillHeaderData();
-	void printHeaderdata();
-	int ParseUrl();
-	bool redirectionType(std::vector<Location> &);
+	void getCurrentServer(std::vector<ConfServer> & , DataPool &headerData);
+	void getCurrentLocationIndex(std::vector<Location> &, DataPool &headerData);
+	void ParseRequest(DataPool &headerData);
+	void getContentType(DataPool &headerData);
+	void fillHeaderData(DataPool &headerData);
+	void printHeaderdata(DataPool &headerData);
+	int ParseUrl(DataPool &headerData);
+	bool redirectionType(std::vector<Location> &, DataPool &headerData);
 };
 
 int directoryStatus(const std::string &);

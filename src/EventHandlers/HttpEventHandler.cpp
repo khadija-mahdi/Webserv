@@ -1,7 +1,7 @@
 #include "HttpEventHandler.hpp"
 
 HttpEventHandler::HttpEventHandler(int SocketFd, struct sockaddr_storage address, socklen_t address_len)
-	: EventHandler(SocketFd), request(&headerData)
+	: EventHandler(SocketFd)
 {
 	this->client.address = address;
 	this->client.address_len = address_len;
@@ -92,7 +92,9 @@ const int &HttpEventHandler::GetSocketFd() const
 
 Request *HttpEventHandler::GetRequestHandler()
 {
-	return this->request.GetRequestHandler();
+		// printf("%p \n" , this->request.GetDataPool());
+		printf("%p \n" , this->request.request);
+	return this->request.request;
 }
 
 HttpEventHandler::~HttpEventHandler()

@@ -3,21 +3,19 @@
 RequestHandler::RequestHandler(/* args */)
 {
 	REQUEST_STATE = HEADERS_STAGE;
-	headerData = new DataPool();
-	headerData->locationIndex = -1;
-	headerData->REDIRECTION_STAGE = false;
-	headerData->response.StatusCode = 200;
+	this->dataPool.locationIndex = -1;
+	this->dataPool.REDIRECTION_STAGE = false;
+	this->dataPool.response.StatusCode = 200;
 }
-RequestHandler::RequestHandler(DataPool *data) : headerData(data), requestParser(headerData)
-{
-	printf("%p\n", headerData);
-	fflush(stdout);
-	// exit(0);
-	REQUEST_STATE = HEADERS_STAGE;
-	headerData->locationIndex = -1;
-	headerData->REDIRECTION_STAGE = false;
-	headerData->response.StatusCode = 200;
-}
+
+// RequestHandler::RequestHandler(DataPool &data) : dataPool(dataPool) , requestParser(dataPool)
+// {
+// 	REQUEST_STATE = HEADERS_STAGE;
+// 	dataPool.locationIndex = -1;
+// 	dataPool.REDIRECTION_STAGE = false;
+// 	dataPool.response.StatusCode = 200;
+// }
+
 RequestHandler::~RequestHandler()
 {
 }
@@ -39,18 +37,22 @@ std::string GetHeadersValue(std::map<std::string, std::string> &headers, std::st
 
 bool RequestHandler::parseHeaderErrors()
 {
-	if (!GetHeadersValue(headerData->Headers, "Transfer-Encoding").empty() && GetHeadersValue(headerData->Headers, "Transfer-Encoding") != "chunked")
+	if (!GetHeadersValue(dataPool.Headers, "Transfer-Encoding").empty() && GetHeadersValue(dataPool.Headers, "Transfer-Encoding") != "chunked")
 		throw HTTPError(501);
-	if (headerData->Method == "POST" && GetHeadersValue(headerData->Headers, "Transfer-Encoding").empty() && GetHeadersValue(headerData->Headers, "Content-Length").empty())
+	if (dataPool.Method == "POST" && GetHeadersValue(dataPool.Headers, "Transfer-Encoding").empty() && GetHeadersValue(dataPool.Headers, "Content-Length").empty())
 		throw HTTPError(400);
-	if (!IsValidSetOfCharacter(headerData->Path))
+	if (!IsValidSetOfCharacter(dataPool.Path))
 		throw HTTPError(400);
-	if (headerData->Path.length() > 2048)
+	if (dataPool.Path.length() > 2048)
 		throw HTTPError(414);
 	// if (max body size with body length from post method) //-> add 4014 max body size
 	// 	throw HTTPError(414);
-	if (directoryStatus(headerData->Path) < 1 && !headerData->REDIRECTION_STAGE)
+	if (directoryStatus(dataPool.Path) < 1 && !dataPool.REDIRECTION_STAGE)
 		throw HTTPError(404);
+	if (GetHeadersValue(dataPool.Headers, "Transfer-Encoding") == "chunked")
+        this->request->SetBodyController(Chunked, 0);
+    else if (!GetHeadersValue(dataPool.Headers, "Content-Length").empty())
+        this->request->SetBodyController(Lenght, atoll(GetHeadersValue(dataPool.Headers, "Content-Length").c_str()));
 	return false;
 }
 
@@ -60,16 +62,16 @@ bool RequestHandler::processRedirectionAndAllowance()
 	int pos1 = 0;
 	std::string newPath;
 
-	if (headerData->locationIndex != -1)
+	if (dataPool.locationIndex != -1)
 	{
-		std::vector<std::string> allowMethod = headerData->currentLocation.getAllow();
-		int allow = std::find(allowMethod.begin(), allowMethod.end(), headerData->Method) != allowMethod.end();
+		std::vector<std::string> allowMethod = dataPool.currentLocation.getAllow();
+		int allow = std::find(allowMethod.begin(), allowMethod.end(), dataPool.Method) != allowMethod.end();
 		if (!allow)
 			throw HTTPError(405);
-		if (headerData->REDIRECTION_STAGE)
+		if (dataPool.REDIRECTION_STAGE)
 		{
-			headerData->response.Location = headerData->Path;
-			headerData->response.StatusCode = headerData->currentLocation.getRedirection().statusCode;
+			dataPool.response.Location = dataPool.Path;
+			dataPool.response.StatusCode = dataPool.currentLocation.getRedirection().statusCode;
 			return true;
 		}
 	}
@@ -78,39 +80,42 @@ bool RequestHandler::processRedirectionAndAllowance()
 
 Request *RequestHandler::handlerRequestMethods()
 {
-	if (headerData->Method == "GET")
-		return request = new MethodGet(headerData);
-	if (headerData->Method == "DELETE")
-		return request = new MethodDelete(headerData);
-	if (headerData->Method == "POST")
-		return request = new PostRequest(*headerData);
+	if (dataPool.Method == "GET")
+		return request = new MethodGet(dataPool);
+	if (dataPool.Method == "DELETE")
+		return request = new MethodDelete(dataPool);
+	if (dataPool.Method == "POST")
+		return request = new PostRequest(dataPool);
 	return request;
 }
 
 bool RequestHandler::HandlerRequest1(std::string Data)
 {
-	headerData->Buffer += Data;
+	dataPool.Buffer += Data;
 	switch (REQUEST_STATE)
 	{
 	case HEADERS_STAGE:
-		if (headerData->Buffer.find("\r\n\r\n") != std::string::npos)
+		if (dataPool.Buffer.find("\r\n\r\n") != std::string::npos)
 		{
-			DEBUGMSGT(1, headerData->Buffer);
-			requestParser.ParseRequest();
+			DEBUGMSGT(1, dataPool.Buffer);
+			requestParser.ParseRequest(dataPool);
+			handlerRequestMethods();
 			if (parseHeaderErrors())
 				return true;
 			if (processRedirectionAndAllowance())
 				return true;
-			handlerRequestMethods();
 
-			// DEBUGMSGT(1, COLORED("\n the current Server is  : " << headerData->currentServer.getListen() << "\n", Cyan));
-			// DEBUGMSGT(1, COLORED("\n the current Location is  : " << headerData->currentLocation.getPath() << "\n", Cyan));
-			// DEBUGMSGT(1, COLORED("\n the Path : " << headerData->Path << ", dir status : " << directoryStatus(headerData->Path) << "\n", Green));
-			// DEBUGMSGT(1, COLORED("\n REDIRECTION_STAGE " << headerData->REDIRECTION_STAGE << "\n", Green));
+			DEBUGMSGT(1, COLORED("\n the current Server is  : " << dataPool.currentServer.getListen() << "\n", Cyan));
+			DEBUGMSGT(1, COLORED("\n the current Location is  : " << dataPool.currentLocation.getPath() << "\n", Cyan));
+			DEBUGMSGT(1, COLORED("\n the Path : " << dataPool.Path << ", dir status : " << directoryStatus(dataPool.Path) << "\n", Green));
+			DEBUGMSGT(1, COLORED("\n REDIRECTION_STAGE " << dataPool.REDIRECTION_STAGE << "\n", Green));
+			REQUEST_STATE = REQUEST_HANDLER_STAGE;
+			// intentionally fall through
+			// std::cout << REQUEST_STATE << std::endl;	
+			// break;
 		}
-		REQUEST_STATE = REQUEST_HANDLER_STAGE;
-		// intentionally fall through
 	case REQUEST_HANDLER_STAGE:
+	std::cout << "hi";
 		if (request != NULL)
 			return request->HandleRequest(Data);
 		break;
@@ -119,7 +124,7 @@ bool RequestHandler::HandlerRequest1(std::string Data)
 }
 DataPool &RequestHandler::GetDataPool(void)
 {
-	return (*this->headerData);
+	return (this->dataPool);
 }
 
 Request *RequestHandler::GetRequestHandler()

@@ -26,14 +26,8 @@ enum
 
 class MethodGet : public Request
 {
-private:
-	DataPool *headerData;
-	int fd;
-	std::vector<std::string> env;
-	std::vector<std::string> arguments;
-
 public:
-	MethodGet(DataPool *headerData);
+	MethodGet(DataPool &headerData);
 	MethodGet();
 	~MethodGet();
 	bool handleDirectoryPath();

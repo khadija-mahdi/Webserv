@@ -1,6 +1,6 @@
 #include "Include/MethodGet.hpp"
 
-MethodGet::MethodGet(DataPool *Data) : Request(*Data), headerData(Data) {}
+MethodGet::MethodGet(DataPool &Data) : Request(Data){}
 
 MethodGet::~MethodGet() {}
 
@@ -57,59 +57,60 @@ int fileStatus(const std::string &path)
 bool MethodGet::handleDirectoryPath()
 {
 	std::vector<std::string> indexes;
-	if (headerData->currentLocation.getAutoindex() == "off")
+	if (dataPool.currentLocation.getAutoindex() == "off")
 		throw HTTPError(403);
-	if (headerData->locationIndex == -1)
+	if (dataPool.locationIndex == -1)
 	{ // only server
-		indexes = headerData->currentServer.getIndex();
+		indexes = dataPool.currentServer.getIndex();
 		if (indexes.size() > 0)
 		{
 			for (int i = 0; i < indexes.size(); ++i)
 			{
-				std::string newPath = headerData->Path + indexes[i];
+				std::string newPath = dataPool.Path + indexes[i];
 				if (directoryStatus(newPath) == 2)
 				{
-					headerData->response.fileFd = open(newPath.c_str(), O_RDONLY, 0664);
+					dataPool.response.fileFd = open(newPath.c_str(), O_RDONLY, 0664);
 					return true;
 				}
 			};
 			throw HTTPError(404);
 		}
 	}
-	indexes = headerData->currentLocation.getIndex();
+	indexes = dataPool.currentLocation.getIndex();
 	for (int i = 0; i < indexes.size(); ++i)
 	{
-		std::string newPath = headerData->Path + indexes[i];
+		std::string newPath = dataPool.Path + indexes[i];
 		if (directoryStatus(newPath) == 2)
 		{
 			DEBUGMSGT(1, COLORED("path is  : " << newPath, Red));
-			headerData->response.fileFd = open(newPath.c_str(), O_RDONLY, 0664);
+			dataPool.response.fileFd = open(newPath.c_str(), O_RDONLY, 0664);
 			return true;
 		}
 	}
-	headerData->response.StatusCode = 200;
-	headerData->response.Location = headerData->Path;
+	dataPool.response.StatusCode = dataPool.currentLocation.getRedirection().statusCode;
+	dataPool.response.Location = dataPool.currentLocation.getRedirection().ReturnLocation;
+	throw HTTPError(dataPool.currentLocation.getRedirection().statusCode);
 	return true;
 }
 
 bool MethodGet::GetFileHandler()
 {
 	DEBUGMSGT(1, "GET OPENED FILE : ");
-	if (fileStatus(headerData->Path) == FORBIDDEN_READ)
+	if (fileStatus(dataPool.Path) == FORBIDDEN_READ)
 		throw HTTPError(403);
-	headerData->response.fileFd = open(headerData->Path.c_str(), O_RDONLY, 0664);
+	dataPool.response.fileFd = open(dataPool.Path.c_str(), O_RDONLY, 0664);
 	return true;
 }
 
 bool MethodGet::GetDirectoryHandler()
 {
-	if (directoryStatus(headerData->Path) == DIRE && headerData->Path[headerData->Path.length() - 1] == '/')
+	if (directoryStatus(dataPool.Path) == DIRE && dataPool.Path[dataPool.Path.length() - 1] == '/')
 		return handleDirectoryPath();
-	DEBUGMSGT(1, COLORED("headerData->Path[headerData->Path.length() - 1] : " << headerData->Path[headerData->Path.length() - 1], Blue));
-	if (headerData->Path[headerData->Path.length() - 1] != '/')
+	DEBUGMSGT(1, COLORED("dataPool.Path[dataPool.Path.length() - 1] : " << dataPool.Path[dataPool.Path.length() - 1], Blue));
+	if (dataPool.Path[dataPool.Path.length() - 1] != '/')
 	{
-		headerData->response.StatusCode = 301;
-		headerData->response.Location = headerData->url + "/";
+		dataPool.response.StatusCode = 301;
+		dataPool.response.Location = dataPool.url + "/";
 		return true;
 	}
 	throw HTTPError(404);
@@ -118,8 +119,8 @@ bool MethodGet::GetDirectoryHandler()
 bool MethodGet::GetMethodHandler()
 {
 	DEBUGMSGT(1, COLORED("GET Method Handler : ", Blue));
-	DEBUGMSGT(1, COLORED("path  : " << headerData->Path << " , IS DIR : " << directoryStatus(headerData->Path), Blue));
-	if (directoryStatus(headerData->Path) == VALID_PATH)
+	DEBUGMSGT(1, COLORED("path  : " << dataPool.Path << " , IS DIR : " << directoryStatus(dataPool.Path), Blue));
+	if (directoryStatus(dataPool.Path) == VALID_PATH)
 		return GetFileHandler();
 	return GetDirectoryHandler();
 }

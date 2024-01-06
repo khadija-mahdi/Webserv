@@ -8,13 +8,9 @@
 class Request;
 class MethodDelete : public Request
 {
-private:
-	DataPool *headerData;
-	int fd;
-
 public:
 	MethodDelete();
-	MethodDelete(DataPool *headerData);
+	MethodDelete(DataPool &headerData);
 	~MethodDelete();
 
 	bool DeleteMethodHandler();

@@ -2,6 +2,7 @@
 
 Request::Request(DataPool &dataPool) : dataPool(dataPool)
 {
+	printf("%p \n" , this->cgiController);
 	this->BodyReady = false;
 	this->BodyReceiver = NULL;
 	this->CGIProcessId = 0;
@@ -95,6 +96,7 @@ void Request::Execute(std::string ResourceFilePath, std::string Method)
 {
 	std::string BodyFile = this->BodyReceiver ? this->BodyReceiver->GetFileName() : "";
 	cgiController = new CGIController(dataPool, ResourceFilePath, BodyFile, Method);
+	std::cout << dataPool.locationIndex << std::endl;
 }
 
 CGIController *Request::GetCGIController()

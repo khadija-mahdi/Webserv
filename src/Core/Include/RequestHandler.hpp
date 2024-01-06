@@ -20,15 +20,17 @@ enum
 class RequestHandler
 {
 private:
-	DataPool *headerData;
+	// DataPool headerData;
 	int serverIndex;
 	int REQUEST_STATE;
-	Request *request;
 	RequestParser requestParser;
 
 public:
+	Request *request;
+	DataPool dataPool;
+	// DataPool dataPool;
 	RequestHandler(/* args */);
-	RequestHandler(DataPool *);
+	// RequestHandler(DataPool &);
 
 	~RequestHandler();
 

@@ -56,7 +56,6 @@ private:
 	Client client;
 	RequestHandler request;
 	ResponseBuilder *response;
-	DataPool headerData;
 };
 
 #endif
