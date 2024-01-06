@@ -42,12 +42,7 @@ void Location::setRedirection(std::string &_value, int _key)
 	redirection.statusCode = _key;
 }
 
-// void	Location::setCgi(std::string & _cig_accept, std::string cgi_path)
-// {
-// 	this->cgiAccept = _cig_accept;
-// 	this->cgiPath = cgi_path;
 
-// }
 void Location::setCgiAccept(std::map<std::string, std::string> &cgi) { this->cgiAccept = cgi; }
 
 void Location::setRoot(std::string const &_root) { root = _root; }

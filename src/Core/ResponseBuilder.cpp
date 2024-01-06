@@ -67,7 +67,7 @@ ResponseBuilder::ResponseBuilder(DataPool dataPool, HeadersType &ResponseHeaders
 std::string ResponseBuilder::GetDefaultErrorPagePath()
 {
 	std::string FileName = "/tmp/" + Lstring::RandomStr(16);
-	std::string title = SSTR(dataPool.response.StatusCode) + StatusCodes[dataPool.response.StatusCode];
+	std::string title = SSTR(dataPool.response.StatusCode) + " " + StatusCodes[dataPool.response.StatusCode];
 	std::ofstream ErrorPage(FileName.c_str());
 	ErrorPage << "<!DOCTYPE html>"
 			  << "<html>"
@@ -86,6 +86,7 @@ std::string ResponseBuilder::GetDefaultErrorPagePath()
 	return (FileName);
 }
 
+
 void ResponseBuilder::CreateStatusFile()
 {
 	std::string FileName;
@@ -94,7 +95,6 @@ void ResponseBuilder::CreateStatusFile()
 	if (FileName.empty())
 		FileName = GetDefaultErrorPagePath();
 	this->dataPool.response.fileFd = IO::OpenFile(FileName.c_str(), "r+");
-
 	this->dataPool.response.contentType = "text/html";
 }
 
@@ -106,9 +106,9 @@ void ResponseBuilder::FillHeaders(int StatusCode)
 				 ? (SSTR(StatusCode) + " " + StatusCodes[StatusCode])
 				 : ResponseHeaders["Status"];
 	Buffer += ("HTTP/1.1 " + Status + "\r\n");
-	if (dataPool.response.fileFd == NOBODY)
+;
+	if (dataPool.response.fileFd == NOBODY && dataPool.response.Location.empty())
 		CreateStatusFile();
-	Buffer += this->dataPool.response.Location.empty() ? "" : "Location: " + this->dataPool.response.Location + "\r\n";
 	for (HeadersIterator it = ResponseHeaders.begin(); it != ResponseHeaders.end(); it++)
 	{
 		if (it->first == "Status")
@@ -118,7 +118,8 @@ void ResponseBuilder::FillHeaders(int StatusCode)
 	if (ResponseHeaders.find("Content-type") == ResponseHeaders.end())
 		Buffer += ("Content-Type: " + this->dataPool.response.contentType + "\r\n");
 	Buffer += "Connection: closed\r\n";
-	Buffer += "Transfer-Encoding: chunked\r\n\r\n";
+	Buffer += "Transfer-Encoding: chunked\r\n";
+	Buffer += this->dataPool.response.Location.empty() ? "\r\n" : "Location: " + this->dataPool.response.Location + "\r\n\r\n";
 }
 
 bool ResponseBuilder::checkErrorPage(std::map<int, std::string> error_pages)
@@ -155,7 +156,7 @@ int ResponseBuilder::FlushBuffer(int SocketFd)
 
 	if (this->Buffer.empty())
 		return (0);
-	DEBUGMSGT(SHOWBUFFER, COLORED(this->Buffer.c_str(), Yellow));
+	DEBUGMSGT(1, COLORED(this->Buffer.c_str(), Magenta));
 	int i = 0;
 	if ((i = write(SocketFd, this->Buffer.c_str(), this->Buffer.size())) < 0 || this->Buffer == "0\r\n\r\n")
 		return (0);
@@ -170,7 +171,6 @@ void ResponseBuilder::FillBuffer()
 	memset(buffer, 0, sizeof(buffer));
 	std::stringstream ss;
 	int BytesCount;
-	DEBUGMSGT("File Fd : ", dataPool.response.fileFd);
 	BytesCount = read(dataPool.response.fileFd, buffer, KB);
 	if (BytesCount < 0)
 		throw std::runtime_error("Error Reading ResourceFile");

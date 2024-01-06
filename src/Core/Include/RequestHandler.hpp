@@ -34,7 +34,6 @@ public:
 
 	~RequestHandler();
 
-	bool processRedirectionAndAllowance();
 	bool parseHeaderErrors();
 	bool HandlerRequest1(std::string);
 	Request *handlerRequestMethods();

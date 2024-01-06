@@ -18,6 +18,7 @@ bool hasWritePermission(const std::string &path)
 	}
 	return true;
 }
+
 bool deleteFolderContents(const std::string &folderPath)
 {
 	DIR *dir = opendir(folderPath.c_str());
@@ -41,7 +42,6 @@ bool deleteFolderContents(const std::string &folderPath)
 				}
 				if (unlink(filePath.c_str()) != 0 && rmdir(filePath.c_str()) != 0)
 				{
-					std::cerr << "Error deleting: " << filePath << std::endl;
 					closedir(dir);
 					return false;
 				}
@@ -50,62 +50,47 @@ bool deleteFolderContents(const std::string &folderPath)
 		closedir(dir);
 	}
 	else
-	{
-		std::cerr << "Error opening directory: " << folderPath << std::endl;
 		return false;
-	}
 	return true;
 }
 
 bool MethodDelete::DeleteDirectoryHandler()
 {
 	DEBUGMSGT(1, COLORED("Delete Method the Path Is a Directory : " << dataPool.Path, Green));
-	if (dataPool.Path[dataPool.Path.length() - 1] != '/')
-	{
-		DEBUGMSGT(1, COLORED("Delete Method 409  dir without / ", Green));
+	if (dataPool.Path[dataPool.Path.length() - 1] != '/'){
+		DEBUGMSGT(1, COLORED("\n The directory path should end with a forward slash (/) when attempting to remove it \n ", Red));
 		throw HTTPError(409);
 	}
 	else
 	{
 		if (deleteFolderContents(dataPool.Path))
 		{
-			DEBUGMSGT(1, COLORED("success remove all Directory content : ", Green));
+			DEBUGMSGT(1, COLORED("\n 	success remove all Directory content ! \n ", Green));
 			throw HTTPError(204);
 		}
 		else
 		{
-			if (hasWritePermission(dataPool.Path))
+			if (hasWritePermission(dataPool.Path)){
+				DEBUGMSGT(1, COLORED("\n 	Even though the directory has write permissions, the removal operation is still encountering issues! \n ", Red));
 				throw HTTPError(500);
+			}
+			DEBUGMSGT(1, COLORED("\n 	The removal operation failed due to insufficient write permissions on the directory. ! \n ", Red));
 			throw HTTPError(403);
 		}
 	}
 	return false;
 }
 
-bool MethodDelete::DeleteFileHandler()
-{
-	DEBUGMSGT(1, COLORED("Delete Method the Path Is a File : " << dataPool.Path, Green));
-	if (std::remove(dataPool.Path.c_str()) == 0)
-		throw HTTPError(204);
-	else
-		throw HTTPError(403);
-	return false;
-}
-
-bool MethodDelete::DeleteMethodHandler()
-{
-	DEBUGMSGT(1, COLORED("Delete Method Handler : ", Blue));
-	if (directoryStatus(dataPool.Path) == 1)
-		return DeleteDirectoryHandler();
-	if (directoryStatus(dataPool.Path) == 2)
-		return DeleteFileHandler();
-	else
-		throw HTTPError(404);
-
-	return false;
-}
-
 bool MethodDelete::HandleRequest(std::string &data)
 {
-	return DeleteMethodHandler();
+	DEBUGMSGT(1, COLORED("\n 	Delete Method Handler : \n", Blue));
+	(void)data;
+	if (directoryStatus(dataPool.Path) == DIRE)
+		return DeleteDirectoryHandler();
+	if (directoryStatus(dataPool.Path) == VALID_PATH ){
+		if (std::remove(dataPool.Path.c_str()) == 0)
+			throw HTTPError(204);
+		throw HTTPError(403);
+	}
+	throw HTTPError(404);
 }

@@ -34,6 +34,7 @@ int HttpEventHandler::Read()
 	{
 		this->request.GetDataPool().response.StatusCode = e.statusCode;
 		this->response = new ResponseBuilder(this->request.GetDataPool());
+		
 		DEBUGMSGT(0, "HTTPError " << COLORED(this->response->GetStatusCodes()[e.statusCode], Red));
 	}
 	catch (const std::exception &e)
@@ -93,7 +94,7 @@ const int &HttpEventHandler::GetSocketFd() const
 Request *HttpEventHandler::GetRequestHandler()
 {
 		// printf("%p \n" , this->request.GetDataPool());
-		printf("%p \n" , this->request.request);
+	printf("%p \n" , this->request.request);
 	return this->request.request;
 }
 

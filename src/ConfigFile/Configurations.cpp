@@ -2,6 +2,7 @@
 #define MB 1048576
 #define GB 1073741824
 
+
 //---------------------------------Events class -------------------------------
 int Configurations::Events::worker_connections = 0;
 Http Configurations::http;
@@ -39,13 +40,20 @@ std::map<std::string, std::string> ReverseTypesMap(std::map<std::string, std::st
 
 unsigned long long ConvertToBytes(std::string &value)
 {
+	std::stringstream errorMessage;
+
 	char MUnit;
 	unsigned long long DecimalValue;
 
 	for (size_t i = 0; i < value.size() - 1; i++)
 	{
 		if (!isdigit(value[i]))
-			throw std::runtime_error("Invalide Value of `client_max_body_size` Incorrect");
+		{
+			errorMessage << "\033[1;" << 31 << "mError: "
+						<< "\nInvalide Value of `client_max_body_size` Incorrect" << value
+						<< "\033[0m" << std::endl;
+			throw std::runtime_error(errorMessage.str());
+		}
 	}
 	DecimalValue = atoll(value.c_str());
 	MUnit = *(value.end() - 1);
@@ -78,8 +86,7 @@ void checkValues(const std::string &lines)
 	std::stringstream errorMessage;
 	std::istringstream lineStream(lines);
 	std::string line;
-	size_t lineNumber = 0;
-	int nextLine = 0;
+	size_t nextLine = 0;
 
 	while (std::getline(lineStream, line))
 	{
@@ -107,14 +114,14 @@ void checkValues(const std::string &lines)
 
 std::vector<std::pair<std::string, std::pair<int, int> > > &Values::BlocksS(const std::string &lines, const std::string &blockName)
 {
-	int pos = 0;
+	size_t pos = 0;
 	checkValues(lines);
 	while (pos < lines.length())
 	{
-		int start = lines.find(blockName, pos);
+		size_t start = lines.find(blockName, pos);
 		if (start == std::string::npos)
 			break;
-		int openBrace = lines.find('{', start);
+		size_t openBrace = lines.find('{', start);
 		if (openBrace == std::string::npos)
 			break;
 		if (blockName == "location")
@@ -123,8 +130,8 @@ std::vector<std::pair<std::string, std::pair<int, int> > > &Values::BlocksS(cons
 			std::string path = lines.substr(start + 9, openBrace - (start + 10));
 			paths.push_back(path);
 		}
-		int closeBrace = openBrace + 1;
-		int bracesCount = 1;
+		size_t closeBrace = openBrace + 1;
+		size_t bracesCount = 1;
 		while (bracesCount > 0 && closeBrace < lines.length())
 		{
 			if (lines[closeBrace] == '{')

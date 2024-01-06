@@ -1,7 +1,7 @@
 #include "ParseConfig.hpp"
 
 bool isDigitStr(std::string &value){
-	for (int i = 0; i < value.length() ; i++)
+	for (size_t i = 0; i < value.length() ; i++)
 	{
 		if (!std::isdigit(value[i]))
 			return 0;
@@ -10,7 +10,7 @@ bool isDigitStr(std::string &value){
 }
 
 int linesLength(std::string& Block){
-    int len = 0;
+    size_t len = 0;
     for (size_t i = 0 ; Block[i]; i++)
     {
         if (Block[i] == '\n')  
@@ -20,16 +20,19 @@ int linesLength(std::string& Block){
 }
 
 bool isDigit(std::string &value){
-    for (int i = 0; i < value.length() -2  ; i++)
+	std::stringstream errorMessage;
+    for (size_t i = 0; i < value.length() -2  ; i++)
     {
-        if (!std::isdigit(value[i]))
-            throw std::runtime_error("key is not integer : " + value);
+        if (!std::isdigit(value[i])){
+			errorMessage << "\033[1;31m key is not integer : " + value  << "\033[0m" << std::endl;
+			throw std::runtime_error(errorMessage.str());
+		}
     }
     return true;
 }
 
 bool lineSpace(std::string &line) {
-    for (int i =0; line[i]; i++){
+    for (size_t i =0; line[i]; i++){
         if (line[i] != ' ' && line[i] != '\t')
             return 0;
     }
@@ -37,7 +40,7 @@ bool lineSpace(std::string &line) {
 }
 
 std::string &skepComment(std::string &line) {
-    for (int i =0; line[i]; i++){
+    for (size_t i =0; line[i]; i++){
         if (line[i] == '#')
             return line = line.substr(0, i);
     }
@@ -48,7 +51,7 @@ std::string locationSyntax(std::string word){
     std::string locWord = "";
 	std::stringstream errorMessage;
 
-    int i;
+    size_t i;
     for(i = 0; word[i] &&( word[i] == ' ' || word[i] == '\t'); i++);
     for(; word[i] && word[i] != ' '; i++)
         locWord += word[i];
@@ -58,8 +61,9 @@ std::string locationSyntax(std::string word){
         errorMessage << "\033[1;31mError: Syntax error in : " << word << "\033[0m" << std::endl;
 		throw std::runtime_error(errorMessage.str());
 	}
-    if (locWord == "location")
+    if (locWord == "location"){
         return locWord;
+	}
 	errorMessage << "\033[1;31mError: Syntax error in : " << word << "\033[0m" << std::endl;
 	throw std::runtime_error(errorMessage.str());
     return NULL;

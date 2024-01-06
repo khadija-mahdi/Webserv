@@ -31,20 +31,14 @@ void urlDecoding(std::string &Path)
 						i += 2;
 					}
 					else
-					{
 						decoded_ss << currentCh;
-					}
 				}
 			}
 			else if (Flag > 0)
-			{
 				decoded_ss << currentCh; // Append '%' as is
-			}
 		}
 		else
-		{
 			decoded_ss << currentCh;
-		}
 	}
 	Path = decoded_ss.str();
 }
@@ -61,7 +55,7 @@ void RequestParser::printHeaderdata(DataPool &headerData)
 
 void RequestParser::getContentType(DataPool &headerData)
 {
-	int pos = headerData.Path.find(".");
+	size_t pos = headerData.Path.find(".");
 	if (pos != std::string::npos)
 	{
 		std::string extention = headerData.Path.substr(pos + 1, headerData.Path.length());
@@ -143,7 +137,7 @@ bool RequestParser::redirectionType(std::vector<Location> &confLocation, DataPoo
 void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation, DataPool &headerData)
 {
 	size_t i = 0;
-	int start = 0, end = 0;
+	size_t start = 0, end = 0;
 	if ((headerData.Path) == "/")
 	{
 		headerData.url = headerData.url + "/";
@@ -156,7 +150,6 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation,
 		for (; i < confLocation.size(); i++)
 		{
 			std::string locPath = confLocation[i].getPath();
-			size_t lastCharPos = locPath[locPath.length() + 1];
 			start = headerData.Path.find(confLocation[i].getPath());
 			if (start != std::string::npos)
 			{
@@ -168,28 +161,21 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation,
 	if (headerData.locationIndex != -1)
 	{
 		headerData.currentLocation = confLocation[headerData.locationIndex];
-		if (!headerData.currentLocation.getRedirection().ReturnLocation.empty() && headerData.Method == "GET")
+		if (headerData.Method == "GET")
 		{
-			headerData.Path = headerData.currentLocation.getRedirection().ReturnLocation;
-			if (!redirectionType(confLocation, headerData))
-			{
-				headerData.url = headerData.currentLocation.getRedirection().ReturnLocation;
-				getCurrentLocationIndex(confLocation, headerData);
-			}
-			else
+			if (!headerData.currentLocation.getRedirection().ReturnLocation.empty()){
 				headerData.REDIRECTION_STAGE = true;
+				headerData.Path = headerData.currentLocation.getRedirection().ReturnLocation;
+				headerData.response.StatusCode = headerData.currentLocation.getRedirection().statusCode;
+			}
 		}
-		if (!headerData.REDIRECTION_STAGE)
-		{
-			end = confLocation[headerData.locationIndex].getPath().length();
-			headerData.newRoot = headerData.Path.substr(start + end);
-		}
+		end = confLocation[headerData.locationIndex].getPath().length();
+		headerData.newRoot = headerData.Path.substr(start + end);
 	}
 }
 
 int RequestParser::ParseUrl(DataPool &headerData)
 {
-	int pos1 = 0;
 
 	if (headerData.locationIndex == -1)
 	{
@@ -231,6 +217,12 @@ void RequestParser::ParseRequest(DataPool &headerData)
 	std::vector<Location> confLocation = headerData.currentServer.getLocations();
 	if (confLocation.size() > 0)
 		getCurrentLocationIndex(confLocation, headerData);
+	if (!headerData.REDIRECTION_STAGE && !headerData.currentServer.getRedirection().ReturnLocation.empty()){
+		headerData.REDIRECTION_STAGE = true;
+		headerData.Path = headerData.currentServer.getRedirection().ReturnLocation;
+		headerData.response.StatusCode = headerData.currentServer.getRedirection().statusCode;
+
+	}
 	if (!headerData.REDIRECTION_STAGE)
 		ParseUrl(headerData);
 	if (directoryStatus(headerData.Path.substr(1)) >= 1 && headerData.Path[0] == '/')

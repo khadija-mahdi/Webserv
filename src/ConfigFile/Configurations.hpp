@@ -19,6 +19,7 @@ private:
 	std::map<int, std::string> error_pages;
 	std::string max_body_size;
 	std::string default_type;
+	
 
 public:
 	void setMax_body_size(std::string &);

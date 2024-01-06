@@ -15,26 +15,19 @@
 #include "Request.hpp"
 
 class Request;
-enum
-{
-	DIRE = 1,
-	VALID_PATH = 2,
-	NOT_DIR = 0,
-	NOT_VALID_PATH = -1,
-	FORBIDDEN_READ = 4,
-};
 
 class MethodGet : public Request
 {
 public:
 	MethodGet(DataPool &headerData);
-	MethodGet();
 	~MethodGet();
+
+	bool processRedirection();
 	bool handleDirectoryPath();
-	bool GetMethodHandler();
 	bool GetDirectoryHandler();
 	bool GetFileHandler();
-	virtual bool HandleRequest(std::string &data);
+	virtual bool HandleRequest(std::string &);
+
 };
 
 int directoryStatus(const std::string &);

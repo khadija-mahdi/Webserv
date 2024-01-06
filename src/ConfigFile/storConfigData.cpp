@@ -25,6 +25,14 @@ void processErrorPage(const std::string &line, std::string &value, int &errorCod
 		throw std::runtime_error(errorMessage.str());
 	}
 	value = secondWord;
+	int fd = open(value.c_str(), O_RDONLY, 0664);
+	if (fd == -1){
+		errorMessage << "\033[1;" << Red << "mError: "
+				<< "Wrong Path " << value  << ", please use a valid path! : "
+				<< "\033[0m" << std::endl;
+		throw std::runtime_error(errorMessage.str());
+	}
+	close(fd); 
 }
 
 std::map<std::string, std::string> extractKeyValuesIN(const std::string &Block)
@@ -32,7 +40,6 @@ std::map<std::string, std::string> extractKeyValuesIN(const std::string &Block)
 	std::map<std::string, std::string> keyValues;
 	std::istringstream BlockStream(Block);
 	std::string line;
-	int i = 0;
 
 	while (std::getline(BlockStream, line))
 	{
@@ -74,7 +81,7 @@ bool processRedirection(std::string &path, int &status, std::string &key)
 	std::istringstream iss(key);
 
 	std::string word;
-	int i = 0;
+	size_t i = 0;
 
 	while (iss >> word)
 	{
@@ -96,11 +103,7 @@ bool processRedirection(std::string &path, int &status, std::string &key)
 					 << "\033[0m" << std::endl;
 		throw std::runtime_error(errorMessage.str());
 	}
-	if (i == 1)
-	{
-		status = 301;
-	}
-	if (i == 1 || (i == 2) && status >= 100 && status <= 599)
+	if ((i == 1 || (i == 2)) && status >= 100 && status <= 599)
 		return true;
 	else
 	{
@@ -189,12 +192,14 @@ std::map<std::string, std::string> extractKeyValues(const std::string &Block, st
 				std::istringstream iss(value);
 				std::string accept, cgi_path;
 				iss >> accept >> cgi_path;
-				if (accept == "" || cgi_path == "")
+				int fd = open(cgi_path.c_str(), O_RDONLY, 0664);
+				if (accept == "" || cgi_path == "" || fd == -1)
 				{
 					errorMessage << "\033[1;" << Red << "mError: "
-								 << "Location Block Wrong Key Found :" << key + "\t" + value << "\033[0m" << std::endl;
+								 << "cgi Error , please correct the path or extention:" << key + "\t" + value << "\033[0m" << std::endl;
 					throw std::runtime_error(errorMessage.str());
 				}
+				close(fd);
 				cgi[accept] = cgi_path;
 			}
 			keyValues[key] = value;
@@ -220,9 +225,7 @@ void splitKeyValue(std::string &block, std::string &key, std::string &value, std
 		throw std::runtime_error(errorMessage.str());
 	}
 	size_t end = block.find("}");
-	// if(pos = std::string::npos)
-	//     return;
-	for (int i = pos; i < end; i++)
+	for (size_t i = pos; i < end; i++)
 		keyValue += block[i];
 	int vstart = 0;
 	int vend = keyValue.find("\t");
@@ -235,30 +238,26 @@ void splitKeyValue(std::string &block, std::string &key, std::string &value, std
 
 std::string Blocks(const std::string &lines, const std::string &blockName)
 {
-	int pos = 0;
+	size_t pos = 0;
 	std::string extractedBlock = "";
 
 	while (pos < lines.length())
 	{
-		int start = lines.find(blockName, pos);
+		size_t start = lines.find(blockName, pos);
 		if (start == std::string::npos)
 			break;
-		int openBrace = lines.find('{', start);
+		size_t openBrace = lines.find('{', start);
 		if (openBrace == std::string::npos)
 			break;
-		int closeBrace = openBrace + 1;
-		int bracesCount = 1;
+		size_t closeBrace = openBrace + 1;
+		size_t bracesCount = 1;
 
 		while (bracesCount > 0 && closeBrace < lines.length())
 		{
 			if (lines[closeBrace] == '{')
-			{
 				bracesCount++;
-			}
 			else if (lines[closeBrace] == '}')
-			{
 				bracesCount--;
-			}
 			closeBrace++;
 		}
 		if (bracesCount == 0)
@@ -276,19 +275,19 @@ std::string Blocks(const std::string &lines, const std::string &blockName)
 
 std::vector<std::string> BlocksExtra(const std::string &lines, const std::string &blockName)
 {
-	int pos = 0;
+	size_t pos = 0;
 	std::vector<std::string> extractedBlocks;
 
 	while (pos < lines.length())
 	{
-		int start = lines.find(blockName, pos);
+		size_t start = lines.find(blockName, pos);
 		if (start == std::string::npos)
 			break;
-		int openBrace = lines.find('{', start);
+		size_t openBrace = lines.find('{', start);
 		if (openBrace == std::string::npos)
 			break;
-		int closeBrace = openBrace + 1;
-		int bracesCount = 1;
+		size_t closeBrace = openBrace + 1;
+		size_t bracesCount = 1;
 
 		while (bracesCount > 0 && closeBrace < lines.length())
 		{
@@ -333,7 +332,6 @@ void singleData(ConfServer &ConfServer, std::string &ConfServerBlock)
 		if (it->first == "listen")
 		{
 			flag++;
-			int value;
 			if (isDigitStr(it->second))
 			{
 				int value = atoi(it->second.c_str());
@@ -463,8 +461,16 @@ void locationValues(Location &location, std::string &locationBlock)
 				throw std::runtime_error(errorMessage.str());
 			}
 		}
-		else if (it->first == "upload_stor")
+		else if (it->first == "upload_stor"){
+			int fd = open(it->second.c_str(), O_RDONLY, 0664);
+			if (fd == -1){
+				errorMessage << "\033[1;" << Red << "mError: "
+				<< "upload stor  Wrong Path:" << it->second << "\033[0m" << std::endl;
+				throw std::runtime_error(errorMessage.str());
+			}
+			close(fd);
 			location.setUpload_stor(it->second.c_str());
+		}
 		else if (it->first == "return" && processRedirection(path, st, it->second))
 			location.setRedirection(path, st);
 		else if (it->first == "cgi")

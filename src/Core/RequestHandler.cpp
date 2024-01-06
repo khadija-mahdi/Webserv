@@ -6,19 +6,10 @@ RequestHandler::RequestHandler(/* args */)
 	this->dataPool.locationIndex = -1;
 	this->dataPool.REDIRECTION_STAGE = false;
 	this->dataPool.response.StatusCode = 200;
+	this->dataPool.response.fileFd = -1;
 }
 
-// RequestHandler::RequestHandler(DataPool &data) : dataPool(dataPool) , requestParser(dataPool)
-// {
-// 	REQUEST_STATE = HEADERS_STAGE;
-// 	dataPool.locationIndex = -1;
-// 	dataPool.REDIRECTION_STAGE = false;
-// 	dataPool.response.StatusCode = 200;
-// }
-
-RequestHandler::~RequestHandler()
-{
-}
+RequestHandler::~RequestHandler(){}
 
 bool IsValidSetOfCharacter(std::string str)
 {
@@ -37,6 +28,13 @@ std::string GetHeadersValue(std::map<std::string, std::string> &headers, std::st
 
 bool RequestHandler::parseHeaderErrors()
 {
+	if (dataPool.locationIndex != -1)
+	{
+		std::vector<std::string> allowMethod = dataPool.currentLocation.getAllow();
+		int allow = std::find(allowMethod.begin(), allowMethod.end(), dataPool.Method) != allowMethod.end();
+		if (!allow)
+			throw HTTPError(405);
+	}
 	if (!GetHeadersValue(dataPool.Headers, "Transfer-Encoding").empty() && GetHeadersValue(dataPool.Headers, "Transfer-Encoding") != "chunked")
 		throw HTTPError(501);
 	if (dataPool.Method == "POST" && GetHeadersValue(dataPool.Headers, "Transfer-Encoding").empty() && GetHeadersValue(dataPool.Headers, "Content-Length").empty())
@@ -49,34 +47,15 @@ bool RequestHandler::parseHeaderErrors()
 	// 	throw HTTPError(414);
 	if (directoryStatus(dataPool.Path) < 1 && !dataPool.REDIRECTION_STAGE)
 		throw HTTPError(404);
-	if (GetHeadersValue(dataPool.Headers, "Transfer-Encoding") == "chunked")
+	if (GetHeadersValue(dataPool.Headers, "Transfer-Encoding") == "chunked"){
         this->request->SetBodyController(Chunked, 0);
-    else if (!GetHeadersValue(dataPool.Headers, "Content-Length").empty())
+	}
+    else if (!GetHeadersValue(dataPool.Headers, "Content-Length").empty()){
         this->request->SetBodyController(Lenght, atoll(GetHeadersValue(dataPool.Headers, "Content-Length").c_str()));
-	return false;
-}
-
-bool RequestHandler::processRedirectionAndAllowance()
-{
-
-	int pos1 = 0;
-	std::string newPath;
-
-	if (dataPool.locationIndex != -1)
-	{
-		std::vector<std::string> allowMethod = dataPool.currentLocation.getAllow();
-		int allow = std::find(allowMethod.begin(), allowMethod.end(), dataPool.Method) != allowMethod.end();
-		if (!allow)
-			throw HTTPError(405);
-		if (dataPool.REDIRECTION_STAGE)
-		{
-			dataPool.response.Location = dataPool.Path;
-			dataPool.response.StatusCode = dataPool.currentLocation.getRedirection().statusCode;
-			return true;
-		}
 	}
 	return false;
 }
+
 
 Request *RequestHandler::handlerRequestMethods()
 {
@@ -102,20 +81,14 @@ bool RequestHandler::HandlerRequest1(std::string Data)
 			handlerRequestMethods();
 			if (parseHeaderErrors())
 				return true;
-			if (processRedirectionAndAllowance())
-				return true;
-
 			DEBUGMSGT(1, COLORED("\n the current Server is  : " << dataPool.currentServer.getListen() << "\n", Cyan));
 			DEBUGMSGT(1, COLORED("\n the current Location is  : " << dataPool.currentLocation.getPath() << "\n", Cyan));
 			DEBUGMSGT(1, COLORED("\n the Path : " << dataPool.Path << ", dir status : " << directoryStatus(dataPool.Path) << "\n", Green));
 			DEBUGMSGT(1, COLORED("\n REDIRECTION_STAGE " << dataPool.REDIRECTION_STAGE << "\n", Green));
 			REQUEST_STATE = REQUEST_HANDLER_STAGE;
-			// intentionally fall through
-			// std::cout << REQUEST_STATE << std::endl;	
-			// break;
 		}
+		// intentionally fall through
 	case REQUEST_HANDLER_STAGE:
-	std::cout << "hi";
 		if (request != NULL)
 			return request->HandleRequest(Data);
 		break;

@@ -38,7 +38,7 @@ void ParseConfig::includeMimeTypes(std::string &_file)
 	else
 	{
 		errorMessage << "\033[1;" << Red << "mError: "
-					 << "m\ncould not open file."
+					 << "\ncould not open file." << _file
 					 << "\033[0m" << std::endl;
 		throw std::runtime_error(errorMessage.str());
 	}
@@ -157,7 +157,6 @@ Location ParseConfig::parseLocationBlock(std::string &locationBlock)
 {
 	Location location;
 	locationValues(location, locationBlock);
-	// location.printErrorPages();
 	return location;
 }
 
@@ -229,8 +228,6 @@ void ParseConfig::ServerInHttp(std::string &httpBlock, Http &httpConfig)
 void ParseConfig::parseHttpBlock(std::string &httpBlock)
 {
 	std::string line = "";
-	int st;
-	int status = 0;
 	std::string path = "";
 	std::map<int, std::string> errs;
 	std::map<std::string, std::string> cgi;
@@ -265,8 +262,6 @@ void ParseConfig::parseHttpBlock(std::string &httpBlock)
 void ParseConfig::parsingValues()
 {
 	std::istringstream BlockStream(lines);
-	std::string line;
-	Values val;
 	size_t pos = lines.find("events");
 	if (pos != std::string::npos)
 	{

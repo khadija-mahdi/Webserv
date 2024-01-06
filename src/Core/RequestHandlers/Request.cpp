@@ -96,7 +96,6 @@ void Request::Execute(std::string ResourceFilePath, std::string Method)
 {
 	std::string BodyFile = this->BodyReceiver ? this->BodyReceiver->GetFileName() : "";
 	cgiController = new CGIController(dataPool, ResourceFilePath, BodyFile, Method);
-	std::cout << dataPool.locationIndex << std::endl;
 }
 
 CGIController *Request::GetCGIController()

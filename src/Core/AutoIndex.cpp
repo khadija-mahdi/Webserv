@@ -97,42 +97,4 @@ std::string GetPermission(struct stat fileInfo)
 	return (ss.str());
 }
 
-void AutoIndex(DataPool &dataPool, std::string &dirPath)
-{
-	dirent *entry;
-	std::string buffer;
-	std::string cur_path;
-	DIR *dir;
-	struct stat fileInfo;
 
-	std::string FileName = "/tmp/" + Lstring::RandomStr(16);
-
-	dir = opendir(dirPath.c_str());
-	if (dir == NULL)
-		return;
-	buffer = TemplateStart(dirPath);
-	while ((entry = readdir(dir)) != NULL)
-	{
-		if (std::string(entry->d_name) == "." || std::string(entry->d_name) == "..")
-			buffer.append(CreateRow(1, entry->d_name, 0, ""));
-		else
-		{
-			cur_path = dirPath + entry->d_name;
-			stat(cur_path.c_str(), &fileInfo);
-			buffer.append(CreateRow(entry->d_type == DT_DIR ? 1 : 2,
-									entry->d_name, (long long)fileInfo.st_size / (1024 * 1024),
-									GetPermission(fileInfo)));
-		}
-	}
-	buffer.append("</tbody></table></body></html>");
-
-	dataPool.response.fileFd = IO::OpenFile(FileName.c_str(), "w+");
-	write(dataPool.response.fileFd, buffer.c_str(), buffer.size());
-	close(dataPool.response.fileFd);
-
-	dataPool.response.fileFd = IO::OpenFile(FileName.c_str(), "r+");
-	dataPool.response.contentType = "text/html";
-	dataPool.response.StatusCode = OK;
-
-	closedir(dir);
-}

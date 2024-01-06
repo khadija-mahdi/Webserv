@@ -8,6 +8,15 @@
 #include "../../../Lib/Lstring.hpp"
 #include <sys/wait.h>
 #include "../../Include/CGIController.hpp"
+
+enum
+{
+	DIRE = 1,
+	VALID_PATH = 2,
+	NOT_DIR = 0,
+	NOT_VALID_PATH = -1,
+	FORBIDDEN_READ = 4,
+};
 class Request
 {
 public:

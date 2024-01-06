@@ -65,6 +65,4 @@ int PostRequest::GetRequestedResource()
 	throw HTTPError(403);
 }
 
-PostRequest::~PostRequest()
-{
-}
+PostRequest::~PostRequest(){}
