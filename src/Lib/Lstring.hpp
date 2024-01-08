@@ -32,7 +32,7 @@ typedef enum Colors
  * <any other number>-  deactivated
  */
 #ifndef DEBUGE
-#define DEBUGE 2
+#define DEBUGE 20
 #endif
 
 #if DEBUGE == 1
@@ -43,8 +43,11 @@ typedef enum Colors
 	if (active)              \
 	std::cout << x << std::endl
 #else
-#define DEBUGMSGT(active, x) \
-	std::ostringstream() << x << active;
+#define DEBUGMSGT(active, x)                 \
+	do                                       \
+	{                                        \
+		std::ostringstream() << active << x; \
+	} while (0)
 #endif
 
 class Lstring

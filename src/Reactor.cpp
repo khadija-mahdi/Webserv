@@ -1,5 +1,5 @@
 #include "Reactor.hpp"
-#define verbose 0
+#define verbose 1
 
 Reactor::Reactor()
 {
@@ -15,9 +15,9 @@ void Reactor::RegisterSocket(int socketFd, EventHandler *eventHandler)
 	if (eventHandler == NULL)
 		return;
 	DEBUGMSGT(verbose, COLORED("Regester New "
-								  << (dynamic_cast<AcceptEventHandler *>(eventHandler) != NULL ? "Server " : "Client ")
-								  << "Socket " << SSTR(socketFd) << "\n",
-							  Blue));
+								   << (dynamic_cast<AcceptEventHandler *>(eventHandler) != NULL ? "Server " : "Client ")
+								   << "Socket " << SSTR(socketFd) << "\n",
+							   Blue));
 	event.events = EPOLLRDNORM | EPOLLWRNORM;
 	event.data.fd = eventHandler->GetSocketFd();
 	if (epoll_ctl(this->epoll_fd, EPOLL_CTL_ADD, eventHandler->GetSocketFd(), &event) < 0)
@@ -30,10 +30,13 @@ void Reactor::UnRegisterSocket(int SocketFd)
 {
 	std::string Type = dynamic_cast<AcceptEventHandler *>(this->clients[SocketFd]) != NULL ? "Server " : "Client ";
 	DEBUGMSGT(verbose, COLORED("UnRegister " << Type << "Socket "
-											<< SSTR(SocketFd) << "\n",
-							  Red));
+											 << SSTR(SocketFd) << "\n",
+							   Red));
 	if (epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, SocketFd, NULL) < 0)
-		throw std::runtime_error("epoll_ctl() `EPOLL_CTL_DEL` failed");
+	{
+		perror("epoll failed");
+		throw std::runtime_error("epoll_ctl() `EPOLL_CTL_DEL` failed fd : " + SSTR(SocketFd));
+	}
 
 	if (this->clients[SocketFd] != NULL)
 	{
@@ -74,7 +77,7 @@ void Reactor::Dispatch()
 
 				client->start = clock();
 				if (client->Read() == 0)
-					return UnRegisterSocket(i);
+					return UnRegisterSocket(current_fd);
 			}
 		}
 		else if (this->events[i].events & EPOLLWRNORM)
@@ -100,7 +103,6 @@ void CheckCGIOutput(HttpEventHandler *client)
 
 	if ((RequestHandler = client->GetRequestHandler()))
 	{
-		printf("%p \n" , RequestHandler);
 		if (client->GetResponse() != NULL ||
 			!RequestHandler->GetRunningProcessId())
 			return;

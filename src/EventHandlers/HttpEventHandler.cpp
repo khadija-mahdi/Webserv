@@ -93,9 +93,7 @@ const int &HttpEventHandler::GetSocketFd() const
 
 Request *HttpEventHandler::GetRequestHandler()
 {
-		// printf("%p \n" , this->request.GetDataPool());
-	printf("%p \n" , this->request.request);
-	return this->request.request;
+	return this->request.GetRequestHandler();
 }
 
 HttpEventHandler::~HttpEventHandler()

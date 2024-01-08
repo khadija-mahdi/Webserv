@@ -28,13 +28,6 @@ std::string GetHeadersValue(std::map<std::string, std::string> &headers, std::st
 
 bool RequestHandler::parseHeaderErrors()
 {
-	if (dataPool.locationIndex != -1)
-	{
-		std::vector<std::string> allowMethod = dataPool.currentLocation.getAllow();
-		int allow = std::find(allowMethod.begin(), allowMethod.end(), dataPool.Method) != allowMethod.end();
-		if (!allow)
-			throw HTTPError(405);
-	}
 	if (!GetHeadersValue(dataPool.Headers, "Transfer-Encoding").empty() && GetHeadersValue(dataPool.Headers, "Transfer-Encoding") != "chunked")
 		throw HTTPError(501);
 	if (dataPool.Method == "POST" && GetHeadersValue(dataPool.Headers, "Transfer-Encoding").empty() && GetHeadersValue(dataPool.Headers, "Content-Length").empty())
@@ -47,6 +40,18 @@ bool RequestHandler::parseHeaderErrors()
 	// 	throw HTTPError(414);
 	if (directoryStatus(dataPool.Path) < 1 && !dataPool.REDIRECTION_STAGE)
 		throw HTTPError(404);
+	if (dataPool.locationIndex != -1)
+	{
+		std::vector<std::string> allowMethod = dataPool.currentLocation.getAllow();
+		int allow = std::find(allowMethod.begin(), allowMethod.end(), dataPool.Method) != allowMethod.end();
+		if (!allow)
+			throw HTTPError(405);
+	}
+	if (dataPool.REDIRECTION_STAGE)
+	{
+		dataPool.response.Location = dataPool.Path;
+		return true;
+	}
 	if (GetHeadersValue(dataPool.Headers, "Transfer-Encoding") == "chunked"){
         this->request->SetBodyController(Chunked, 0);
 	}
@@ -68,6 +73,17 @@ Request *RequestHandler::handlerRequestMethods()
 	return request;
 }
 
+bool RequestHandler::processRedirection()
+{
+	if (dataPool.REDIRECTION_STAGE)
+	{
+		dataPool.response.Location = dataPool.Path;
+		std::cout << " data path : " << dataPool.Path << std::endl;
+		return true;
+	}
+	return false;
+}
+
 bool RequestHandler::HandlerRequest1(std::string Data)
 {
 	dataPool.Buffer += Data;
@@ -76,7 +92,7 @@ bool RequestHandler::HandlerRequest1(std::string Data)
 	case HEADERS_STAGE:
 		if (dataPool.Buffer.find("\r\n\r\n") != std::string::npos)
 		{
-			DEBUGMSGT(1, dataPool.Buffer);
+			DEBUGMSGT(0, dataPool.Buffer);
 			requestParser.ParseRequest(dataPool);
 			handlerRequestMethods();
 			if (parseHeaderErrors())

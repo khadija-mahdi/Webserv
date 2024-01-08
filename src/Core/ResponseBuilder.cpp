@@ -86,7 +86,6 @@ std::string ResponseBuilder::GetDefaultErrorPagePath()
 	return (FileName);
 }
 
-
 void ResponseBuilder::CreateStatusFile()
 {
 	std::string FileName;
@@ -106,7 +105,6 @@ void ResponseBuilder::FillHeaders(int StatusCode)
 				 ? (SSTR(StatusCode) + " " + StatusCodes[StatusCode])
 				 : ResponseHeaders["Status"];
 	Buffer += ("HTTP/1.1 " + Status + "\r\n");
-;
 	if (dataPool.response.fileFd == NOBODY && dataPool.response.Location.empty())
 		CreateStatusFile();
 	for (HeadersIterator it = ResponseHeaders.begin(); it != ResponseHeaders.end(); it++)
@@ -167,13 +165,19 @@ int ResponseBuilder::FlushBuffer(int SocketFd)
 
 void ResponseBuilder::FillBuffer()
 {
+	if (this->dataPool.response.fileFd < 0)
+	{
+		// this->Buffer.append(SSTR(0) + "\r\n\r\n");
+		this->Buffer.clear();
+		return;
+	}
 	char buffer[1025];
 	memset(buffer, 0, sizeof(buffer));
 	std::stringstream ss;
 	int BytesCount;
 	BytesCount = read(dataPool.response.fileFd, buffer, KB);
 	if (BytesCount < 0)
-		throw std::runtime_error("Error Reading ResourceFile");
+		throw std::runtime_error("Error Reading ResourceFile ");
 	else if (BytesCount == 0)
 		this->Buffer.append(SSTR(0) + "\r\n\r\n");
 	else

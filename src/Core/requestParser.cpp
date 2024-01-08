@@ -1,6 +1,5 @@
 #include "Include/RequestParser.hpp"
 
-// RequestParser::RequestParser(DataPool &Data):headerData(Data){}
 
 RequestParser::RequestParser() {} 
 
@@ -35,7 +34,7 @@ void urlDecoding(std::string &Path)
 				}
 			}
 			else if (Flag > 0)
-				decoded_ss << currentCh; // Append '%' as is
+				decoded_ss << currentCh;
 		}
 		else
 			decoded_ss << currentCh;
@@ -63,6 +62,8 @@ void RequestParser::getContentType(DataPool &headerData)
 
 		if (Types.find(extention) != Types.end())
 			headerData.response.contentType = Types[extention];
+		if (Configurations::http.getDefault_type().empty())
+			headerData.response.contentType = "application/octet-stream";
 		else
 			headerData.response.contentType = Configurations::http.getDefault_type();
 	}
@@ -161,13 +162,10 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation,
 	if (headerData.locationIndex != -1)
 	{
 		headerData.currentLocation = confLocation[headerData.locationIndex];
-		if (headerData.Method == "GET")
-		{
-			if (!headerData.currentLocation.getRedirection().ReturnLocation.empty()){
-				headerData.REDIRECTION_STAGE = true;
-				headerData.Path = headerData.currentLocation.getRedirection().ReturnLocation;
-				headerData.response.StatusCode = headerData.currentLocation.getRedirection().statusCode;
-			}
+		if (!headerData.currentLocation.getRedirection().ReturnLocation.empty()){
+			headerData.REDIRECTION_STAGE = true;
+			headerData.Path = headerData.currentLocation.getRedirection().ReturnLocation;
+			headerData.response.StatusCode = headerData.currentLocation.getRedirection().statusCode;
 		}
 		end = confLocation[headerData.locationIndex].getPath().length();
 		headerData.newRoot = headerData.Path.substr(start + end);
@@ -211,7 +209,7 @@ std::string GetHeaderAttr(HeadersType &Headers, std::string name)
 void RequestParser::ParseRequest(DataPool &headerData)
 {
 	fillHeaderData(headerData);
-	printHeaderdata(headerData);
+	// printHeaderdata(headerData);
 	std::vector<ConfServer> confServers = Configurations::http.getConfServes();
 	getCurrentServer(confServers, headerData);
 	std::vector<Location> confLocation = headerData.currentServer.getLocations();

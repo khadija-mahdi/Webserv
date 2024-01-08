@@ -24,16 +24,15 @@ private:
 	int serverIndex;
 	int REQUEST_STATE;
 	RequestParser requestParser;
-
-public:
 	Request *request;
 	DataPool dataPool;
-	// DataPool dataPool;
-	RequestHandler(/* args */);
-	// RequestHandler(DataPool &);
 
+public:
+
+	RequestHandler(/* args */);
 	~RequestHandler();
 
+	bool processRedirection();
 	bool parseHeaderErrors();
 	bool HandlerRequest1(std::string);
 	Request *handlerRequestMethods();

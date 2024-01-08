@@ -83,35 +83,19 @@ bool processRedirection(std::string &path, int &status, std::string &key)
 	std::string word;
 	size_t i = 0;
 
+	status = 301;
 	while (iss >> word)
 	{
-		if (isDigitStr(word) && i == 0)
-		{
-			status = atoi(word.c_str());
-			i++;
-		}
-		else if (!isDigitStr(word))
-		{
-			i++;
+		if (!isDigitStr(word))
 			path = word;
-		}
+		i++;
 	}
-	if (status != 301 && status != 302)
-	{
-		errorMessage << "\033[1;" << Red << "mError: "
-					 << "Please Correct The Redirection Syntax ! entree 301 or 302 in " << status << " " << path
-					 << "\033[0m" << std::endl;
-		throw std::runtime_error(errorMessage.str());
-	}
-	if ((i == 1 || (i == 2)) && status >= 100 && status <= 599)
-		return true;
-	else
-	{
+	if (i != 1 || path.empty()){
 		errorMessage << "\033[1;" << Red << "mError: "
 					 << "Please Correct The Redirection Syntax !" << key << "\033[0m" << std::endl;
 		throw std::runtime_error(errorMessage.str());
 	}
-	return 0;
+	return 1;
 }
 
 bool processErrors(std::string &path, int &status, std::string &key)

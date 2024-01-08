@@ -2,7 +2,6 @@
 
 Request::Request(DataPool &dataPool) : dataPool(dataPool)
 {
-	printf("%p \n" , this->cgiController);
 	this->BodyReady = false;
 	this->BodyReceiver = NULL;
 	this->CGIProcessId = 0;
@@ -32,7 +31,7 @@ int Request::GetRequestedResource()
 
 	Redirection redirection = this->dataPool.currentServer.getRedirection();
 
-	if (redirection.statusCode != 0)
+	if (dataPool.REDIRECTION_STAGE)
 	{
 		DEBUGMSGT(1, "statusCode :" << redirection.statusCode << " ReturnLocation : " << redirection.ReturnLocation);
 		this->dataPool.response.Location = redirection.ReturnLocation;
