@@ -8,7 +8,7 @@ OBJ = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
 CPP = g++-11
 CPPFLAGS = -Wall -Wextra -Werror -std=c++98
-# CPPFLAGS = -std=c++98 -fsanitize=address -g
+CPPFLAGS = -std=c++98 -fsanitize=address -g
 
 GREEN = \033[0;32m
 RED = \033[0;31m

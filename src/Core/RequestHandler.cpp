@@ -7,6 +7,7 @@ RequestHandler::RequestHandler(/* args */)
 	this->dataPool.REDIRECTION_STAGE = false;
 	this->dataPool.response.StatusCode = 200;
 	this->dataPool.response.fileFd = -1;
+	this->request = NULL;
 }
 
 RequestHandler::~RequestHandler(){}

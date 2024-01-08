@@ -88,7 +88,7 @@ void Reactor::Dispatch()
 				if ((clock() - client->start) > 30 * CLOCKS_PER_SEC)
 					return UnRegisterSocket(current_fd);
 				/* ********************* */
-				// CheckCGIOutput(client);
+				CheckCGIOutput(client);
 				if (client->Write() == 0)
 					return UnRegisterSocket(current_fd);
 			}
@@ -101,8 +101,11 @@ void CheckCGIOutput(HttpEventHandler *client)
 	Request *RequestHandler;
 	HeadersType ResponseHeaders;
 
+	
 	if ((RequestHandler = client->GetRequestHandler()))
 	{
+		printf("RequestHandler : %p, client : %p", RequestHandler, client);
+		// exit(0);
 		if (client->GetResponse() != NULL ||
 			!RequestHandler->GetRunningProcessId())
 			return;
