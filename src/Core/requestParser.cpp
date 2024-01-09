@@ -225,4 +225,9 @@ void RequestParser::ParseRequest(DataPool &headerData)
 		ParseUrl(headerData);
 	if (directoryStatus(headerData.Path.substr(1)) >= 1 && headerData.Path[0] == '/')
 		headerData.Path = headerData.Path.substr(1);
+	// std::string newp = headerData.Path.substr(0, headerData.Path.length() - 1);
+	// std::cout << "newp : " << newp << std::endl;
+	// if (directoryStatus(newp) == 2){
+	// 	headerData.Path = newp;
+	// }
 }

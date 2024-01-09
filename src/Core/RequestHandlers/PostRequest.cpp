@@ -9,6 +9,7 @@ PostRequest::PostRequest(DataPool &dataPool) : Request(dataPool)
 
 bool PostRequest::HandleRequest(std::string &data)
 {
+		DEBUGMSGT(1, COLORED("\n 		POST Method Handler : \n ", Yellow));
 	if (this->UploadBodyState == ZERO && GetRequestedResource())
 		return (PrintfFullRequest(), dataPool.response.StatusCode = OK, true);
 	if (this->UploadBodyState == UP_INPROGRESS || this->UploadBodyState == CGI_INPROGRESS)
@@ -30,6 +31,7 @@ bool PostRequest::HandleRequest(std::string &data)
 
 int PostRequest::GetRequestedResource()
 {
+
 	Request::GetRequestedResource();
 	std::string IndexFileName;
 
