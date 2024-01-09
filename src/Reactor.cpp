@@ -104,8 +104,6 @@ void CheckCGIOutput(HttpEventHandler *client)
 	
 	if ((RequestHandler = client->GetRequestHandler()))
 	{
-		printf("RequestHandler : %p, client : %p", RequestHandler, client);
-		// exit(0);
 		if (client->GetResponse() != NULL ||
 			!RequestHandler->GetRunningProcessId())
 			return;

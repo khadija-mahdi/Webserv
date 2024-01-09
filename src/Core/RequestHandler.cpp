@@ -39,8 +39,10 @@ bool RequestHandler::parseHeaderErrors()
 		throw HTTPError(414);
 	// if (max body size with body length from post method) //-> add 4014 max body size
 	// 	throw HTTPError(414);
-	if (directoryStatus(dataPool.Path) < 1 && !dataPool.REDIRECTION_STAGE)
+	if (directoryStatus(dataPool.Path) < 1 && !dataPool.REDIRECTION_STAGE){
+		std::cout << "out here ";
 		throw HTTPError(404);
+	}
 	if (dataPool.locationIndex != -1)
 	{
 		std::vector<std::string> allowMethod = dataPool.currentLocation.getAllow();
@@ -88,6 +90,7 @@ bool RequestHandler::processRedirection()
 bool RequestHandler::HandlerRequest1(std::string Data)
 {
 	dataPool.Buffer += Data;
+	DEBUGMSGT(1, COLORED( dataPool.Buffer << "\n", Yellow));
 	switch (REQUEST_STATE)
 	{
 	case HEADERS_STAGE:

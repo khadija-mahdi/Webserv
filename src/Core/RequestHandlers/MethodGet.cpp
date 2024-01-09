@@ -31,7 +31,7 @@ int directoryStatus(const std::string &path)
 	return -1; // is not exist
 }
 
-std::string	autoIndexListenDir(DataPool &dataPool)
+std::string autoIndexListenDir(DataPool &dataPool)
 {
 	dirent *entry;
 	std::string buffer;
@@ -64,7 +64,8 @@ std::string	autoIndexListenDir(DataPool &dataPool)
 	autoindex.close();
 	return FileName;
 }
-std::string getCorrectIndex(std::vector<std::string> &indexes, std::string &Path){
+std::string getCorrectIndex(std::vector<std::string> &indexes, std::string &Path)
+{
 
 	for (size_t i = 0; i < indexes.size(); ++i)
 	{
@@ -77,19 +78,26 @@ std::string getCorrectIndex(std::vector<std::string> &indexes, std::string &Path
 
 bool MethodGet::handleDirectoryPath()
 {
-	if (access(dataPool.Path.c_str(), R_OK) != 0 ||dataPool.currentLocation.getAutoindex() == "off")
+	if (access(dataPool.Path.c_str(), R_OK) != 0 || dataPool.currentLocation.getAutoindex() == "off")
 		throw HTTPError(403);
-	
+
 	std::vector<std::string> indexes;
 	if (dataPool.locationIndex == -1)
 		indexes = dataPool.currentServer.getIndex();
 	else
 		indexes = dataPool.currentLocation.getIndex();
-	if (indexes.size() > 0)
+	std::string Path = getCorrectIndex(indexes, dataPool.Path);
+	if (indexes.size() > 0 && !Path.empty())
 	{
-		// if  cgi exist --> ru cgi ; else ->
-		std::string Path = getCorrectIndex(indexes, dataPool.Path);
-		if (!Path.empty()){
+		DEBUGMSGT(1, "index " << dataPool.Path);
+
+		std::string extention = GetFileExtention(Path);
+		std::cout << "file ext : " << extention << std::endl;
+		size_t pos = dataPool.currentLocation.getCgiAccept().find(extention);
+		if(dataPool.currentLocation.getCgiAccept() == extention)
+			return (Request::Execute(dataPool.Path, "GET"), false);
+		else if (!Path.empty())
+		{
 			dataPool.Path = Path;
 			return GetFileHandler();
 		}
@@ -102,16 +110,24 @@ bool MethodGet::handleDirectoryPath()
 bool MethodGet::GetFileHandler()
 {
 	DEBUGMSGT(1, "GET OPENED FILE : ");
-	// if cgi exist --> ru cgi else {
-	int fd = open(dataPool.Path.c_str(), O_RDONLY, 0664);
-	if (fd == -1)
-		throw HTTPError(403);
-	dataPool.response.fileFd = fd;
+	std::string extention = GetFileExtention(dataPool.Path);
+	size_t pos = dataPool.currentLocation.getCgiAccept().find(extention);
+	if(dataPool.currentLocation.getCgiAccept() == extention)
+		return (Request::Execute(dataPool.Path, "GET"), false);
+	else{
+		int fd = open(dataPool.Path.c_str(), O_RDONLY, 0664);
+		DEBUGMSGT(1, "Tried to Open File " << dataPool.Path);
+		if (fd == -1)
+			throw HTTPError(403);
+		dataPool.response.fileFd = fd;
+
+		}
 	return true;
 }
 
 bool MethodGet::GetDirectoryHandler()
 {
+	DEBUGMSGT(1, COLORED("\n 		GET Method Directory Handler : \n ", Green));
 	if (dataPool.Path[dataPool.Path.length() - 1] != '/')
 	{
 		dataPool.response.Location = dataPool.url + "/";
@@ -127,6 +143,6 @@ bool MethodGet::HandleRequest(std::string &data)
 	(void)data;
 	DEBUGMSGT(1, COLORED("\n 		GET Method Handler : \n ", Yellow));
 	if (directoryStatus(dataPool.Path) == VALID_PATH)
-		return GetFileHandler();;
+		return GetFileHandler();
 	return GetDirectoryHandler();
 }

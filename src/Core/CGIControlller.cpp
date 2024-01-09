@@ -6,7 +6,7 @@ CGIController::CGIController(DataPool &data, std::string &ScriptPath, std::strin
 	std::cout << "cgicontroller contractor called \n";
 	this->RunningProcessId = 0;
 	this->BodyFile = BodyFile;
-	this->CgiPath = data.currentLocation.getCgiAccept()[GetFileExtention(ScriptPath)];
+	this->CgiPath = data.currentLocation.getCgiPath();
 	this->RequestMethod = RequestMethod;
 	this->ScriptPath = ScriptPath;
 }

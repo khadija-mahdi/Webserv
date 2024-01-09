@@ -6,8 +6,19 @@ Redirection Location::getRedirection() const { return redirection; }
 
 std::map<int, std::string> Location::getError_pages() const { return error_pages; }
 
-std::map<std::string, std::string> Location::getCgiAccept() const { return cgiAccept; }
 
+std::string Location::getCgiAccept() const {
+	return cgiAccept; 
+}
+
+std::string Location::getCgiPath() const {
+	return cgiPath; 
+}
+void Location::setCgi(std::string const &_value, std::string const &_key){
+	cgiAccept = _key;
+	cgiPath = _value;
+
+}
 std::string Location::getRoot() const { return root; }
 
 std::string Location::getPath() const { return path; }
@@ -20,9 +31,7 @@ bool Location::getUpload() const { return IS_ON_OR_OFF(upload); }
 
 bool Location::hasCgi(std::string &FileExtention)
 {
-	std::map<std::string, std::string>::iterator it;
-	it = this->cgiAccept.find(FileExtention);
-	if (it != this->cgiAccept.end())
+	if (FileExtention == cgiAccept)
 		return (true);
 	return (false);
 }
@@ -43,7 +52,7 @@ void Location::setRedirection(std::string &_value, int _key)
 }
 
 
-void Location::setCgiAccept(std::map<std::string, std::string> &cgi) { this->cgiAccept = cgi; }
+// void Location::setCgiAccept(std::map<std::string, std::string> cgi) { this->cgiAccept = cgi; }
 
 void Location::setRoot(std::string const &_root) { root = _root; }
 

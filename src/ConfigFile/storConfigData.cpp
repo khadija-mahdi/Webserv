@@ -177,7 +177,7 @@ std::map<std::string, std::string> extractKeyValues(const std::string &Block, st
 				std::string accept, cgi_path;
 				iss >> accept >> cgi_path;
 				int fd = open(cgi_path.c_str(), O_RDONLY, 0664);
-				if (accept == "" || cgi_path == "" || fd == -1)
+				if (accept.empty() || cgi_path.empty()|| fd == -1)
 				{
 					errorMessage << "\033[1;" << Red << "mError: "
 								 << "cgi Error , please correct the path or extention:" << key + "\t" + value << "\033[0m" << std::endl;
@@ -459,8 +459,12 @@ void locationValues(Location &location, std::string &locationBlock)
 			location.setRedirection(path, st);
 		else if (it->first == "cgi")
 		{
-			if (cgi.size())
-				location.setCgiAccept(cgi);
+			if (cgi.size()){
+				std::string ext, path;
+				std::istringstream iss(it->second);
+				iss >> ext >> path ;
+				location.setCgi(path, ext);
+			}
 		}
 		else if (it->first == "error_page")
 		{
