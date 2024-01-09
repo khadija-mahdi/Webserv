@@ -437,7 +437,7 @@ void locationValues(Location &location, std::string &locationBlock)
 		else if (it->first == "upload")
 		{
 			if (it->second == "on" || it->second == "off")
-				location.setUpload(it->second);
+				location.setUpload(IS_ON_OR_OFF(it->second));
 			else
 			{
 				errorMessage << "\033[1;" << Red << "mError: "

@@ -31,7 +31,7 @@ std::vector<std::string> Location::getAllow() const { return allow; }
 bool Location::getUpload() const
 {
 	std::cout << "upload value : " << upload << std::endl;
-	return IS_ON_OR_OFF(upload);
+	return upload;
 }
 
 bool Location::hasCgi(std::string &FileExtention)
@@ -64,7 +64,7 @@ void Location::setPath(std::string const &_Path) { path = _Path; }
 
 void Location::setAutoindex(std::string const &_autoindex) { autoindex = _autoindex; }
 
-void Location::setUpload(std::string const &_upload) { upload = _upload; }
+void Location::setUpload(bool const &_upload) { upload = _upload; }
 
 void Location::setUpload_stor(std::string const &_upload_stor) { upload_stor = _upload_stor; }
 

@@ -23,9 +23,9 @@ private:
 	std::string root;
 	Redirection redirection;
 	std::string autoindex;
-	std::string upload;
 	std::string upload_stor;
 	std::string path;
+	bool		 upload;
 
 public:
 	// std::map<std::string, std::string> getCgiAccept() const;
@@ -36,7 +36,7 @@ public:
 	std::string getRoot() const;
 	std::string getPath() const;
 	std::string getAutoindex() const;
-	bool getUpload() const;
+	bool		getUpload() const;
 	std::string getUpload_stor() const;
 	std::string getCgiAccept() const;
 	std::string getCgiPath() const;
@@ -50,6 +50,6 @@ public:
 	void setPath(std::string const &);
 	void setAutoindex(std::string const &);
 	void setAllow(std::string const &);
-	void setUpload(std::string const &);
+	void setUpload(bool const &);
 	void setUpload_stor(std::string const &);
 };
