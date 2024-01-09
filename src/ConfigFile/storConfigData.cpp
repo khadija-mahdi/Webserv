@@ -376,6 +376,22 @@ void singleData(ConfServer &ConfServer, std::string &ConfServerBlock)
 	}
 }
 
+int directoryStatus(const std::string &path)
+{
+	struct stat directoryInfo;
+	if (stat(path.c_str(), &directoryInfo) == 0)
+	{
+		if (S_ISDIR(directoryInfo.st_mode))
+		{
+			return 1; // is a directory
+		}
+		else if (S_ISREG(directoryInfo.st_mode))
+			return 2; // is path exist;
+		return 0;	  // is not
+	}
+	return -1; // is not exist
+}
+
 void locationValues(Location &location, std::string &locationBlock)
 {
 	std::map<std::string, std::string> values;
@@ -449,13 +465,11 @@ void locationValues(Location &location, std::string &locationBlock)
 			}
 		}
 		else if (it->first == "upload_stor"){
-			int fd = open(it->second.c_str(), O_RDONLY, 0664);
-			if (fd == -1){
+			if (directoryStatus(it->second) != 1){
 				errorMessage << "\033[1;" << Red << "mError: "
 				<< "upload stor  Wrong Path:" << it->second << "\033[0m" << std::endl;
 				throw std::runtime_error(errorMessage.str());
 			}
-			close(fd);
 			location.setUpload_stor(it->second.c_str());
 		}
 		else if (it->first == "return" && processRedirection(path, st, it->second))
