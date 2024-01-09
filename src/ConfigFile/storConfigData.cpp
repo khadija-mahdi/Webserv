@@ -212,7 +212,10 @@ void splitKeyValue(std::string &block, std::string &key, std::string &value, std
 	for (size_t i = pos; i < end; i++)
 		keyValue += block[i];
 	int vstart = 0;
-	int vend = keyValue.find("\t");
+	int vend = keyValue.find(" ");
+	if (vend != std::string::npos){
+		int vend =  keyValue.find("/t");
+	}
 	value = keyValue.substr(vstart, vend);
 	for (; keyValue[vend] && keyValue[vend] == '\t'; vend++)
 		;

@@ -23,7 +23,7 @@ bool isDigit(std::string &value){
 	std::stringstream errorMessage;
     for (size_t i = 0; i < value.length() -2  ; i++)
     {
-        if (!std::isdigit(value[i])){
+        if (!std::isdigit(value[i]) && value[i] != ' ' && value[i] != '\t' ){
 			errorMessage << "\033[1;31m key is not integer : " + value  << "\033[0m" << std::endl;
 			throw std::runtime_error(errorMessage.str());
 		}
