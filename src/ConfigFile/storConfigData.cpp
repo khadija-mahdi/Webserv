@@ -376,7 +376,7 @@ void singleData(ConfServer &ConfServer, std::string &ConfServerBlock)
 	}
 }
 
-int directoryStatus(const std::string &path)
+int getDirectoryStatus(const std::string &path)
 {
 	struct stat directoryInfo;
 	if (stat(path.c_str(), &directoryInfo) == 0)
@@ -465,7 +465,7 @@ void locationValues(Location &location, std::string &locationBlock)
 			}
 		}
 		else if (it->first == "upload_stor"){
-			if (directoryStatus(it->second) != 1){
+			if (getDirectoryStatus(it->second) != 1){
 				errorMessage << "\033[1;" << Red << "mError: "
 				<< "upload stor  Wrong Path:" << it->second << "\033[0m" << std::endl;
 				throw std::runtime_error(errorMessage.str());

@@ -51,7 +51,8 @@ int PostRequest::GetRequestedResource()
 	}
 
 	FileExtention = GetFileExtention(ResourceFilePath);
-	if (this->dataPool.currentLocation.hasCgi(FileExtention))
+	std::cout << "cg i ex : " << this->dataPool.currentLocation.getCgiAccept() << std::endl;
+	if (this->dataPool.currentLocation.getCgiAccept() == FileExtention)
 	{
 		DEBUGMSGT(1, "HAS CGIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
 		this->BodyReceiver->CreateFile("", true);
