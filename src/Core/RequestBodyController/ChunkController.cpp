@@ -32,7 +32,6 @@ int ChunkController::Receiver(std::string &data)
         case Data:
             if (Remaining != 0)
             {
-
                 Part = ((size_t)Remaining) > data.size() ? data.size() : Remaining;
                 RawData = data.substr(0, Part);
                 dataPool.body.append(RawData);

@@ -19,6 +19,7 @@ std::string GetFileExtention(std::string &FilePath)
 		return (FilePath.substr(LastDotPos + 1));
 	return ("");
 }
+
 char **FromVectorToArray(std::vector<std::string> vec)
 {
 	char **Array = new char *[vec.size() + 1];
@@ -85,8 +86,12 @@ void CGIController::Execute()
 			exit(1);
 		dup2(IO::OpenFile(OutputFileName.c_str(), "w+"), 1);
 		dup2(IO::OpenFile((OutputFileName + ErrorPrefix).c_str(), "w+"), 2);
+
 		if (RequestMethod == "POST")
+		{
+			DEBUGMSGT(1, COLORED("BodyFile : " << BodyFile, Magenta));
 			dup2(IO::OpenFile(BodyFile.c_str(), "r+"), 0);
+		}
 		if (execve(CgiPath.c_str(), FromVectorToArray(av), FromVectorToArray(env)) < 0)
 			exit(1);
 	}
@@ -154,7 +159,9 @@ bool CGIController::ParseCGIOutput(HeadersType &ResponseHeaders)
 	ResponseHeaders = ParseCgiHeaders();
 	ContentType = GetHeaderAttr(Headers, "Content-type");
 	data.response.contentType = ContentType.empty() ? "text/html" : ContentType;
-	unlink(BodyFile.c_str());
+	// temperarly commented
+	// unlink(BodyFile.c_str());
+	//
 	FileFd = IO::OpenFile(OutputFileName.c_str(), "wt+");
 	write(FileFd, BodyContent.c_str(), BodyContent.size());
 	close(FileFd);

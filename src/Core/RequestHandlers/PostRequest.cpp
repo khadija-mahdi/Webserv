@@ -9,7 +9,7 @@ PostRequest::PostRequest(DataPool &dataPool) : Request(dataPool)
 
 bool PostRequest::HandleRequest(std::string &data)
 {
-		DEBUGMSGT(1, COLORED("\n 		POST Method Handler : \n ", Yellow));
+	DEBUGMSGT(1, COLORED(data, Red));
 	if (this->UploadBodyState == ZERO && GetRequestedResource())
 		return (PrintfFullRequest(), dataPool.response.StatusCode = OK, true);
 	if (this->UploadBodyState == UP_INPROGRESS || this->UploadBodyState == CGI_INPROGRESS)
@@ -18,6 +18,7 @@ bool PostRequest::HandleRequest(std::string &data)
 			this->BodyReady = BodyReceiver ? BodyReceiver->Receiver(data) : false;
 		if (this->BodyReady)
 		{
+			DEBUGMSGT(1, "BodyReady : " << this->BodyReceiver->GetFileName());
 			if (this->UploadBodyState == UP_INPROGRESS)
 				return (this->UploadBodyState = DONE,
 						dataPool.response.StatusCode = CREATED, true);
@@ -51,6 +52,7 @@ int PostRequest::GetRequestedResource()
 	FileExtention = GetFileExtention(ResourceFilePath);
 	if (this->dataPool.currentLocation.hasCgi(FileExtention))
 	{
+		DEBUGMSGT(1, "HAS CGIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
 		this->BodyReceiver->CreateFile("", true);
 		this->BodyReceiver->SetIsCGI(true);
 		return (this->UploadBodyState = CGI_INPROGRESS, false);
@@ -67,4 +69,4 @@ int PostRequest::GetRequestedResource()
 	throw HTTPError(403);
 }
 
-PostRequest::~PostRequest(){}
+PostRequest::~PostRequest() {}

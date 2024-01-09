@@ -13,8 +13,9 @@ int Request::GetRequestedResource()
 {
 	struct stat ResourceState;
 
-	if ((ResourceFilePath = dataPool.currentLocation.getRoot()).empty())
-		ResourceFilePath = dataPool.currentServer.getRoot();
+	ResourceFilePath = dataPool.Path;
+
+	DEBUGMSGT(1, COLORED("ResourceFilePath : " << ResourceFilePath, Green));
 
 	if (access(ResourceFilePath.c_str(), F_OK) != 0)
 		throw HTTPError(404);
