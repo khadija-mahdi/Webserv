@@ -3,10 +3,10 @@ NAME = webserv
 SRC = $(shell find . -name '*.cpp')
 INC = $(shell find . -name '*.hpp')
 
-OBJ_DIR = objects
+OBJ_DIR = compiled
 OBJ = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
-CPP = g++-11
+CPP = c++
 CPPFLAGS = -Wall -Wextra -Werror -std=c++98
 CPPFLAGS = -std=c++98 -fsanitize=address -g
 
@@ -19,7 +19,7 @@ all: Start
 
 $(OBJ_DIR)/%.o: %.cpp $(INC)
 	@mkdir -p $(dir $@)
-	@$(CPP) ${CPPFLAGS} -c $< -o $@
+	$(CPP) ${CPPFLAGS} -c $< -o $@
 
 -include $(OBJ:.o=.d)
 

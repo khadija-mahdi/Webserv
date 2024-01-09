@@ -9,7 +9,8 @@ PostRequest::PostRequest(DataPool &dataPool) : Request(dataPool)
 
 bool PostRequest::HandleRequest(std::string &data)
 {
-	DEBUGMSGT(1, COLORED(Lstring::encode_binary_to_text(data), Red));
+	DEBUGMSGT(0, COLORED(Lstring::encode_binary_to_text(data), Red));
+
 	if (this->UploadBodyState == ZERO && GetRequestedResource())
 		return (PrintfFullRequest(), dataPool.response.StatusCode = OK, true);
 	if (this->UploadBodyState == UP_INPROGRESS || this->UploadBodyState == CGI_INPROGRESS)

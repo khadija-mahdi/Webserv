@@ -2,3 +2,5 @@
 .vscode/
 public/example
 public/Uploads
+public/UploadedFiles/
+public/UploadedFiles

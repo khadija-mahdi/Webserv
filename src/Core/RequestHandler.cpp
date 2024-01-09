@@ -94,7 +94,6 @@ bool RequestHandler::HandlerRequest1(std::string Data)
 	dataPool.Buffer += Data;
 	size_t index;
 
-	DEBUGMSGT(1, COLORED(dataPool.Buffer << "\n", Yellow));
 	switch (REQUEST_STATE)
 	{
 	case HEADERS_STAGE:
