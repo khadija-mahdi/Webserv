@@ -45,5 +45,6 @@ public:
 	virtual ~Request();
 };
 std::string GetFileRoot(std::string FilePath);
+std::string getCorrectIndex(std::vector<std::string> &indexes, std::string &Path);
 int directoryStatus(const std::string &path);
 #endif

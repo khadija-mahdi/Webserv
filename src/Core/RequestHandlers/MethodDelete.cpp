@@ -57,24 +57,32 @@ bool deleteFolderContents(const std::string &folderPath)
 bool MethodDelete::DeleteDirectoryHandler()
 {
 	DEBUGMSGT(1, COLORED("Delete Method the Path Is a Directory : " << dataPool.Path, Green));
-	if (dataPool.Path[dataPool.Path.length() - 1] != '/'){
-		DEBUGMSGT(1, COLORED("\n The directory path should end with a forward slash (/) when attempting to remove it \n ", Red));
+	if (dataPool.Path[dataPool.Path.length() - 1] != '/')
 		throw HTTPError(409);
+	if(!dataPool.currentLocation.getCgiAccept().empty()){
+		std::vector<std::string> indexes;
+		if (dataPool.locationIndex == -1)
+			indexes = dataPool.currentServer.getIndex();
+		else
+			indexes = dataPool.currentLocation.getIndex();
+		std::string Path = getCorrectIndex(indexes, dataPool.Path);
+		std::cout << "Path index ==  : " <<  Path << std::endl;
+		if (!Path.empty())
+		{
+			std::string extention = GetFileExtention(Path);
+			if(dataPool.currentLocation.getCgiAccept() == extention)
+				return (Request::Execute (Path, "DELETE"), false);
+		}
+		throw HTTPError(403);
 	}
 	else
 	{
 		if (deleteFolderContents(dataPool.Path))
-		{
-			DEBUGMSGT(1, COLORED("\n 	success remove all Directory content ! \n ", Green));
-			throw HTTPError(204);
-		}
+				throw HTTPError(204);
 		else
 		{
-			if (hasWritePermission(dataPool.Path)){
-				DEBUGMSGT(1, COLORED("\n 	Even though the directory has write permissions, the removal operation is still encountering issues! \n ", Red));
+			if (hasWritePermission(dataPool.Path))
 				throw HTTPError(500);
-			}
-			DEBUGMSGT(1, COLORED("\n 	The removal operation failed due to insufficient write permissions on the directory. ! \n ", Red));
 			throw HTTPError(403);
 		}
 	}
@@ -88,9 +96,14 @@ bool MethodDelete::HandleRequest(std::string &data)
 	if (directoryStatus(dataPool.Path) == DIRE)
 		return DeleteDirectoryHandler();
 	if (directoryStatus(dataPool.Path) == VALID_PATH ){
-		if (std::remove(dataPool.Path.c_str()) == 0)
-			throw HTTPError(204);
-		throw HTTPError(403);
+		std::string extention = GetFileExtention(dataPool.Path);
+		if(dataPool.currentLocation.getCgiAccept() == extention)
+			return (Request::Execute(dataPool.Path, "DELETE"), false);
+		else{
+			if (std::remove(dataPool.Path.c_str()) == 0)
+				throw HTTPError(204);
+			throw HTTPError(403);
+		}
 	}
 	throw HTTPError(404);
 }

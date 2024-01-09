@@ -106,6 +106,10 @@ bool RequestHandler::HandlerRequest1(std::string Data)
 			if (parseHeaderErrors())
 				return true;
 			dataPool.Buffer = dataPool.Buffer.substr(index + 4);
+						DEBUGMSGT(1, COLORED("\n the current Server is  : " << dataPool.currentServer.getListen() << "\n", Cyan));
+			DEBUGMSGT(1, COLORED("\n the current Location is  : " << dataPool.currentLocation.getPath() << "\n", Cyan));
+			DEBUGMSGT(1, COLORED("\n the Path : " << dataPool.Path << ", dir status : " << directoryStatus(dataPool.Path) << "\n", Green));
+			DEBUGMSGT(1, COLORED("\n REDIRECTION_STAGE " << dataPool.REDIRECTION_STAGE << "\n", Green));
 			REQUEST_STATE = REQUEST_HANDLER_STAGE;
 		}
 		// intentionally fall through

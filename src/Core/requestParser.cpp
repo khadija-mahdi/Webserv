@@ -96,6 +96,9 @@ void RequestParser::fillHeaderData(DataPool &headerData)
 			headerData.Headers[key] = value;
 		}
 	}
+	size_t index;
+	if ((index = headerData.url.find("?")) != std::string::npos)
+        headerData.Query = headerData.url.substr(index + 1);
 }
 
 void RequestParser::getCurrentServer(std::vector<ConfServer> &confServers, DataPool &headerData)
@@ -209,7 +212,6 @@ std::string GetHeaderAttr(HeadersType &Headers, std::string name)
 void RequestParser::ParseRequest(DataPool &headerData)
 {
 	fillHeaderData(headerData);
-	// printHeaderdata(headerData);
 	std::vector<ConfServer> confServers = Configurations::http.getConfServes();
 	getCurrentServer(confServers, headerData);
 	std::vector<Location> confLocation = headerData.currentServer.getLocations();
@@ -225,9 +227,4 @@ void RequestParser::ParseRequest(DataPool &headerData)
 		ParseUrl(headerData);
 	if (directoryStatus(headerData.Path.substr(1)) >= 1 && headerData.Path[0] == '/')
 		headerData.Path = headerData.Path.substr(1);
-	// std::string newp = headerData.Path.substr(0, headerData.Path.length() - 1);
-	// std::cout << "newp : " << newp << std::endl;
-	// if (directoryStatus(newp) == 2){
-	// 	headerData.Path = newp;
-	// }
 }
