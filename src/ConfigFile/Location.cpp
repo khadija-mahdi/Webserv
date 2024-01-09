@@ -36,7 +36,7 @@ bool Location::getUpload() const
 
 bool Location::hasCgi(std::string &FileExtention)
 {
-	if (FileExtention == cgiAccept)
+	if (FileExtention == cgiAccept && cgiAccept.empty())
 		return (true);
 	return (false);
 }

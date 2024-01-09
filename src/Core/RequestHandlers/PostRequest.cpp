@@ -43,18 +43,17 @@ int PostRequest::GetRequestedResource()
 			this->dataPool.response.Location = this->dataPool.url + "/";
 			throw HTTPError(301);
 		}
-		DEBUGMSGT(1, "is upload on ? " << std::boolalpha <<  this->dataPool.currentLocation.getUpload());
+
 		if ((IndexFileName = GetIndex(ResourceFilePath)).empty() &&
 			!this->dataPool.currentLocation.getUpload())
 			throw HTTPError(403);
+
 		ResourceFilePath.append(IndexFileName);
 	}
 
 	FileExtention = GetFileExtention(ResourceFilePath);
-	std::cout << "cg i ex : " << this->dataPool.currentLocation.getCgiAccept() << std::endl;
-	if (this->dataPool.currentLocation.getCgiAccept() == FileExtention)
+	if(this->dataPool.currentLocation.hasCgi(FileExtention))
 	{
-		DEBUGMSGT(1, "HAS CGIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
 		this->BodyReceiver->CreateFile("", true);
 		this->BodyReceiver->SetIsCGI(true);
 		return (this->UploadBodyState = CGI_INPROGRESS, false);
