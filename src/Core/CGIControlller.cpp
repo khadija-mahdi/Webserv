@@ -159,9 +159,9 @@ bool CGIController::ParseCGIOutput(HeadersType &ResponseHeaders)
 	ResponseHeaders = ParseCgiHeaders();
 	ContentType = GetHeaderAttr(Headers, "Content-type");
 	data.response.contentType = ContentType.empty() ? "text/html" : ContentType;
-	// temperarly commented
-	// unlink(BodyFile.c_str());
-	//
+	
+	unlink(BodyFile.c_str());
+	
 	FileFd = IO::OpenFile(OutputFileName.c_str(), "wt+");
 	write(FileFd, BodyContent.c_str(), BodyContent.size());
 	close(FileFd);

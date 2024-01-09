@@ -10,7 +10,7 @@ RequestHandler::RequestHandler(/* args */)
 	this->request = NULL;
 }
 
-RequestHandler::~RequestHandler(){}
+RequestHandler::~RequestHandler() {}
 
 bool IsValidSetOfCharacter(std::string str)
 {
@@ -39,7 +39,8 @@ bool RequestHandler::parseHeaderErrors()
 		throw HTTPError(414);
 	// if (max body size with body length from post method) //-> add 4014 max body size
 	// 	throw HTTPError(414);
-	if (directoryStatus(dataPool.Path) < 1 && !dataPool.REDIRECTION_STAGE){
+	if (directoryStatus(dataPool.Path) < 1 && !dataPool.REDIRECTION_STAGE)
+	{
 		std::cout << "out here ";
 		throw HTTPError(404);
 	}
@@ -55,15 +56,16 @@ bool RequestHandler::parseHeaderErrors()
 		dataPool.response.Location = dataPool.Path;
 		return true;
 	}
-	if (GetHeadersValue(dataPool.Headers, "Transfer-Encoding") == "chunked"){
-        this->request->SetBodyController(Chunked, 0);
+	if (GetHeadersValue(dataPool.Headers, "Transfer-Encoding") == "chunked")
+	{
+		this->request->SetBodyController(Chunked, 0);
 	}
-    else if (!GetHeadersValue(dataPool.Headers, "Content-Length").empty()){
-        this->request->SetBodyController(Lenght, atoll(GetHeadersValue(dataPool.Headers, "Content-Length").c_str()));
+	else if (!GetHeadersValue(dataPool.Headers, "Content-Length").empty())
+	{
+		this->request->SetBodyController(Lenght, atoll(GetHeadersValue(dataPool.Headers, "Content-Length").c_str()));
 	}
 	return false;
 }
-
 
 Request *RequestHandler::handlerRequestMethods()
 {
@@ -90,27 +92,26 @@ bool RequestHandler::processRedirection()
 bool RequestHandler::HandlerRequest1(std::string Data)
 {
 	dataPool.Buffer += Data;
-	DEBUGMSGT(1, COLORED( dataPool.Buffer << "\n", Yellow));
+	size_t index;
+
+	DEBUGMSGT(1, COLORED(dataPool.Buffer << "\n", Yellow));
 	switch (REQUEST_STATE)
 	{
 	case HEADERS_STAGE:
-		if (dataPool.Buffer.find("\r\n\r\n") != std::string::npos)
+		if ((index = dataPool.Buffer.find("\r\n\r\n")) != std::string::npos)
 		{
 			DEBUGMSGT(0, dataPool.Buffer);
 			requestParser.ParseRequest(dataPool);
 			handlerRequestMethods();
 			if (parseHeaderErrors())
 				return true;
-			DEBUGMSGT(1, COLORED("\n the current Server is  : " << dataPool.currentServer.getListen() << "\n", Cyan));
-			DEBUGMSGT(1, COLORED("\n the current Location is  : " << dataPool.currentLocation.getPath() << "\n", Cyan));
-			DEBUGMSGT(1, COLORED("\n the Path : " << dataPool.Path << ", dir status : " << directoryStatus(dataPool.Path) << "\n", Green));
-			DEBUGMSGT(1, COLORED("\n REDIRECTION_STAGE " << dataPool.REDIRECTION_STAGE << "\n", Green));
+			dataPool.Buffer = dataPool.Buffer.substr(index + 4);
 			REQUEST_STATE = REQUEST_HANDLER_STAGE;
 		}
 		// intentionally fall through
 	case REQUEST_HANDLER_STAGE:
 		if (request != NULL)
-			return request->HandleRequest(Data);
+			return request->HandleRequest(dataPool.Buffer);
 		break;
 	}
 	return (false);
