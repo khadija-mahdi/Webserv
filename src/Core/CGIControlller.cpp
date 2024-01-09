@@ -3,12 +3,13 @@
 CGIController::CGIController(DataPool &data, std::string &ScriptPath, std::string &BodyFile,
 							 std::string &RequestMethod) : data(data)
 {
-	std::cout << "cgicontroller contractor called \n";
+	std::cout << " ScriptPath : " << ScriptPath << " RequestMethod : " << RequestMethod;
 	this->RunningProcessId = 0;
 	this->BodyFile = BodyFile;
 	this->CgiPath = data.currentLocation.getCgiPath();
 	this->RequestMethod = RequestMethod;
 	this->ScriptPath = ScriptPath;
+	this->Execute();
 }
 
 std::string GetFileExtention(std::string &FilePath)
