@@ -86,7 +86,6 @@ struct DataPool
 	std::string Query; // example : ?name=ayoub&pass=*****
 	int locationIndex;
 	std::map<std::string, std::string> Headers;
-	std::string Buffer;
 	std::string Method;
 	std::string Path;
 	Location currentLocation;

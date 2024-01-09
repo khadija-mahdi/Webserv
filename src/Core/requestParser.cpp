@@ -69,10 +69,10 @@ void RequestParser::getContentType(DataPool &headerData)
 	}
 }
 
-void RequestParser::fillHeaderData(DataPool &headerData)
+void RequestParser::fillHeaderData(DataPool &headerData, std::string Buffer)
 {
 
-	std::istringstream BufferStream(headerData.Buffer);
+	std::istringstream BufferStream(Buffer);
 	std::string requestLine;
 	std::getline(BufferStream, requestLine);
 
@@ -207,9 +207,9 @@ std::string GetHeaderAttr(HeadersType &Headers, std::string name)
 	return ("");
 }
 
-void RequestParser::ParseRequest(DataPool &headerData)
+void RequestParser::ParseRequest(DataPool &headerData, std::string Buffer)
 {
-	fillHeaderData(headerData);
+	fillHeaderData(headerData, Buffer);
 	std::vector<ConfServer> confServers = Configurations::http.getConfServes();
 	getCurrentServer(confServers, headerData);
 	std::vector<Location> confLocation = headerData.currentServer.getLocations();

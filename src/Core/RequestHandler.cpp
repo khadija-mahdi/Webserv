@@ -91,20 +91,21 @@ bool RequestHandler::processRedirection()
 
 bool RequestHandler::HandlerRequest1(std::string Data)
 {
-	dataPool.Buffer += Data;
+	std::string Buffer;
+	Buffer += Data;
 	size_t index;
 
 	switch (REQUEST_STATE)
 	{
 	case HEADERS_STAGE:
-		if ((index = dataPool.Buffer.find("\r\n\r\n")) != std::string::npos)
+		if ((index = Buffer.find("\r\n\r\n")) != std::string::npos)
 		{
-			DEBUGMSGT(0, dataPool.Buffer);
-			requestParser.ParseRequest(dataPool);
+			DEBUGMSGT(0, Buffer);
+			requestParser.ParseRequest(dataPool, Buffer);
 			handlerRequestMethods();
 			if (parseHeaderErrors())
 				return true;
-			dataPool.Buffer = dataPool.Buffer.substr(index + 4);
+			Buffer = Buffer.substr(index + 4);
 						DEBUGMSGT(1, COLORED("\n the current Server is  : " << dataPool.currentServer.getListen() << "\n", Cyan));
 			DEBUGMSGT(1, COLORED("\n the current Location is  : " << dataPool.currentLocation.getPath() << "\n", Cyan));
 			DEBUGMSGT(1, COLORED("\n the Path : " << dataPool.Path << ", dir status : " << directoryStatus(dataPool.Path) << "\n", Green));
@@ -114,7 +115,7 @@ bool RequestHandler::HandlerRequest1(std::string Data)
 		// intentionally fall through
 	case REQUEST_HANDLER_STAGE:
 		if (request != NULL)
-			return request->HandleRequest(dataPool.Buffer);
+			return request->HandleRequest(Buffer);
 		break;
 	}
 	return (false);
