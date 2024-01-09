@@ -9,7 +9,7 @@ PostRequest::PostRequest(DataPool &dataPool) : Request(dataPool)
 
 bool PostRequest::HandleRequest(std::string &data)
 {
-	DEBUGMSGT(1, COLORED(data, Red));
+	DEBUGMSGT(1, COLORED(Lstring::encode_binary_to_text(data), Red));
 	if (this->UploadBodyState == ZERO && GetRequestedResource())
 		return (PrintfFullRequest(), dataPool.response.StatusCode = OK, true);
 	if (this->UploadBodyState == UP_INPROGRESS || this->UploadBodyState == CGI_INPROGRESS)
@@ -43,6 +43,7 @@ int PostRequest::GetRequestedResource()
 			this->dataPool.response.Location = this->dataPool.url + "/";
 			throw HTTPError(301);
 		}
+		DEBUGMSGT(1, "is upload on ? " << std::boolalpha <<  this->dataPool.currentLocation.getUpload());
 		if ((IndexFileName = GetIndex(ResourceFilePath)).empty() &&
 			!this->dataPool.currentLocation.getUpload())
 			throw HTTPError(403);

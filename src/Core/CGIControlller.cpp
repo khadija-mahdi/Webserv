@@ -84,6 +84,7 @@ void CGIController::Execute()
 	{
 		if (chdir(GetFileRoot(ScriptPath).c_str()) < 0)
 			exit(1);
+			
 		dup2(IO::OpenFile(OutputFileName.c_str(), "w+"), 1);
 		dup2(IO::OpenFile((OutputFileName + ErrorPrefix).c_str(), "w+"), 2);
 
