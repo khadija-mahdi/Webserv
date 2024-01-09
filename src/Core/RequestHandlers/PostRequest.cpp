@@ -37,11 +37,11 @@ int PostRequest::GetRequestedResource()
 
 	if (this->dataPool.ResourceType == WB_DIRECTORY)
 	{
-		if (*(this->dataPool.url.end() - 1) != '/')
-		{
-			this->dataPool.response.Location = this->dataPool.url + "/";
-			throw HTTPError(301);
-		}
+		// if (*(this->dataPool.url.end() - 1) != '/')
+		// {
+		// 	this->dataPool.response.Location = this->dataPool.url + "/";
+		// 	throw HTTPError(301);
+		// }
 		if ((IndexFileName = GetIndex(ResourceFilePath)).empty() &&
 			!this->dataPool.currentLocation.getUpload())
 			throw HTTPError(403);
