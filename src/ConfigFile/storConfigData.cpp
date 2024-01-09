@@ -460,9 +460,11 @@ void locationValues(Location &location, std::string &locationBlock)
 		else if (it->first == "cgi")
 		{
 			if (cgi.size()){
-				std::string ext, path;
 				std::istringstream iss(it->second);
+				std::string ext, path;
 				iss >> ext >> path ;
+				if (ext[0] == '.')
+					ext.erase(0, 1);
 				location.setCgi(path, ext);
 			}
 		}
