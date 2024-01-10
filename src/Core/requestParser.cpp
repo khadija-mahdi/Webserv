@@ -101,32 +101,51 @@ void RequestParser::fillHeaderData(DataPool &headerData, std::string Buffer)
         headerData.Query = headerData.url.substr(index + 1);
 }
 
+bool inServerName(std::vector<ConfServer> &confServers, DataPool &headerData){
+	size_t pos = headerData.Headers["Host"].find(":");
+    std::string server_name = headerData.Headers["Host"].substr(0, pos);
+    std::cout << "server name is from req: " <<  server_name << std::endl;
+    std::string Port = headerData.Headers["Host"].substr(pos + 1);
+    std::vector<std::string> serverNames;
+
+    for (size_t i = 0; i < confServers.size(); i++)
+    {
+        serverNames = confServers[i].getConfServer_names();
+        
+        std::vector<std::string>::iterator it = std::find(serverNames.begin(), serverNames.end(), server_name);
+        if (it != serverNames.end())
+        {
+            if (confServers[i].getListen() == Port)
+            {
+                headerData.currentServer = confServers[i];
+                return true;
+            }
+        }
+	}
+	return false;
+}
+
 void RequestParser::getCurrentServer(std::vector<ConfServer> &confServers, DataPool &headerData)
 {
-	size_t pos = headerData.Headers["Host"].find(":");
-	std::string server_name = headerData.Headers["Host"].substr(0, pos);
-	std::string Port = headerData.Headers["Host"].substr(pos + 1);
-	std::vector<std::string> serverNames;
+    size_t pos = headerData.Headers["Host"].find(":");
+    std::string server_name = headerData.Headers["Host"].substr(0, pos);
+    std::cout << "server name is from req: " <<  server_name << std::endl;
+    std::string Port = headerData.Headers["Host"].substr(pos + 1);
+    std::vector<std::string> serverNames;
 
-	for (size_t i = 0; i < confServers.size(); i++)
-	{
-		serverNames = confServers[i].getConfServer_names();
-		int pos = std::find(serverNames.begin(), serverNames.end(), server_name) != serverNames.end();
-		if (pos || confServers[i].getHost() == server_name)
+	if (!inServerName(confServers, headerData)){
+		for (size_t i = 0; i < confServers.size(); i++)
 		{
 			if (confServers[i].getListen() == Port)
 			{
+				// Server name is not in the vector, but the port matches
 				headerData.currentServer = confServers[i];
 				break;
 			}
 		}
-		else if (confServers[i].getListen() == Port)
-		{
-			headerData.currentServer = confServers[i];
-			break;
-		}
 	}
 }
+
 
 bool RequestParser::redirectionType(std::vector<Location> &confLocation, DataPool &headerData)
 {
