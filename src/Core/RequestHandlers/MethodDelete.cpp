@@ -66,7 +66,6 @@ bool MethodDelete::DeleteDirectoryHandler()
 		else
 			indexes = dataPool.currentLocation.getIndex();
 		std::string Path = getCorrectIndex(indexes, dataPool.Path);
-		std::cout << "Path index ==  : " <<  Path << std::endl;
 		if (!Path.empty())
 		{
 			std::string extention = GetFileExtention(Path);

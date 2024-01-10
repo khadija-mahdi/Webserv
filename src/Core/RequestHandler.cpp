@@ -10,8 +10,6 @@ RequestHandler::RequestHandler(/* args */)
 	this->request = NULL;
 }
 
-RequestHandler::~RequestHandler() {}
-
 bool IsValidSetOfCharacter(std::string str)
 {
 	std::string expectedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
@@ -37,13 +35,9 @@ bool RequestHandler::parseHeaderErrors()
 		throw HTTPError(400);
 	if (dataPool.Path.length() > 2048)
 		throw HTTPError(414);
-	// if (max body size with body length from post method) //-> add 4014 max body size
-	// 	throw HTTPError(414);
+
 	if (directoryStatus(dataPool.Path) < 1 && !dataPool.REDIRECTION_STAGE)
-	{
-		std::cout << "out here ";
 		throw HTTPError(404);
-	}
 	if (dataPool.locationIndex != -1)
 	{
 		std::vector<std::string> allowMethod = dataPool.currentLocation.getAllow();
@@ -95,7 +89,6 @@ bool RequestHandler::HandlerRequest1(std::string Data)
 	Buffer += Data;
 	size_t index;
 
-	DEBUGMSGT(1, Buffer);
 	switch (REQUEST_STATE)
 	{
 	case HEADERS_STAGE:
@@ -106,11 +99,11 @@ bool RequestHandler::HandlerRequest1(std::string Data)
 			if (parseHeaderErrors())
 				return true;
 			Buffer = Buffer.substr(index + 4);
-						DEBUGMSGT(1, COLORED("\n the current Server is  : " << dataPool.currentServer.getListen() << "\n", Cyan));
+			DEBUGMSGT(1, COLORED("\n the current Server is  : " << dataPool.currentServer.getListen() << "\n", Cyan));
 			DEBUGMSGT(1, COLORED("\n the current Location is  : " << dataPool.currentLocation.getPath() << "\n", Cyan));
 			DEBUGMSGT(1, COLORED("\n the Path : " << dataPool.Path << ", dir status : " << directoryStatus(dataPool.Path) << "\n", Green));
 			DEBUGMSGT(1, COLORED("\n REDIRECTION_STAGE " << dataPool.REDIRECTION_STAGE << "\n", Green));
-			DEBUGMSGT(1, COLORED("\n Server_name " << dataPool.currentServer.getConfServer_names()[0] << "\n", Green));
+
 			REQUEST_STATE = REQUEST_HANDLER_STAGE;
 		}
 		// intentionally fall through
@@ -129,4 +122,9 @@ DataPool &RequestHandler::GetDataPool(void)
 Request *RequestHandler::GetRequestHandler()
 {
 	return this->request;
+}
+
+RequestHandler::~RequestHandler()
+{
+	delete this->request;
 }

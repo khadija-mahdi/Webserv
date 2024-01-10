@@ -91,8 +91,6 @@ bool MethodGet::handleDirectoryPath()
 	std::string Path = getCorrectIndex(indexes, dataPool.Path);
 	if (indexes.size() > 0 && !Path.empty())
 	{
-		DEBUGMSGT(1, "index " << std::string(Path));
-
 		std::string extention = GetFileExtention(Path);
 		if(dataPool.currentLocation.getCgiAccept() == extention)
 			return (Request::Execute (Path, "GET"), false);

@@ -154,7 +154,7 @@ int ResponseBuilder::FlushBuffer(int SocketFd)
 
 	if (this->Buffer.empty())
 		return (0);
-	DEBUGMSGT(1, COLORED(this->Buffer.c_str(), Magenta));
+	// DEBUGMSGT(1, COLORED(this->Buffer.c_str(), Magenta));
 	int i = 0;
 	if ((i = write(SocketFd, this->Buffer.c_str(), this->Buffer.size())) < 0 || this->Buffer == "0\r\n\r\n")
 		return (0);
