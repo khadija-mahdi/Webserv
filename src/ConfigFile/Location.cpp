@@ -1,5 +1,7 @@
 #include "Location.hpp"
 
+Location::Location(){autoindex = "off";}
+
 std::vector<std::string> Location::getIndex() const { return index; }
 
 Redirection Location::getRedirection() const { return redirection; }

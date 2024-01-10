@@ -16,7 +16,6 @@ class Location
 private:
 	std::string cgiAccept;
 	std::string cgiPath;
-	// std::map<std::string, std::string> cgiAccept;
 	std::vector<std::string> index;
 	std::map<int, std::string> error_pages;
 	std::vector<std::string> allow;
@@ -28,7 +27,7 @@ private:
 	bool		 upload;
 
 public:
-	// std::map<std::string, std::string> getCgiAccept() const;
+	Location();
 	std::map<int, std::string> getError_pages() const;
 	std::vector<std::string> getAllow() const;
 	std::vector<std::string> getIndex() const;
