@@ -20,8 +20,6 @@ enum
 class RequestHandler
 {
 private:
-	// DataPool headerData;
-	int serverIndex;
 	int REQUEST_STATE;
 	RequestParser requestParser;
 	Request *request;

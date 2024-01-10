@@ -26,13 +26,14 @@ void processErrorPage(const std::string &line, std::string &value, int &errorCod
 	}
 	value = secondWord;
 	int fd = open(value.c_str(), O_RDONLY, 0664);
-	if (fd == -1){
+	if (fd == -1)
+	{
 		errorMessage << "\033[1;" << Red << "mError: "
-				<< "Wrong Path " << value  << ", please use a valid path! : "
-				<< "\033[0m" << std::endl;
+					 << "Wrong Path " << value << ", please use a valid path! : "
+					 << "\033[0m" << std::endl;
 		throw std::runtime_error(errorMessage.str());
 	}
-	close(fd); 
+	close(fd);
 }
 
 std::map<std::string, std::string> extractKeyValuesIN(const std::string &Block)
@@ -90,7 +91,8 @@ bool processRedirection(std::string &path, int &status, std::string &key)
 			path = word;
 		i++;
 	}
-	if (i != 1 || path.empty()){
+	if (i != 1 || path.empty())
+	{
 		errorMessage << "\033[1;" << Red << "mError: "
 					 << "Please Correct The Redirection Syntax !" << key << "\033[0m" << std::endl;
 		throw std::runtime_error(errorMessage.str());
@@ -177,7 +179,7 @@ std::map<std::string, std::string> extractKeyValues(const std::string &Block, st
 				std::string accept, cgi_path;
 				iss >> accept >> cgi_path;
 				int fd = open(cgi_path.c_str(), O_RDONLY, 0664);
-				if (accept.empty() || cgi_path.empty()|| fd == -1)
+				if (accept.empty() || cgi_path.empty() || fd == -1)
 				{
 					errorMessage << "\033[1;" << Red << "mError: "
 								 << "cgi Error , please correct the path or extention:" << key + "\t" + value << "\033[0m" << std::endl;
@@ -212,10 +214,12 @@ void splitKeyValue(std::string &block, std::string &key, std::string &value, std
 	for (size_t i = pos; i < end; i++)
 		keyValue += block[i];
 	int vstart = 0;
-	int vend = keyValue.find(" ");
-	if (vend != std::string::npos){
-		int vend =  keyValue.find("/t");
-	}
+	size_t vend = keyValue.find(" ");
+	
+	// * *
+	// if (vend != std::string::npos)
+	// 	vend = keyValue.find("/t");
+
 	value = keyValue.substr(vstart, vend);
 	for (; keyValue[vend] && keyValue[vend] == '\t'; vend++)
 		;
@@ -464,10 +468,12 @@ void locationValues(Location &location, std::string &locationBlock)
 				throw std::runtime_error(errorMessage.str());
 			}
 		}
-		else if (it->first == "upload_stor"){
-			if (getDirectoryStatus(it->second) != 1){
+		else if (it->first == "upload_stor")
+		{
+			if (getDirectoryStatus(it->second) != 1)
+			{
 				errorMessage << "\033[1;" << Red << "mError: "
-				<< "upload stor  Wrong Path:" << it->second << "\033[0m" << std::endl;
+							 << "upload stor  Wrong Path:" << it->second << "\033[0m" << std::endl;
 				throw std::runtime_error(errorMessage.str());
 			}
 			location.setUpload_stor(it->second.c_str());
@@ -476,10 +482,11 @@ void locationValues(Location &location, std::string &locationBlock)
 			location.setRedirection(path, st);
 		else if (it->first == "cgi")
 		{
-			if (cgi.size()){
+			if (cgi.size())
+			{
 				std::istringstream iss(it->second);
 				std::string ext, path;
-				iss >> ext >> path ;
+				iss >> ext >> path;
 				if (ext[0] == '.')
 					ext.erase(0, 1);
 				location.setCgi(path, ext);
