@@ -202,29 +202,27 @@ std::map<std::string, std::string> extractKeyValues(const std::string &Block, st
 
 void splitKeyValue(std::string &block, std::string &key, std::string &value, std::string word, int flag)
 {
-	std::string keyValue = "";
-	size_t pos = block.find(word);
-	if (pos == std::string::npos && flag == 1)
-	{
-		errorMessage << "\033[1;" << Red << "mError: "
-					 << "Block " << block << "\033[0m" << std::endl;
-		throw std::runtime_error(errorMessage.str());
-	}
-	size_t end = block.find("}");
-	for (size_t i = pos; i < end; i++)
-		keyValue += block[i];
-	int vstart = 0;
-	size_t vend = keyValue.find(" ");
-	
-	// * *
-	// if (vend != std::string::npos)
-	// 	vend = keyValue.find("/t");
-
-	value = keyValue.substr(vstart, vend);
-	for (; keyValue[vend] && keyValue[vend] == '\t'; vend++)
-		;
-	int kEnd = keyValue.find(";");
-	key = keyValue.substr(vend, kEnd - vend);
+    size_t vend;
+    std::string keyValue = "";
+    size_t pos = block.find(word);
+    if (pos == std::string::npos && flag == 1)
+    {
+        errorMessage << "\033[1;" << Red << "mError: "
+                     << "Block " << block << "\033[0m" << std::endl;
+        throw std::runtime_error(errorMessage.str());
+    }
+    size_t end = block.find("}");
+    for (size_t i = pos; i < end; i++)
+        keyValue += block[i];
+    int vstart = 0;
+    vend = keyValue.find(" ");
+    if (vend == std::string::npos)
+        vend = keyValue.find("\t");
+    value = keyValue.substr(vstart, vend);
+    for (; keyValue[vend] && (keyValue[vend] == ' ' || keyValue[vend] == '\t'); vend++)
+        ;
+    int kEnd = keyValue.find(";");
+    key = keyValue.substr(vend, kEnd - vend);
 }
 
 std::string Blocks(const std::string &lines, const std::string &blockName)

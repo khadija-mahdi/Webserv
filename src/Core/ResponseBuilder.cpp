@@ -117,8 +117,7 @@ void ResponseBuilder::FillHeaders(int StatusCode)
 		Buffer += ("Content-Type: " + this->dataPool.response.contentType + "\r\n");
 	Buffer += "Connection: closed\r\n";
 	Buffer += "Transfer-Encoding: chunked\r\n";
-	if (dataPool.RESPONSE__STATE)
-		Buffer += this->dataPool.response.Location.empty() ? "\r\n" : "Location: " + this->dataPool.response.Location + "\r\n\r\n";
+	Buffer += this->dataPool.response.Location.empty() ? "\r\n" : "Location: " + this->dataPool.response.Location + "\r\n\r\n";
 }
 
 bool ResponseBuilder::checkErrorPage(std::map<int, std::string> error_pages)

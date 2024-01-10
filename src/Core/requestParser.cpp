@@ -144,8 +144,8 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation,
 	size_t start = 0, end = 0;
 	if ((headerData.Path) == "/")
 	{
-		std::cout << "headerData.Path :" << headerData.Path << std::endl;
 		headerData.locationIndex = headerData.currentServer.getDefaultLocation();
+		headerData.Path += "/";
 	}
 	else
 	{

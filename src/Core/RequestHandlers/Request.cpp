@@ -30,14 +30,14 @@ int Request::GetRequestedResource()
 	else
 		this->dataPool.ResourceType = WB_NEITHER;
 
-	Redirection redirection = this->dataPool.currentServer.getRedirection();
+	// Redirection redirection = this->dataPool.currentServer.getRedirection();
 
-	if (dataPool.REDIRECTION_STAGE)
-	{
-		DEBUGMSGT(1, "statusCode :" << redirection.statusCode << " ReturnLocation : " << redirection.ReturnLocation);
-		this->dataPool.response.Location = redirection.ReturnLocation;
-		throw HTTPError(redirection.statusCode);
-	}
+	// if (dataPool.REDIRECTION_STAGE)
+	// {
+	// 	DEBUGMSGT(1, "statusCode :" << redirection.statusCode << " ReturnLocation : " << redirection.ReturnLocation);
+	// 	this->dataPool.response.Location = redirection.ReturnLocation;
+	// 	throw HTTPError(redirection.statusCode);
+	// }
 	return true;
 }
 
