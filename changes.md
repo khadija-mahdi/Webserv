@@ -4,4 +4,10 @@
 - look for the HTTP response status codes list on internet and during this evaluation
 - no location post 403
 - if upload is 'on' and upload_store is empty config parser error
-- add /
+- add / to end of public in the case is not found
+- add path location and with / 
+- config root end py '/' & nessacery a dir
+- if location '/' is the first it uses it
+- delete does delete a file with no permission
+- if method is not post/delete/get 
+- Test Cockies And CGI

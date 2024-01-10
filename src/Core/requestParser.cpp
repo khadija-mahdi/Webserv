@@ -159,23 +159,22 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation,
 {
 	size_t i = 0;
 	size_t start = 0, end = 0;
-	if ((headerData.Path) == "/")
+	for (; i < confLocation.size(); i++)
+	{
+		std::string locPath = confLocation[i].getPath();
+		start = headerData.Path.find(confLocation[i].getPath());
+		if (start != std::string::npos)
+		{
+			headerData.locationIndex = i;
+			break;
+		}
+	}
+
+	if ((headerData.Path) == "/" && headerData.locationIndex == -1)
 	{
 		headerData.locationIndex = headerData.currentServer.getDefaultLocation();
-		headerData.Path += "/";
-	}
-	else
-	{
-		for (; i < confLocation.size(); i++)
-		{
-			std::string locPath = confLocation[i].getPath();
-			start = headerData.Path.find(confLocation[i].getPath());
-			if (start != std::string::npos)
-			{
-				headerData.locationIndex = i;
-				break;
-			}
-		}
+		std::cout << headerData.Path << std::endl;
+		// headerData.Path += "/";
 	}
 	if (headerData.locationIndex != -1)
 	{
@@ -213,7 +212,6 @@ int RequestParser::ParseUrl(DataPool &headerData)
 		headerData.Path = headerData.currentServer.getRoot() + headerData.newRoot;
 	return 0;
 }
-
 std::string GetHeaderAttr(HeadersType &Headers, std::string name)
 {
 	HeadersIterator it;
@@ -242,4 +240,9 @@ void RequestParser::ParseRequest(DataPool &headerData, std::string Buffer)
 		ParseUrl(headerData);
 	if (directoryStatus(headerData.Path.substr(1)) >= 1 && headerData.Path[0] == '/')
 		headerData.Path = headerData.Path.substr(1);
+		DEBUGMSGT(1, COLORED("\n the current Server is  : " << headerData.currentServer.getListen() << "\n", Cyan));
+		DEBUGMSGT(1, COLORED("\n the current Location is  : " << headerData.currentLocation.getPath() << "\n", Cyan));
+		DEBUGMSGT(1, COLORED("\n the Path : " << headerData.Path << ", dir status : " << directoryStatus(headerData.Path) << "\n", Green));
+		DEBUGMSGT(1, COLORED("\n REDIRECTION_STAGE " << headerData.REDIRECTION_STAGE << "\n", Green));
+
 }

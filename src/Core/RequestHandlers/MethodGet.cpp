@@ -92,8 +92,8 @@ bool MethodGet::handleDirectoryPath()
 	if (indexes.size() > 0 && !Path.empty())
 	{
 		std::string extention = GetFileExtention(Path);
-		if(dataPool.currentLocation.getCgiAccept() == extention)
-			return (Request::Execute (Path, "GET"), false);
+		if (dataPool.currentLocation.hasCgi(extention))
+			return (Request::Execute(Path, "GET"), false);
 		else if (!Path.empty())
 		{
 			dataPool.Path = Path;
@@ -109,16 +109,16 @@ bool MethodGet::GetFileHandler()
 {
 	DEBUGMSGT(1, "GET OPENED FILE : ");
 	std::string extention = GetFileExtention(dataPool.Path);
-	if(dataPool.currentLocation.getCgiAccept() == extention)
+	if (dataPool.currentLocation.hasCgi(extention))
 		return (Request::Execute(dataPool.Path, "GET"), false);
-	else{
+	else
+	{
 		int fd = open(dataPool.Path.c_str(), O_RDONLY, 0664);
 		DEBUGMSGT(1, "Tried to Open File " << dataPool.Path);
 		if (fd == -1)
 			throw HTTPError(403);
 		dataPool.response.fileFd = fd;
-
-		}
+	}
 	return true;
 }
 

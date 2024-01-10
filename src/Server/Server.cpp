@@ -20,24 +20,32 @@ void Server::CreatSocket(const std::string &node, const std::string &serv)
 	const char *str_servce = serv == "" ? NULL : serv.c_str();
 
 	if (getaddrinfo(str_node, str_servce, &hint, &addr) < 0)
+	{
+		freeaddrinfo(addr);
 		throw std::runtime_error("getaddrinfo() failed");
+	}
 
 	socket_fd = socket(addr->ai_family, addr->ai_socktype, 0);
 	if (socket_fd < 0)
 	{
 		perror("socket: ");
+		freeaddrinfo(addr);
 		throw std::runtime_error("socket() failed");
 	}
 
 	resure_flag = 1;
 
 	if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &resure_flag, sizeof(resure_flag)) < 0)
+	{
+		freeaddrinfo(addr);
 		throw std::runtime_error("setsockopt() failed");
+	}
 
 	if (bind(socket_fd, addr->ai_addr, addr->ai_addrlen) < 0)
 	{
 		perror("bind() ");
-		throw std::runtime_error("bind() failed");
+		freeaddrinfo(addr);
+		throw std::runtime_error("bind() failed : " + node + ":" + serv);
 	}
 	freeaddrinfo(addr);
 	VirtualServersFd.push_back(socket_fd);
@@ -55,4 +63,8 @@ void Server::Run()
 	}
 	std::cout << COLORED("Rolling ....", Green) << std::endl;
 	reactor.EventLoop();
+}
+
+Server::~Server()
+{
 }

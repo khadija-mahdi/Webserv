@@ -20,6 +20,7 @@ class Server
 {
 public:
     Server();
+    ~Server();
 
 public:
     void CreatSocket(const std::string &node, const std::string &serv);

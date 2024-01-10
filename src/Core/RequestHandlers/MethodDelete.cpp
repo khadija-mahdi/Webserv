@@ -59,7 +59,8 @@ bool MethodDelete::DeleteDirectoryHandler()
 	DEBUGMSGT(1, COLORED("Delete Method the Path Is a Directory : " << dataPool.Path, Green));
 	if (dataPool.Path[dataPool.Path.length() - 1] != '/')
 		throw HTTPError(409);
-	if(!dataPool.currentLocation.getCgiAccept().empty()){
+	if (!dataPool.currentLocation.getCgiAccept().empty())
+	{
 		std::vector<std::string> indexes;
 		if (dataPool.locationIndex == -1)
 			indexes = dataPool.currentServer.getIndex();
@@ -69,15 +70,15 @@ bool MethodDelete::DeleteDirectoryHandler()
 		if (!Path.empty())
 		{
 			std::string extention = GetFileExtention(Path);
-			if(dataPool.currentLocation.getCgiAccept() == extention)
-				return (Request::Execute (Path, "DELETE"), false);
+			if (dataPool.currentLocation.hasCgi(extention))
+				return (Request::Execute(Path, "DELETE"), false);
 		}
 		throw HTTPError(403);
 	}
 	else
 	{
 		if (deleteFolderContents(dataPool.Path))
-				throw HTTPError(204);
+			throw HTTPError(204);
 		else
 		{
 			if (hasWritePermission(dataPool.Path))
@@ -90,15 +91,18 @@ bool MethodDelete::DeleteDirectoryHandler()
 
 bool MethodDelete::HandleRequest(std::string &data)
 {
+	DEBUGMSGT(0, COLORED(data, Blue));
+
 	DEBUGMSGT(1, COLORED("\n 	Delete Method Handler : \n", Blue));
-	(void)data;
 	if (directoryStatus(dataPool.Path) == DIRE)
 		return DeleteDirectoryHandler();
-	if (directoryStatus(dataPool.Path) == VALID_PATH ){
+	if (directoryStatus(dataPool.Path) == VALID_PATH)
+	{
 		std::string extention = GetFileExtention(dataPool.Path);
-		if(dataPool.currentLocation.getCgiAccept() == extention)
+		if (dataPool.currentLocation.hasCgi(extention))
 			return (Request::Execute(dataPool.Path, "DELETE"), false);
-		else{
+		else
+		{
 			if (std::remove(dataPool.Path.c_str()) == 0)
 				throw HTTPError(204);
 			throw HTTPError(403);

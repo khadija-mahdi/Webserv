@@ -105,7 +105,9 @@ void ResponseBuilder::FillHeaders(int StatusCode)
 				 ? (SSTR(StatusCode) + " " + StatusCodes[StatusCode])
 				 : ResponseHeaders["Status"];
 	Buffer += ("HTTP/1.1 " + Status + "\r\n");
-	if (dataPool.response.fileFd == NOBODY && dataPool.response.Location.empty())
+	if (this->dataPool.response.StatusCode != 405 &&
+		dataPool.response.fileFd == NOBODY &&
+		dataPool.response.Location.empty())
 		CreateStatusFile();
 	for (HeadersIterator it = ResponseHeaders.begin(); it != ResponseHeaders.end(); it++)
 	{
@@ -116,8 +118,11 @@ void ResponseBuilder::FillHeaders(int StatusCode)
 	if (ResponseHeaders.find("Content-type") == ResponseHeaders.end())
 		Buffer += ("Content-Type: " + this->dataPool.response.contentType + "\r\n");
 	Buffer += "Connection: closed\r\n";
-	Buffer += "Transfer-Encoding: chunked\r\n";
-	Buffer += this->dataPool.response.Location.empty() ? "\r\n" : "Location: " + this->dataPool.response.Location + "\r\n\r\n";
+	if (this->dataPool.response.StatusCode != 405)
+		Buffer += "Transfer-Encoding: chunked\r\n";
+	Buffer += this->dataPool.response.Location.empty()
+				  ? "\r\n"
+				  : ("Location: " + this->dataPool.response.Location + "\r\n\r\n");
 }
 
 bool ResponseBuilder::checkErrorPage(std::map<int, std::string> error_pages)
@@ -154,7 +159,7 @@ int ResponseBuilder::FlushBuffer(int SocketFd)
 
 	if (this->Buffer.empty())
 		return (0);
-	// DEBUGMSGT(1, COLORED(this->Buffer.c_str(), Magenta));
+	DEBUGMSGT(1, COLORED(this->Buffer.c_str(), Magenta));
 	int i = 0;
 	if ((i = write(SocketFd, this->Buffer.c_str(), this->Buffer.size())) < 0 || this->Buffer == "0\r\n\r\n")
 		return (0);

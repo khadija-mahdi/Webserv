@@ -32,8 +32,8 @@ int main(int ac, char **av)
 
 		for (size_t i = 0; i < conf_servers.size(); i++)
 		{
-			if (Containes(taken_ports, conf_servers.at(i).getListen()))
-				continue;
+			// if (Containes(taken_ports, conf_servers.at(i).getListen()))
+			// 	continue;
 			server.CreatSocket(conf_servers.at(i).getHost(), conf_servers.at(i).getListen());
 			taken_ports.push_back(conf_servers.at(i).getListen());
 		}

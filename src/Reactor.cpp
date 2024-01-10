@@ -58,7 +58,7 @@ void Reactor::Dispatch()
 	AcceptEventHandler *server;
 	HttpEventHandler *client;
 	int current_fd;
-	DEBUGMSGT(0, "Dispatch called event_count: " << this->event_count);
+
 	for (int i = 0; i < this->event_count; i++)
 	{
 		current_fd = this->events[i].data.fd;
@@ -101,7 +101,6 @@ void CheckCGIOutput(HttpEventHandler *client)
 	Request *RequestHandler;
 	HeadersType ResponseHeaders;
 
-	
 	if ((RequestHandler = client->GetRequestHandler()))
 	{
 		if (client->GetResponse() != NULL ||
@@ -131,6 +130,8 @@ void Reactor::EventLoop()
 Reactor::~Reactor()
 {
 	delete[] this->events;
+	for (iterator it = this->clients.begin(); it != this->clients.end(); ++it)
+		delete it->second;
 	if (close(this->epoll_fd) < 0)
 		throw std::runtime_error("close(epoll_fd) failed");
 }
