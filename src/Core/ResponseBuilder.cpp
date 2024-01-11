@@ -100,7 +100,7 @@ void ResponseBuilder::CreateStatusFile()
 void ResponseBuilder::FillHeaders(int StatusCode)
 {
 	std::string Status;
-
+	size_t index;
 	Status = ResponseHeaders["Status"].empty()
 				 ? (SSTR(StatusCode) + " " + StatusCodes[StatusCode])
 				 : ResponseHeaders["Status"];
@@ -113,6 +113,11 @@ void ResponseBuilder::FillHeaders(int StatusCode)
 	{
 		if (it->first == "Status")
 			continue;
+		if (it->first == "Content-type" && (index = it->second.find(";")) != std::string::npos)
+		{
+			Buffer += (it->first + ": " + it->second.substr(0, index) + "\r\n");
+			continue;
+		}
 		Buffer += (it->first + ": " + it->second + "\r\n");
 	}
 	if (ResponseHeaders.find("Content-type") == ResponseHeaders.end())
@@ -159,7 +164,7 @@ int ResponseBuilder::FlushBuffer(int SocketFd)
 
 	if (this->Buffer.empty())
 		return (0);
-	DEBUGMSGT(0, COLORED(this->Buffer.c_str(), Magenta));
+	DEBUGMSGT(1, COLORED(this->Buffer.c_str(), Magenta));
 	int i = 0;
 	if ((i = write(SocketFd, this->Buffer.c_str(), this->Buffer.size())) < 0 || this->Buffer == "0\r\n\r\n")
 		return (0);
