@@ -1,6 +1,8 @@
 #include "Location.hpp"
 
-Location::Location(){autoindex = "off";}
+Location::Location(){
+	autoindex = "off";
+}
 
 std::vector<std::string> Location::getIndex() const { return index; }
 
@@ -32,7 +34,6 @@ std::vector<std::string> Location::getAllow() const { return allow; }
 
 bool Location::getUpload() const
 {
-	std::cout << "upload value : " << upload << std::endl;
 	return upload;
 }
 

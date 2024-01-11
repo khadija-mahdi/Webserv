@@ -73,3 +73,4 @@ void singleData(ConfServer &, std::string &);
 void locationValues(Location &, std::string &);
 bool processErrors(std::string &, int &, std::string &);
 bool isDigitStr(std::string &);
+int getDirectoryStatus(const std::string &path);

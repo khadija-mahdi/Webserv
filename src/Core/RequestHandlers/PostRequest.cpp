@@ -13,7 +13,7 @@ bool PostRequest::HandleRequest(std::string &data)
 
 	if (this->UploadBodyState == ZERO && GetRequestedResource())
 		return (PrintfFullRequest(), dataPool.response.StatusCode = OK, true);
-	if (this->UploadBodyState == UP_INPROGRESS || this->UploadBodyState == CGI_INPROGRESS)
+	if (this->UploadBodyState == UP_INPROGRESS || this->UploadBodyState == CGI_INPROGRESS || this->UploadBodyState == EMPTY_INPROGRESS)
 	{
 		if (!this->BodyReady)
 			this->BodyReady = BodyReceiver ? BodyReceiver->Receiver(data) : false;
@@ -26,6 +26,12 @@ bool PostRequest::HandleRequest(std::string &data)
 			else if (this->UploadBodyState == CGI_INPROGRESS)
 				return (Execute(ResourceFilePath, "POST"),
 						this->UploadBodyState = DONE, false);
+			else if (this->UploadBodyState == EMPTY_INPROGRESS)
+			{
+				unlink(this->BodyReceiver->GetFileName().c_str());
+				return (this->UploadBodyState = DONE,
+						dataPool.response.StatusCode = 301, true);
+			}
 		}
 	}
 	return false;
@@ -45,15 +51,21 @@ int PostRequest::GetRequestedResource()
 			throw HTTPError(301);
 		}
 
-		if ((IndexFileName = GetIndex(ResourceFilePath)).empty() &&
-			!this->dataPool.currentLocation.getUpload())
+		if (((IndexFileName = GetIndex(ResourceFilePath)).empty() &&
+			 !this->dataPool.currentLocation.getUpload()) &&
+			!this->dataPool.REDIRECTION_STAGE)
 			throw HTTPError(403);
 
 		ResourceFilePath.append(IndexFileName);
 	}
 
 	FileExtention = GetFileExtention(ResourceFilePath);
-	if(this->dataPool.currentLocation.hasCgi(FileExtention))
+	if (this->dataPool.REDIRECTION_STAGE)
+	{
+		this->BodyReceiver->CreateFile("", true);
+		return (this->UploadBodyState = EMPTY_INPROGRESS, false);
+	}
+	if (this->dataPool.currentLocation.hasCgi(FileExtention))
 	{
 		this->BodyReceiver->CreateFile("", true);
 		this->BodyReceiver->SetIsCGI(true);

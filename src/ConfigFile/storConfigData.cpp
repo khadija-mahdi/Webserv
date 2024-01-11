@@ -336,8 +336,14 @@ void singleData(ConfServer &ConfServer, std::string &ConfServerBlock)
 		}
 		else if (it->first == "host")
 			ConfServer.setHost(it->second.c_str());
-		else if (it->first == "root")
+		else if (it->first == "root"){
+			if( getDirectoryStatus(it->second) != 1){
+				errorMessage << "\033[1;" << Red << "mError: "
+							 << "Not a Valid Root should be a directory end with /: " << it->second << "\033[0m" << std::endl;
+				throw std::runtime_error(errorMessage.str());
+			}
 			ConfServer.setRoot(it->second.c_str());
+		}
 		else if (it->first == "server_names")
 		{
 			std::string key = it->second;
@@ -407,7 +413,7 @@ void locationValues(Location &location, std::string &locationBlock)
 	std::map<std::string, std::string>::iterator it = values.begin();
 	for (; it != values.end(); ++it)
 	{
-
+		location.is_uploadStore = 0;
 		if (it->first == "root")
 			location.setRoot(it->second.c_str());
 		else if (it->first == "index")
@@ -468,6 +474,7 @@ void locationValues(Location &location, std::string &locationBlock)
 		}
 		else if (it->first == "upload_stor")
 		{
+			location.is_uploadStore = 1;
 			if (getDirectoryStatus(it->second) != 1)
 			{
 				errorMessage << "\033[1;" << Red << "mError: "

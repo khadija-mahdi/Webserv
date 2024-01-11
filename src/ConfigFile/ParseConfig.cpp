@@ -156,7 +156,9 @@ void ParseConfig::parseEventsBlock(std::string &events)
 Location ParseConfig::parseLocationBlock(std::string &locationBlock)
 {
 	Location location;
+	location.setUpload(0);
 	locationValues(location, locationBlock);
+
 	return location;
 }
 
@@ -172,7 +174,13 @@ void ParseConfig::locationInServer(std::string &ServerBlock, ConfServer &ConfSer
 	for (size_t i = 0; i < extractedBlocks.size(); ++i)
 	{
 		Location location = parseLocationBlock(extractedBlocks[i].first);
-
+		if(paths[i][0] != '/' || paths[i][paths[i].length() - 1 ] != '/')
+		{
+			errorMessage << "\033[1;" << Red << "mError: "
+						 << "Location Path  " << paths[i] << " should end and start with '/' :"
+						 << "\033[0m" << std::endl;
+			throw std::runtime_error(errorMessage.str());
+		}
 		location.setPath(paths[i]);
 		ConfServerConfig.addLocation(location);
 		if (location.getPath() == "/")
@@ -187,6 +195,14 @@ void ParseConfig::locationInServer(std::string &ServerBlock, ConfServer &ConfSer
 		start = extractedBlocks[0].second.first;
 		end = extractedBlocks[i].second.second;
 	}
+	std::vector<Location> locations = ConfServerConfig.getLocations();;
+	for(size_t i = 0; i <  locations.size(); i++){
+		if((locations[i].getUpload() == true && locations[i].getUpload_stor().empty())){
+			errorMessage << "\033[1;" << Red << "mError: "
+				<<  "upload on and no upload_store exist ! " << "\033[0m" << std::endl;
+			throw std::runtime_error(errorMessage.str());
+		}
+	}
 	ServerBlock = ServerBlock.substr(0, start) + ServerBlock.substr(end + 1);
 }
 
@@ -196,6 +212,7 @@ ConfServer ParseConfig::parseServerBlock(std::string &serverBlock)
 	std::istringstream BlockStream(serverBlock);
 	locationInServer(serverBlock, server);
 	singleData(server, serverBlock);
+
 	return server;
 }
 

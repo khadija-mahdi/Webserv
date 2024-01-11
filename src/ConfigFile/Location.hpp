@@ -27,6 +27,7 @@ private:
 	bool		 upload;
 
 public:
+	int is_uploadStore;
 	Location();
 	std::map<int, std::string> getError_pages() const;
 	std::vector<std::string> getAllow() const;

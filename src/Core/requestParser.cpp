@@ -157,31 +157,35 @@ bool RequestParser::redirectionType(std::vector<Location> &confLocation, DataPoo
 
 void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation, DataPool &headerData)
 {
-	size_t i = 0;
 	size_t start = 0, end = 0;
-	for (; i < confLocation.size(); i++)
-	{
-		std::string locPath = confLocation[i].getPath();
-		start = headerData.Path.find(confLocation[i].getPath());
-		if (start != std::string::npos)
-		{
-			headerData.locationIndex = i;
-			break;
+	bool pathMatched = false;
+	size_t length = 0;
+	std::string matched = headerData.Path;
+	for (size_t i = 0; i < confLocation.size(); ++i) {
+		if (confLocation[i].getPath() == "/") 
+			continue;
+		if (matched.find(confLocation[i].getPath()) != std::string::npos) {
+			if (confLocation[i].getPath().length() > length){
+				length = confLocation[i].getPath().length();
+				headerData.locationIndex = i;
+				pathMatched = true;
+			}
 		}
 	}
-
-	if ((headerData.Path) == "/" && headerData.locationIndex == -1)
+	if (!pathMatched && headerData.currentServer.getDefaultLocation() != -1)
 	{
 		headerData.locationIndex = headerData.currentServer.getDefaultLocation();
-		std::cout << headerData.Path << std::endl;
-		// headerData.Path += "/";
+		std::cout << matched << std::endl;
+		if(matched == "/")
+			headerData.Path += "/";
 	}
+
 	if (headerData.locationIndex != -1)
 	{
 		headerData.currentLocation = confLocation[headerData.locationIndex];
 		if (!headerData.currentLocation.getRedirection().ReturnLocation.empty()){
 			headerData.REDIRECTION_STAGE = true;
-			headerData.Path = headerData.currentLocation.getRedirection().ReturnLocation;
+			headerData.response.Location = headerData.currentLocation.getRedirection().ReturnLocation;
 			headerData.response.StatusCode = headerData.currentLocation.getRedirection().statusCode;
 		}
 		end = confLocation[headerData.locationIndex].getPath().length();
@@ -232,7 +236,7 @@ void RequestParser::ParseRequest(DataPool &headerData, std::string Buffer)
 		getCurrentLocationIndex(confLocation, headerData);
 	if (!headerData.REDIRECTION_STAGE && !headerData.currentServer.getRedirection().ReturnLocation.empty()){
 		headerData.REDIRECTION_STAGE = true;
-		headerData.Path = headerData.currentServer.getRedirection().ReturnLocation;
+		headerData.response.Location = headerData.currentServer.getRedirection().ReturnLocation;
 		headerData.response.StatusCode = headerData.currentServer.getRedirection().statusCode;
 
 	}
@@ -244,5 +248,6 @@ void RequestParser::ParseRequest(DataPool &headerData, std::string Buffer)
 		DEBUGMSGT(1, COLORED("\n the current Location is  : " << headerData.currentLocation.getPath() << "\n", Cyan));
 		DEBUGMSGT(1, COLORED("\n the Path : " << headerData.Path << ", dir status : " << directoryStatus(headerData.Path) << "\n", Green));
 		DEBUGMSGT(1, COLORED("\n REDIRECTION_STAGE " << headerData.REDIRECTION_STAGE << "\n", Green));
+		DEBUGMSGT(1, COLORED("\n MEthod " << headerData.Method << "\n", Green));
 
 }

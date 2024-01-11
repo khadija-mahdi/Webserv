@@ -42,14 +42,13 @@ bool RequestHandler::parseHeaderErrors()
 	{
 		std::vector<std::string> allowMethod = dataPool.currentLocation.getAllow();
 		int allow = std::find(allowMethod.begin(), allowMethod.end(), dataPool.Method) != allowMethod.end();
-		if (!allow)
+		if (!allow){
+			std::cout << "here ";
 			throw HTTPError(405);
+		}
 	}
-	if (dataPool.REDIRECTION_STAGE)
-	{
-		dataPool.response.Location = dataPool.Path;
+	if (dataPool.REDIRECTION_STAGE && dataPool.Method != "POST")
 		return true;
-	}
 	if (GetHeadersValue(dataPool.Headers, "Transfer-Encoding") == "chunked")
 	{
 		this->request->SetBodyController(Chunked, 0);

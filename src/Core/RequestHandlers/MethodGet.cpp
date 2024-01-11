@@ -84,9 +84,8 @@ bool MethodGet::handleDirectoryPath()
 		throw HTTPError(403);
 
 	std::vector<std::string> indexes;
-	if (dataPool.locationIndex == -1)
-		indexes = dataPool.currentServer.getIndex();
-	else
+	indexes = dataPool.currentServer.getIndex();
+	if (dataPool.currentLocation.getIndex().size() > 0)
 		indexes = dataPool.currentLocation.getIndex();
 	std::string Path = getCorrectIndex(indexes, dataPool.Path);
 	if (indexes.size() > 0 && !Path.empty())

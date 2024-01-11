@@ -18,41 +18,40 @@ bool hasWritePermission(const std::string &path)
 	}
 	return true;
 }
+bool deleteFolderContents(const std::string &folderPath) {
+    DIR *dir = opendir(folderPath.c_str());
+    if (dir != NULL) {
+        struct dirent *entry;
+        while ((entry = readdir(dir)) != NULL) {
+            if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+                std::string filePath = folderPath + "/" + entry->d_name;
 
-bool deleteFolderContents(const std::string &folderPath)
-{
-	DIR *dir = opendir(folderPath.c_str());
-	if (dir != NULL)
-	{
-		struct dirent *entry;
-		while ((entry = readdir(dir)) != NULL)
-		{
-			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
-			{
-				std::string filePath = folderPath + "/" + entry->d_name;
+                if (!access(filePath.c_str(), W_OK)) {
+                    closedir(dir);
+                    return false;
+                }
 
-				int status = directoryStatus(filePath);
-				if (status == 1)
-				{
-					if (!deleteFolderContents(filePath))
-					{
-						closedir(dir);
-						return false;
-					}
-				}
-				if (unlink(filePath.c_str()) != 0 && rmdir(filePath.c_str()) != 0)
-				{
-					closedir(dir);
-					return false;
-				}
-			}
-		}
-		closedir(dir);
-	}
-	else
-		return false;
-	return true;
+                int status = directoryStatus(filePath);
+                if (status == 1) {
+                    if (!deleteFolderContents(filePath)) {
+                        closedir(dir);
+                        return false;
+                    }
+                }
+
+                if (unlink(filePath.c_str()) != 0 && rmdir(filePath.c_str()) != 0) {
+                    closedir(dir);
+                    return false;
+                }
+            }
+        }
+        closedir(dir);
+    } else {
+        return false;
+    }
+    return true;
 }
+
 
 bool MethodDelete::DeleteDirectoryHandler()
 {
@@ -62,9 +61,8 @@ bool MethodDelete::DeleteDirectoryHandler()
 	if (!dataPool.currentLocation.getCgiAccept().empty())
 	{
 		std::vector<std::string> indexes;
-		if (dataPool.locationIndex == -1)
-			indexes = dataPool.currentServer.getIndex();
-		else
+		indexes = dataPool.currentServer.getIndex();
+		if (dataPool.currentLocation.getIndex().size() > 0)
 			indexes = dataPool.currentLocation.getIndex();
 		std::string Path = getCorrectIndex(indexes, dataPool.Path);
 		if (!Path.empty())

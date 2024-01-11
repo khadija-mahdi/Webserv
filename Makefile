@@ -8,7 +8,6 @@ OBJ = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
 CPP = c++
 CPPFLAGS = -Wall -Wextra -Werror -std=c++98
-
 GREEN = \033[0;32m
 RED = \033[0;31m
 NC = \033[0m

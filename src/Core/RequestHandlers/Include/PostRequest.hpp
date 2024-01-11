@@ -5,25 +5,26 @@
 
 enum
 {
-    ZERO,
-    UP_INPROGRESS,
-    CGI_INPROGRESS,
-    DONE
+	ZERO,
+	UP_INPROGRESS,
+	EMPTY_INPROGRESS,
+	CGI_INPROGRESS,
+	DONE
 };
 
 class PostRequest : public Request
 {
 private:
-    int fds[2];
-    int UploadBodyState;
-    std::string FileExtention;
+	int fds[2];
+	int UploadBodyState;
+	std::string FileExtention;
 
 public:
-    PostRequest(DataPool &dataPool);
-    virtual bool HandleRequest(std::string &data);
-    virtual int GetRequestedResource();
-    bool RecieveBody(std::string &data);
-    ~PostRequest();
+	PostRequest(DataPool &dataPool);
+	virtual bool HandleRequest(std::string &data);
+	virtual int GetRequestedResource();
+	bool RecieveBody(std::string &data);
+	~PostRequest();
 };
 
 #endif
