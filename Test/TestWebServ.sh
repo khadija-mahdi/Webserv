@@ -1,1 +1,1 @@
-siege  -b --file=staging-urls.txt --internet  --reps=200 --concurrent=255 --no-parser
+siege  -b --file=staging-urls.txt --internet

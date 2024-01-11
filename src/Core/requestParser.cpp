@@ -162,23 +162,27 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation,
 	size_t length = 0;
 	std::string matched = headerData.Path;
 	for (size_t i = 0; i < confLocation.size(); ++i) {
-		if (confLocation[i].getPath() == "/") 
-			continue;
-		if (matched.find(confLocation[i].getPath()) != std::string::npos) {
-			if (confLocation[i].getPath().length() > length){
-				length = confLocation[i].getPath().length();
-				headerData.locationIndex = i;
-				pathMatched = true;
-			}
-		}
-	}
-	if (!pathMatched && headerData.currentServer.getDefaultLocation() != -1)
-	{
-		headerData.locationIndex = headerData.currentServer.getDefaultLocation();
-		std::cout << matched << std::endl;
-		if(matched == "/")
-			headerData.Path += "/";
-	}
+        if (confLocation[i].getPath() == "/") 
+            continue;
+
+        std::string pathToCheck = confLocation[i].getPath();
+        size_t foundPosition = matched.find(pathToCheck);
+
+        if (foundPosition != std::string::npos && foundPosition == 0) {
+            if (pathToCheck.length() > length) {
+                length = pathToCheck.length();
+                headerData.locationIndex = i;
+                pathMatched = true;
+            }
+        }
+    }
+    if (!pathMatched && headerData.currentServer.getDefaultLocation() != -1) {
+        headerData.locationIndex = headerData.currentServer.getDefaultLocation();
+        std::cout << matched << std::endl;
+        if (matched == "/") {
+            headerData.Path += "/";
+        }
+    }
 
 	if (headerData.locationIndex != -1)
 	{

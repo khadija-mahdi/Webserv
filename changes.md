@@ -1,5 +1,7 @@
 ## THING TO CHECK
 - remove all perror and errno
+- check http default values :	default_type application/octet-stream;
+- default_type application/octet-stream;
 ## DONE
 - redir + body hangs
 - Test Cockies And CGI

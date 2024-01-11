@@ -10,32 +10,50 @@ void HandleSigPip(int signal)
 	write(1, msg.c_str(), msg.size());
 }
 
+bool FindTakenPorts(ServerMap &map, std::string port)
+{
+	ServerMap::iterator it;
+	it = map.find(port);
+	if (it != map.end())
+		return (true);
+	return (false);
+}
+
+bool IsServerNamesEquals(std::vector<std::string> s1, std::vector<std::string> s2)
+{
+	if (s1.size() != s2.size())
+		return false;
+	for (size_t i = 0; i < s1.size(); i++)
+	{
+		if (s1.at(i) != s2.at(i))
+			return (false);
+	}
+	return (true);
+}
+
 int main(int ac, char **av)
 {
-	std::vector<std::string> taken_ports;
+	(void)ac;
+
+	ServerMap taken_ports;
 	std::vector<ConfServer> conf_servers;
 	Server server;
 	ParseConfig parseConfig;
-
 	signal(SIGPIPE, HandleSigPip);
-	if (ac != 2)
-	{
-		std::cout << "Please Provide a Conf file" << std::endl;
-		exit(1);
-	}
 
 	try
 	{
-
-		parseConfig.pacingConfigFile(av[1]);
+		parseConfig.pacingConfigFile((char *)(ac == 2 ? av[1] : "config/config_file.conf"));
 		conf_servers = Configurations::http.getConfServes();
 
 		for (size_t i = 0; i < conf_servers.size(); i++)
 		{
-			// if (Containes(taken_ports, conf_servers.at(i).getListen()))
-			// 	continue;
+			if (FindTakenPorts(taken_ports, conf_servers.at(i).getListen()) &&
+				!IsServerNamesEquals(taken_ports[conf_servers.at(i).getListen()],
+									 conf_servers.at(i).getConfServer_names()))
+				continue;
 			server.CreatSocket(conf_servers.at(i).getHost(), conf_servers.at(i).getListen());
-			taken_ports.push_back(conf_servers.at(i).getListen());
+			taken_ports[conf_servers.at(i).getListen()] = conf_servers.at(i).getConfServer_names();
 		}
 		server.Run();
 	}

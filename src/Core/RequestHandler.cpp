@@ -42,7 +42,8 @@ bool RequestHandler::parseHeaderErrors()
 	{
 		std::vector<std::string> allowMethod = dataPool.currentLocation.getAllow();
 		int allow = std::find(allowMethod.begin(), allowMethod.end(), dataPool.Method) != allowMethod.end();
-		if (!allow){
+		if (!allow)
+		{
 			std::cout << "here ";
 			throw HTTPError(405);
 		}
@@ -87,7 +88,6 @@ bool RequestHandler::HandlerRequest1(std::string Data)
 	std::string Buffer;
 	Buffer += Data;
 	size_t index;
-
 	switch (REQUEST_STATE)
 	{
 	case HEADERS_STAGE:

@@ -78,25 +78,10 @@ void ParseConfig::readConfigFile(std::string const &file)
 	std::ifstream conf(file.c_str());
 	if (!conf.is_open())
 	{
-		std::ifstream defaultConf("config/config_file.conf");
-		if (!defaultConf.is_open())
-		{
-			errorMessage << "\033[1;" << Red << "mError: "
-						 << "could not open file."
-						 << "\033[0m" << std::endl;
-			throw std::runtime_error(errorMessage.str());
-		}
-		conf.close();
-		conf.clear();
-		conf.open("config/config_file.conf", std::ios::in);
-
-		if (!conf.is_open())
-		{
-			errorMessage << "\033[1;" << Red << "mError: "
-						 << "m\ncould not open file."
-						 << "\033[0m" << std::endl;
-			throw std::runtime_error(errorMessage.str());
-		}
+		errorMessage << "\033[1;" << Red << "mError: "
+					 << "could not open file."
+					 << "\033[0m" << std::endl;
+		throw std::runtime_error(errorMessage.str());
 	}
 	while (std::getline(conf, line, '\n'))
 	{
@@ -174,7 +159,7 @@ void ParseConfig::locationInServer(std::string &ServerBlock, ConfServer &ConfSer
 	for (size_t i = 0; i < extractedBlocks.size(); ++i)
 	{
 		Location location = parseLocationBlock(extractedBlocks[i].first);
-		if(paths[i][0] != '/' || paths[i][paths[i].length() - 1 ] != '/')
+		if (paths[i][0] != '/' || paths[i][paths[i].length() - 1] != '/')
 		{
 			errorMessage << "\033[1;" << Red << "mError: "
 						 << "Location Path  " << paths[i] << " should end and start with '/' :"
@@ -195,11 +180,15 @@ void ParseConfig::locationInServer(std::string &ServerBlock, ConfServer &ConfSer
 		start = extractedBlocks[0].second.first;
 		end = extractedBlocks[i].second.second;
 	}
-	std::vector<Location> locations = ConfServerConfig.getLocations();;
-	for(size_t i = 0; i <  locations.size(); i++){
-		if((locations[i].getUpload() == true && locations[i].getUpload_stor().empty())){
+	std::vector<Location> locations = ConfServerConfig.getLocations();
+	;
+	for (size_t i = 0; i < locations.size(); i++)
+	{
+		if ((locations[i].getUpload() == true && locations[i].getUpload_stor().empty()))
+		{
 			errorMessage << "\033[1;" << Red << "mError: "
-				<<  "upload on and no upload_store exist ! " << "\033[0m" << std::endl;
+						 << "upload on and no upload_store exist ! "
+						 << "\033[0m" << std::endl;
 			throw std::runtime_error(errorMessage.str());
 		}
 	}

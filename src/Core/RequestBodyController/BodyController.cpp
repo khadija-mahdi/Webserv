@@ -169,14 +169,12 @@ void BodyController::SaveBodyAsFile()
 
 void BodyController::WriteToFile(std::string &chunk)
 {
-
 	this->WrittenBytes += chunk.length();
 	if (this->WrittenBytes > Configurations::http.getMax_body_size())
 		throw HTTPError(413);
 	if (write(this->FileFd, chunk.c_str(), chunk.length()) < 0)
-	{
-		throw std::runtime_error("Write() Failed");
-	}
+		throw std::runtime_error("Write() Failed, FileFd " + SSTR(this->FileFd));
+
 	chunk.clear();
 }
 

@@ -25,6 +25,7 @@ typedef enum Colors
 } t_colors;
 
 #define COLORED(str, color) "\033[1;" << color << "m" << str << "\033[0m"
+#define STRCOLORED(str, color) "\033[1;" + SSTR(color) + "m" + str + "\033[0m"
 
 /**
  * 1-                   activate for all

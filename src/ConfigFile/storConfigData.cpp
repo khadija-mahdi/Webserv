@@ -146,7 +146,7 @@ std::map<std::string, std::string> extractKeyValues(const std::string &Block, st
 		{
 			parts.push_back(part);
 		}
-		if (parts[0] == "{" || parts[0] == "}")
+		if (parts.size() && (parts[0] == "{" || parts[0] == "}"))
 			continue;
 
 		if (parts.size() >= 2)
@@ -395,7 +395,6 @@ int getDirectoryStatus(const std::string &path)
 		}
 		else if (S_ISREG(directoryInfo.st_mode))
 			return 2; // is path exist;
-		return 0;	  // is not
 	}
 	return -1; // is not exist
 }

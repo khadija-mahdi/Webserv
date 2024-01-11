@@ -58,7 +58,7 @@ void Server::Run()
 	for (std::vector<int>::iterator it = VirtualServersFd.begin(); it != VirtualServersFd.end(); it++)
 	{
 		if (listen(*it, 100) < 0)
-			throw std::runtime_error("listen() failed");
+			throw std::runtime_error(STRCOLORED("This Port Already In Use", Red));
 		reactor.RegisterSocket(*it, new AcceptEventHandler(*it));
 	}
 	std::cout << COLORED("Rolling ....", Green) << std::endl;

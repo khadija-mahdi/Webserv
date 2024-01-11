@@ -1,0 +1,1 @@
+curl --resolve example.com:3015:127.0.0.1 example.com:3015/

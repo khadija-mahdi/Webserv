@@ -29,6 +29,7 @@
 #define STREAM_TO_STRING(x) static_cast<std::ostringstream &>(std::ostringstream() << x).str()
 
 typedef std::map<std::string, std::string> HeadersType;
+typedef std::map<std::string, std::vector<std::string> > ServerMap;
 
 enum
 {

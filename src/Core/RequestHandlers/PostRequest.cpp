@@ -9,7 +9,6 @@ PostRequest::PostRequest(DataPool &dataPool) : Request(dataPool)
 
 bool PostRequest::HandleRequest(std::string &data)
 {
-	DEBUGMSGT(0, COLORED(Lstring::encode_binary_to_text(data), Red));
 
 	if (this->UploadBodyState == ZERO && GetRequestedResource())
 		return (PrintfFullRequest(), dataPool.response.StatusCode = OK, true);
@@ -19,7 +18,6 @@ bool PostRequest::HandleRequest(std::string &data)
 			this->BodyReady = BodyReceiver ? BodyReceiver->Receiver(data) : false;
 		if (this->BodyReady)
 		{
-			DEBUGMSGT(1, "BodyReady : " << this->BodyReceiver->GetFileName());
 			if (this->UploadBodyState == UP_INPROGRESS)
 				return (this->UploadBodyState = DONE,
 						dataPool.response.StatusCode = CREATED, true);

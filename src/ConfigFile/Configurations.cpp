@@ -2,7 +2,6 @@
 #define MB 1048576
 #define GB 1073741824
 
-
 //---------------------------------Events class -------------------------------
 int Configurations::Events::worker_connections = 0;
 Http Configurations::http;
@@ -13,12 +12,15 @@ void Configurations::Events::setWorkerConnections(int worCon) { worker_connectio
 
 //------------------------------------------Http class --------------------------------------------
 
-unsigned long long Http::getMax_body_size() { return ConvertToBytes(max_body_size); }
+unsigned long long Http::getMax_body_size() { return max_body_size; }
 std::string Http::getDefault_type() { return default_type; }
 std::map<int, std::string> Http::getError_pages() { return error_pages; }
 std::map<std::string, std::string> Http::getMimeTypes() const { return MimeTypes; }
 std::vector<ConfServer> Http::getConfServes() { return ConfServers; }
-void Http::setMax_body_size(std::string &bodySize) { max_body_size = bodySize; }
+void Http::setMax_body_size(std::string &bodySize)
+{
+	max_body_size = ConvertToBytes(bodySize);
+}
 void Http::setDefault_type(std::string &defTyp) { default_type = defTyp; }
 
 void Http::setError_pages(std::map<int, std::string> &maperr) { error_pages = maperr; }
@@ -50,8 +52,8 @@ unsigned long long ConvertToBytes(std::string &value)
 		if (!isdigit(value[i]))
 		{
 			errorMessage << "\033[1;" << 31 << "mError: "
-						<< "\nInvalide Value of `client_max_body_size` Incorrect" << value
-						<< "\033[0m" << std::endl;
+						 << "\nInvalide Value of `client_max_body_size` Incorrect" << value
+						 << "\033[0m" << std::endl;
 			throw std::runtime_error(errorMessage.str());
 		}
 	}
