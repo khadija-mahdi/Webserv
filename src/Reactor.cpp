@@ -34,7 +34,6 @@ void Reactor::UnRegisterSocket(int SocketFd)
 							   Red));
 	if (epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, SocketFd, NULL) < 0)
 	{
-		perror("epoll failed");
 		throw std::runtime_error("epoll_ctl() `EPOLL_CTL_DEL` failed fd : " + SSTR(SocketFd));
 	}
 

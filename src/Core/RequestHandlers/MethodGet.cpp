@@ -1,4 +1,5 @@
 #include "Include/MethodGet.hpp"
+#define vebros 0
 
 MethodGet::MethodGet(DataPool &Data) : Request(Data) {}
 
@@ -8,7 +9,6 @@ bool MethodGet::processRedirection()
 {
 	if (dataPool.REDIRECTION_STAGE)
 	{
-		std::cout << " data path : " << dataPool.Path << std::endl;
 		dataPool.response.Location = dataPool.Path;
 		return true;
 	}
@@ -62,6 +62,7 @@ std::string autoIndexListenDir(DataPool &dataPool)
 	autoindex << buffer;
 	closedir(dir);
 	autoindex.close();
+	dataPool.response.contentType = "text/html";
 	return FileName;
 }
 std::string getCorrectIndex(std::vector<std::string> &indexes, std::string &Path)
@@ -105,14 +106,14 @@ bool MethodGet::handleDirectoryPath()
 
 bool MethodGet::GetFileHandler()
 {
-	DEBUGMSGT(1, "GET OPENED FILE : ");
+	DEBUGMSGT(vebros, "GET OPENED FILE : ");
 	std::string extention = GetFileExtention(dataPool.Path);
 	if (dataPool.currentLocation.hasCgi(extention))
 		return (Request::Execute(dataPool.Path, "GET"), false);
 	else
 	{
 		int fd = open(dataPool.Path.c_str(), O_RDONLY, 0664);
-		DEBUGMSGT(1, "Tried to Open File " << dataPool.Path);
+		DEBUGMSGT(vebros, "Tried to Open File " << dataPool.Path);
 		if (fd == -1)
 			throw HTTPError(403);
 		dataPool.response.fileFd = fd;
@@ -122,7 +123,7 @@ bool MethodGet::GetFileHandler()
 
 bool MethodGet::GetDirectoryHandler()
 {
-	DEBUGMSGT(1, COLORED("\n 		GET Method Directory Handler : \n ", Green));
+	DEBUGMSGT(vebros, COLORED("\n 		GET Method Directory Handler : \n ", Green));
 	if (dataPool.Path[dataPool.Path.length() - 1] != '/')
 	{
 		dataPool.response.Location = dataPool.url + "/";
@@ -136,7 +137,7 @@ bool MethodGet::GetDirectoryHandler()
 bool MethodGet::HandleRequest(std::string &data)
 {
 	(void)data;
-	DEBUGMSGT(1, COLORED("\n 		GET Method Handler : \n ", Yellow));
+	DEBUGMSGT(vebros, COLORED("\n 		GET Method Handler : \n ", Yellow));
 	if (directoryStatus(dataPool.Path) == VALID_PATH)
 		return GetFileHandler();
 	return GetDirectoryHandler();

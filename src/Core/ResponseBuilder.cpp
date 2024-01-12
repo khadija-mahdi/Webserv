@@ -66,6 +66,8 @@ ResponseBuilder::ResponseBuilder(DataPool dataPool, HeadersType &ResponseHeaders
 
 void getContentType(DataPool &headerData)
 {
+	if (!headerData.response.contentType.empty())
+		return;
 	size_t pos = headerData.Path.find(".");
 	if (pos != std::string::npos)
 	{
@@ -146,7 +148,6 @@ void ResponseBuilder::FillHeaders(int StatusCode)
 		}
 		Buffer += (it->first + ": " + it->second + "\r\n");
 	}
-	DEBUGMSGT(1, COLORED("- " << this->dataPool.response.contentType << " -", Yellow));
 	if (ResponseHeaders.find("Content-type") == ResponseHeaders.end())
 		Buffer += ("Content-Type: " + this->dataPool.response.contentType + "\r\n");
 	Buffer += "Connection: closed\r\n";
@@ -191,7 +192,6 @@ int ResponseBuilder::FlushBuffer(int SocketFd)
 
 	if (this->Buffer.empty())
 		return (0);
-	DEBUGMSGT(1, COLORED(this->Buffer.c_str(), Magenta));
 	int i = 0;
 	if ((i = write(SocketFd, this->Buffer.c_str(), this->Buffer.size())) < 0 || this->Buffer == "0\r\n\r\n")
 		return (0);

@@ -43,10 +43,7 @@ bool RequestHandler::parseHeaderErrors()
 		std::vector<std::string> allowMethod = dataPool.currentLocation.getAllow();
 		int allow = std::find(allowMethod.begin(), allowMethod.end(), dataPool.Method) != allowMethod.end();
 		if (!allow)
-		{
-			std::cout << "here ";
 			throw HTTPError(405);
-		}
 	}
 	if (dataPool.REDIRECTION_STAGE && dataPool.Method != "POST")
 		return true;
@@ -77,7 +74,6 @@ bool RequestHandler::processRedirection()
 	if (dataPool.REDIRECTION_STAGE)
 	{
 		dataPool.response.Location = dataPool.Path;
-		std::cout << " data path : " << dataPool.Path << std::endl;
 		return true;
 	}
 	return false;

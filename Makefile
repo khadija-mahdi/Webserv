@@ -13,7 +13,7 @@ RED = \033[0;31m
 NC = \033[0m
 RM = rm -f
 
-all: Start
+all: $(NAME)
 
 $(OBJ_DIR)/%.o: %.cpp $(INC)
 	@mkdir -p $(dir $@)

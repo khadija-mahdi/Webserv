@@ -1,0 +1,723 @@
+@import url('http://fonts.cdnfonts.com/css/neometric-2?styles=26751,26748,26747,26764,26762,26753,26769,26755,26771,26743,26773,26745,26760,26741,26757,26750,26766,26775,26774');
+@font-face {
+    font-family: nBold;
+    src: url(/Neometric/Neometric\ Alt\ Bold\ \(Regular\).otf);
+}
+
+* {
+    padding: 0%;
+    margin: 0%;
+    box-sizing: border-box;
+    font-family: 'Neometric', sans-serif;
+    font-family: 'Neometric Alt', sans-serif;
+    user-select: none;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+ul {
+    list-style: none;
+}
+
+#circle {
+    position: fixed;
+    transform: translate(-50%, -50%);
+    height: 10px;
+    z-index: 20;
+    width: 10px;
+    pointer-events: none;
+    background-color: black;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 100ms ease;
+    opacity: 1;
+}
+
+body {
+    height: 100vh;
+    overflow: -moz-scrollbars-vertical;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.titles * {
+    margin: 10%;
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+}
+
+.icon {
+    display: none;
+    position: fixed;
+    top: -7vw;
+    right: -5vw;
+    z-index: 15;
+}
+
+.icon img {
+    width: 37px;
+}
+
+.logo {
+    padding-left: 2%;
+}
+
+.logo img {
+    width: 50%;
+}
+
+.headline,
+.title,
+.title {
+    position: relative;
+    width: 100%;
+    margin-top: 10%;
+    display: flex;
+    align-items: center;
+    font-size: 10vw;
+    font-family: nBold;
+    margin-left: 8%;
+}
+
+.parag p,
+.title p,
+.title p {
+    width: 100vw;
+    font-size: 2.3vw;
+}
+
+.headline h1 {
+    font-size: 5.3vw;
+}
+
+.parag {
+    width: 100%;
+    margin-top: 4%;
+    font-family: 'Neometric', sans-serif;
+    font-size: 1.4rem;
+    margin-bottom: 10%;
+}
+
+.parag .mobile {
+    display: none;
+}
+
+
+/*page2*/
+
+.title,
+.title {
+    font-size: 1.5rem;
+}
+
+.title *,
+.title * {
+    margin: 0 1%;
+    font-family: nBold;
+}
+
+
+/* page3 */
+
+.b_Cntctus_784 {
+    width: 14vw;
+    padding: 5% 1%;
+    border: 1px solid #dadada;
+    border-radius: 50px;
+    background: none;
+    margin-top: 15%;
+    font-size: 1vw;
+}
+
+.b_Cntctus_784:focus {
+    outline: none;
+}
+
+.b_url {
+    text-decoration: none;
+    font-size: 1vw;
+    color: black;
+}
+
+.menu {
+    width: 90%;
+    padding: 2%;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.titles {
+    display: flex;
+}
+
+.headlines * {
+    margin: 10%;
+    display: flex;
+    align-items: center;
+    font-size: 1.4rem;
+}
+
+.icon img {
+    width: 37px;
+}
+
+.logo {
+    padding-left: 2%;
+}
+
+.logo img {
+    width: 50%;
+}
+
+.headline,
+.parag,
+.title,
+.title {
+    position: relative;
+    width: 80%;
+    margin-top: 10%;
+    display: flex;
+    align-items: center;
+    font-size: 2.3rem;
+    font-family: nBold;
+    margin-left: 8%;
+}
+
+.parag p {
+    font-size: 2vw;
+}
+
+
+/* .headline h1 {
+    font-size: 5.3vw;
+} */
+
+.view {
+    position: absolute;
+    background-color: #3678FF;
+    color: white;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    right: -1%;
+    top: -30%;
+    font-size: 1rem;
+}
+
+.headline .view {
+    background-color: #3678FF;
+    color: white;
+    width: 8vw;
+    height: 8vw;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    right: -1%;
+    top: -70%;
+}
+
+.headline .view p {
+    font-size: 2vw;
+}
+
+
+/* 
+.parag {
+    width: 60%;
+    margin-top: 4%;
+    font-family: 'Neometric', sans-serif;
+    font-size: 1.4rem;
+    margin-bottom: 10%;
+}
+ */
+
+
+/*page2*/
+
+.title,
+.title {
+    font-size: 1.5rem;
+}
+
+.title *,
+.title * {
+    margin: 0 1%;
+    font-family: nBold;
+}
+
+.title .s {
+    color: white;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+}
+
+.headlin p,
+.headlin p {
+    margin-left: 9%;
+    font-style: normal;
+    font-size: 1rem;
+    margin-top: 1%;
+}
+
+.headlin .title h1 {
+    font-size: 3.5vw;
+}
+
+.elements {
+    margin-top: 3%;
+}
+
+.service_elemnt {
+    width: 100%;
+    display: flex;
+    border-radius: 10%;
+    padding: 11% 0 15% 0;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0px 0px 12px 1px #F5F5F5;
+    transition: 0.3s;
+}
+
+.service_elemnt .circul {
+    display: flex;
+    width: 117px;
+    height: 117px;
+    background-color: #F5F8FF;
+    border-radius: 50%;
+    justify-content: center;
+}
+
+.service_elemnt .innercircul {
+    display: flex;
+    width: 0px;
+    align-self: center;
+    height: 0px;
+    background-color: #3678FF;
+    border-radius: 50%;
+    justify-content: center;
+    align-items: center;
+}
+
+.service_elemnt .circul:hover .innercircul {
+    animation: scale 300ms forwards ease;
+}
+
+.service_elemnt img {
+    width: 64px;
+    align-self: center;
+}
+
+.service_elemnt h3 {
+    font-size: 1.1vw;
+    margin-top: 10%;
+    font-family: nBold;
+}
+
+.service_elemnt p {
+    margin: 10%;
+    margin-top: 5%;
+    font-size: 0.9vw;
+    text-align: center;
+}
+
+.elements ul {
+    width: 100%;
+    height: 100%;
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: start;
+    margin: 0 10% 0 10%;
+    margin-left: 8%;
+}
+
+.elements ul li {
+    width: 26%;
+    height: 46%;
+    margin: 1%;
+    margin-right: 2%;
+    cursor: pointer;
+}
+
+
+/* hide scroll bar */
+
+
+/*
+ *  STYLE 1
+ */
+
+ ::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+ ::-webkit-scrollbar {
+    background-color: none;
+    width: 12px;
+}
+
+ ::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 1);
+    border: 3px solid transparent;
+    border-radius: 9px;
+    background-clip: content-box;
+}
+
+@keyframes scale {
+    from {}
+    to {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+
+/* page3 */
+
+.page3 {
+    position: relative;
+}
+
+.pag3_container {
+    margin-top: 5%;
+    display: grid;
+    grid-template-columns: 1fr 30% auto;
+}
+
+.leftside {
+    margin: 0 9% 0 20%;
+}
+
+.leftside .c_872CHq {
+    font-family: 'Neometric', sans-serif;
+    font-style: normal;
+    font-size: 4vw;
+    font-weight: 800;
+}
+
+.P_7892ZX {
+    font-size: 1rem;
+    margin-top: 3%;
+    font-family: 300;
+    line-height: 200%;
+}
+
+
+/* right side*/
+
+.side {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10%;
+    padding: 10% 0% 20% 5%;
+}
+
+.side h1 {
+    margin: 5% 0% 0% 0;
+}
+
+.h5_ls_987 {
+    font-size: 1.2rem;
+}
+
+.click_logo {
+    width: 35%;
+}
+
+.b_url {
+    text-decoration: none;
+    font-size: 1.2rem;
+    color: black;
+}
+
+
+/*********************************/
+
+.back_icon .hand1,
+.back_icon .hand2 {
+    width: 30%;
+    position: absolute;
+    pointer-events: none;
+}
+
+.hand1 {
+    top: 18%;
+    left: -8%;
+}
+
+.hand2 {
+    right: -5%;
+    bottom: -56%;
+}
+
+@media (min-width: 1920px) {
+    .hand2 {
+        bottom: -63%;
+    }
+}
+
+
+/*page 4*/
+
+.p4hdli_8789 {
+    margin-top: 15%;
+}
+
+.certif,
+.reference {
+    min-height: 100vh;
+    width: 100%;
+    margin-top: 3%;
+    background: #F9F9F9;
+}
+
+.certif ul,
+.reference ul {
+    height: 100%;
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    flex-direction: row;
+    padding: 5px;
+}
+
+.reference ul {
+    padding-bottom: 2.5vw;
+}
+
+.certif ul li {
+    width: 26%;
+    height: 16vw;
+    margin: 2%;
+}
+
+.reference ul li {
+    width: 20%;
+    height: 12.5vw;
+    margin-top: 2.5vw;
+    margin-bottom: 2.5;
+    margin-left: 2.5vw;
+}
+
+.cer_elem,
+.ref_element {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border-radius: 40px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cer_elem img,
+.ref_element img {
+    width: 75%;
+}
+
+.smrch {
+    background: #421983;
+}
+
+.fbbck {
+    background: #3B5998;
+}
+
+.waze {
+    background: #25BAE7;
+}
+
+.ggl_ele img {
+    width: 60%;
+}
+
+.cosumar img {
+    width: 50%;
+}
+
+.Ismag img {
+    width: 120%;
+}
+
+.wi9aytna img {
+    width: 120%;
+}
+
+
+/**page 6*/
+
+.page6 {
+    width: 100%;
+    height: 100vh;
+    color: white;
+    background-color: black;
+}
+
+.fot_email p {
+    user-select: text;
+}
+
+
+/***mobile version ***/
+
+@media screen and (max-width:768px) {
+    #circle {
+        display: none;
+    }
+    .title_menu {
+        display: none;
+    }
+    .menu {
+        margin-top: 3vw;
+    }
+    .menu h4 {
+        margin-right: 5vw;
+    }
+    .headline h1 {
+        font-size: 3rem;
+        text-align: center;
+    }
+    .headline .view {
+        display: none;
+    }
+    .parag p {
+        width: 100%;
+        font-size: 1rem;
+    }
+    .parag .PC_eclg89 {
+        display: none;
+    }
+    .parag .mobile {
+        display: block;
+    }
+    .title .s {
+        color: white;
+        -webkit-text-stroke-width: .5px;
+        -webkit-text-stroke-color: black;
+    }
+    .headlin p {
+        visibility: hidden;
+    }
+    .elements,
+    .certif,
+    .reference {
+        width: 100%;
+    }
+    .elements ul,
+    .certif ul,
+    .reference ul {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0%;
+        gap: 15px;
+    }
+    .elements ul li {
+        width: 70%;
+    }
+    .service_elemnt h3 {
+        font-size: 1rem;
+    }
+    .service_elemnt p {
+        font-size: 0.9rem;
+    }
+    .headlin .title h1 {
+        font-size: 2rem;
+    }
+    .page3 .headlin {
+        display: none;
+    }
+    .page3 .leftside .P_7892ZX {
+        display: none;
+    }
+    .pag3_container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .pag3_container .b_Cntctus_784 {
+        width: 55%;
+    }
+    .b_Cntctus_784 a {
+        font-size: .8rem;
+        font-weight: bold;
+    }
+    .pag3_container .side h1 {
+        font-size: 1.5rem;
+    }
+    .pag3_container .side p {
+        font-size: .8rem;
+    }
+    .pag3_container .c_872CHq {
+        margin-top: 16%;
+        font-size: 3rem;
+    }
+    .back_icon .hand1,
+    .back_icon .hand2 {
+        width: 50%;
+    }
+    .hand1 {
+        top: -5%;
+        left: -8%;
+    }
+    .hand2 {
+        right: -12%;
+        top: 30%;
+    }
+    .certif ul li,
+    .reference ul li {
+        width: 70%;
+        height: 36vw;
+        margin: 2%;
+    }
+    .page6 .ask {
+        position: relative;
+        width: 85%;
+        display: flex;
+        align-items: center;
+    }
+    .page6 .ask h3 {
+        font-weight: 400;
+    }
+    .page6 .ask h3,
+    .page6 .ask p {
+        font-size: 2.5rem;
+    }
+    .page6 .ask p {
+        border: none;
+    }
+}
+
+@media screen and (max-width:441px) {
+    .headline h1 {
+        font-size: 2.1rem;
+    }
+}

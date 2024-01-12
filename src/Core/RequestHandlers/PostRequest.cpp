@@ -1,7 +1,5 @@
 #include "Include/PostRequest.hpp"
 
-#define DEBUG_GETREQUEST 1
-
 PostRequest::PostRequest(DataPool &dataPool) : Request(dataPool)
 {
 	this->UploadBodyState = ZERO;

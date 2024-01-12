@@ -1,0 +1,329 @@
+.demo {
+    position: fixed;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    top: 4.3%;
+    right: 3vw;
+    z-index: 15;
+}
+
+.menu_mbl_si_logo {
+    display: none;
+}
+
+.demo .menu-icon {
+    -webkit-transform: scale(1.5);
+    transform: scale(1.5);
+}
+
+:root {
+    --bar-bg: #212529;
+}
+
+.menu-icon {
+    position: relative;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+}
+
+.menu-icon .menu-icon__cheeckbox {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    cursor: pointer;
+    z-index: 2;
+    -webkit-touch-callout: none;
+    position: absolute;
+    opacity: 0;
+}
+
+.menu-icon div {
+    margin: auto;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-pack: start;
+    -ms-flex-pack: start;
+    justify-content: start;
+    -webkit-box-align: end;
+    -ms-flex-align: end;
+    align-items: flex-end;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: 18px;
+    height: 6px;
+}
+
+.menu-icon span {
+    position: absolute;
+    display: block;
+    width: 80%;
+    height: 1px;
+    background-color: var(--bar-bg, #000);
+    border-radius: 1px;
+    -webkit-transition: all 0.2s cubic-bezier(0.1, 0.82, 0.76, 0.965);
+    transition: all 0.2s cubic-bezier(0.1, 0.82, 0.76, 0.965);
+}
+
+.menu-icon span:first-of-type {
+    top: 0;
+}
+
+.menu-icon span:last-of-type {
+    bottom: 0;
+}
+
+.menu-icon.active span:first-of-type,
+.menu-icon .menu-icon__cheeckbox:checked+div span:first-of-type {
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+    top: 2px;
+}
+
+.menu-icon.active span:last-of-type,
+.menu-icon .menu-icon__cheeckbox:checked+div span:last-of-type {
+    -webkit-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+    bottom: 5px;
+}
+
+.menu-icon.active:hover span:first-of-type,
+.menu-icon.active:hover span:last-of-type,
+.menu-icon:hover .menu-icon__cheeckbox:checked+div span:first-of-type,
+.menu-icon:hover .menu-icon__cheeckbox:checked+div span:last-of-type {
+    width: 22px;
+}
+
+@media (min-width: 1024px) {
+    .menu-icon:hover span:first-of-type {
+        width: 18px;
+    }
+    .menu-icon:hover span:last-of-type {
+        width: 12px;
+    }
+}
+
+
+/*# sourceMappingURL=menu_icon.css.map */
+
+
+/***side menu style */
+
+.sidemenu_parent {
+    position: absolute;
+    height: 100vh;
+    width: 100%;
+    z-index: 15;
+    background-color: rgba(240, 240, 240, .5);
+    flex-direction: row;
+    justify-content: flex-end;
+    display: none;
+}
+
+.side_menu {
+    height: 100%;
+    right: 0%;
+    top: 0%;
+    width: 0%;
+    background-color: #fff;
+    display: grid;
+}
+
+.side_menu.active {
+    animation: medu_slide_in 500ms forwards ease;
+}
+
+.side_menu.active * {
+    animation: fade_in 500ms forwards ease;
+}
+
+@keyframes medu_slide_in {
+    0% {
+        width: 0%;
+    }
+    100% {
+        width: 50%;
+    }
+}
+
+@keyframes fade_in {
+    0% {
+        opacity: 0;
+    }
+    55% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.side_menu .bottom {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    padding-left: 20%;
+}
+
+.bottom h5 {
+    display: inline;
+    margin-top: 1vh;
+    font-size: 1vw;
+    font-weight: normal;
+    padding-bottom: .5vw;
+    border-bottom: 1px solid #B7B7B7;
+    /*border: 1px solid black;*/
+}
+
+.bottom .line {
+    display: none;
+    width: 32%;
+    height: 1px;
+    background-color: black;
+}
+
+.side_menu .top {
+    width: 100%;
+    height: 80%;
+    display: grid;
+    grid-template-columns: 1fr 50% auto;
+}
+
+.top .left,
+.top .right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20%;
+}
+
+.top .right {
+    align-items: flex-start;
+}
+
+.left ul,
+.right ul {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+    padding-top: 10vh;
+    justify-content: start;
+    align-items: center;
+}
+
+.right ul li {
+    font-size: 3rem;
+}
+
+.left p {
+    width: 100%;
+}
+
+.right p,
+.left p,
+.bottom p {
+    color: #B7B7B7;
+}
+
+.left {
+    margin-left: 10vw;
+}
+
+.left ul {
+    gap: 30px;
+    margin-top: 0.8vw;
+}
+
+.left ul li {
+    width: 20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.right ul,
+.left ul {
+    align-items: flex-start;
+}
+
+
+/***menu*/
+
+.menu {
+    width: 94%;
+    padding: 2%;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media screen and (max-width:768px) {
+    .side_menu {
+        width: 100%;
+    }
+    .top .left {
+        display: none;
+    }
+    .top .right {
+        margin-left: 26%;
+    }
+    .menu_mbl_si_logo {
+        position: absolute;
+        display: block;
+        left: 13%;
+        top: 9vw;
+    }
+    .menu_mbl_si_logo img {
+        width: 50%;
+    }
+    .top .right {
+        margin-top: 60%;
+    }
+    .right ul {
+        padding-top: 6vh;
+        gap: 2vh;
+    }
+    .right ul li {
+        font-size: 2.5rem;
+        font-weight: normal;
+    }
+    .side_menu .bottom {
+        padding: 13%;
+    }
+    .side_menu .bottom * {
+        font-size: 1.1rem;
+        padding: 0%;
+        margin: 0%;
+    }
+    @keyframes medu_slide_in {
+        0% {
+            width: 0%;
+        }
+        100% {
+            width: 100%;
+        }
+    }
+}

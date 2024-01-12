@@ -3,7 +3,6 @@
 CGIController::CGIController(DataPool &data, std::string &ScriptPath, std::string &BodyFile,
 							 std::string &RequestMethod) : data(data)
 {
-	std::cout << " ScriptPath : " << ScriptPath << " RequestMethod : " << RequestMethod;
 	this->RunningProcessId = 0;
 	this->BodyFile = BodyFile;
 	this->CgiPath = data.currentLocation.getCgiPath();
@@ -84,13 +83,12 @@ void CGIController::Execute()
 	{
 		if (chdir(GetFileRoot(ScriptPath).c_str()) < 0)
 			exit(1);
-			
+
 		dup2(IO::OpenFile(OutputFileName.c_str(), "w+"), 1);
 		dup2(IO::OpenFile((OutputFileName + ErrorPrefix).c_str(), "w+"), 2);
 
 		if (RequestMethod == "POST")
 		{
-			DEBUGMSGT(1, COLORED("BodyFile : " << BodyFile, Magenta));
 			dup2(IO::OpenFile(BodyFile.c_str(), "r+"), 0);
 		}
 		if (execve(CgiPath.c_str(), FromVectorToArray(av), FromVectorToArray(env)) < 0)
@@ -160,9 +158,9 @@ bool CGIController::ParseCGIOutput(HeadersType &ResponseHeaders)
 	ResponseHeaders = ParseCgiHeaders();
 	ContentType = GetHeaderAttr(Headers, "Content-type");
 	data.response.contentType = ContentType.empty() ? "text/html" : ContentType;
-	
+
 	unlink(BodyFile.c_str());
-	
+
 	FileFd = IO::OpenFile(OutputFileName.c_str(), "wt+");
 	write(FileFd, BodyContent.c_str(), BodyContent.size());
 	close(FileFd);

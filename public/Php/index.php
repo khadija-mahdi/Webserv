@@ -32,6 +32,10 @@
         echo "<p>Name: $name</p>";
         echo "<p>Email: $email</p>";
     }
+
+	if ($_SERVER["REQUEST_METHOD"] === "DELETE") {
+        echo "<h3>HELP ME THEY ARE TRYING TO DELETE ME :( </h3>";
+    }
     ?>
 
 </body>

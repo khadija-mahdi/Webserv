@@ -1,5 +1,5 @@
 #include "Include/RequestParser.hpp"
-#define vebros 1
+#define vebros 0
 
 RequestParser::RequestParser() {}
 
@@ -46,33 +46,10 @@ void RequestParser::printHeaderdata(DataPool &headerData)
 {
 	std::map<std::string, std::string>::iterator it;
 	it = headerData.Headers.begin();
-	DEBUGMSGT(1, COLORED("Path [" << headerData.Path << "]\n", Yellow));
-	DEBUGMSGT(1, COLORED("Method [" << headerData.Method << "]\n", Yellow));
+	DEBUGMSGT(vebros, COLORED("Path [" << headerData.Path << "]\n", Yellow));
+	DEBUGMSGT(vebros, COLORED("Method [" << headerData.Method << "]\n", Yellow));
 	for (; it != headerData.Headers.end(); ++it)
-		DEBUGMSGT(1, COLORED(it->first << "----> " << it->second << " . \n\n", Yellow));
-}
-
-void RequestParser::getContentType(DataPool &headerData)
-{
-	DEBUGMSGT(vebros, COLORED("--- " << headerData.Path << "  -----", Blue));
-	size_t pos = headerData.Path.find(".");
-	if (pos != std::string::npos)
-	{
-		std::string extention = headerData.Path.substr(pos + 1, headerData.Path.length());
-		std::map<std::string, std::string> Types = Configurations::http.getMimeTypes();
-
-		if (Types.find(extention) != Types.end())
-			headerData.response.contentType = Types[extention];
-		else
-			DEBUGMSGT(vebros, COLORED("NOT IN MIMES : " << extention, Blue));
-
-		if (Configurations::http.getDefault_type().empty())
-			headerData.response.contentType = "application/octet-stream";
-		else
-			headerData.response.contentType = Configurations::http.getDefault_type();
-	}
-	if (headerData.response.contentType.empty())
-		headerData.response.contentType = "application/octet-stream";
+		DEBUGMSGT(vebros, COLORED(it->first << "----> " << it->second << " . \n\n", Yellow));
 }
 
 void RequestParser::fillHeaderData(DataPool &headerData, std::string Buffer)
@@ -189,7 +166,6 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation,
 	if (!pathMatched && headerData.currentServer.getDefaultLocation() != -1)
 	{
 		headerData.locationIndex = headerData.currentServer.getDefaultLocation();
-		std::cout << matched << std::endl;
 		if (matched == "/")
 		{
 			headerData.Path += "/";
@@ -223,7 +199,7 @@ int RequestParser::ParseUrl(DataPool &headerData)
 				std::string newRoot = headerData.Path.substr(lastSlashPos);
 				headerData.Path = headerData.currentServer.getRoot() + newRoot;
 			}
-			DEBUGMSGT(1, COLORED("\n the current Location is  parse url: " << headerData.Path << "\n", Cyan));
+			DEBUGMSGT(vebros, COLORED("\n the current Location is  parse url: " << headerData.Path << "\n", Cyan));
 		}
 		return 1;
 	}

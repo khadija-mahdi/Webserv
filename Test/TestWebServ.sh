@@ -1,1 +1,0 @@
-siege  -b --file=staging-urls.txt --internet

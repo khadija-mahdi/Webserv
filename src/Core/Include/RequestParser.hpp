@@ -27,7 +27,6 @@ public:
 	void getCurrentServer(std::vector<ConfServer> & , DataPool &headerData);
 	void getCurrentLocationIndex(std::vector<Location> &, DataPool &headerData);
 	void ParseRequest(DataPool &headerData, std::string buffer);
-	void getContentType(DataPool &headerData);
 	void fillHeaderData(DataPool &headerData, std::string Buffer);
 	void printHeaderdata(DataPool &headerData);
 	int	 ParseUrl(DataPool &headerData);

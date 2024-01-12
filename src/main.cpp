@@ -25,7 +25,7 @@ bool IsServerNamesEquals(std::vector<std::string> s1, std::vector<std::string> s
 		return false;
 	for (size_t i = 0; i < s1.size(); i++)
 	{
-		if (s1.at(i) != s2.at(i))
+		if (!Containes(s2, s1.at(i)))
 			return (false);
 	}
 	return (true);

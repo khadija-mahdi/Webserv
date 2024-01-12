@@ -15,8 +15,6 @@ int Request::GetRequestedResource()
 
 	ResourceFilePath = dataPool.Path;
 
-	DEBUGMSGT(1, COLORED("ResourceFilePath : " << ResourceFilePath, Green));
-
 	if (access(ResourceFilePath.c_str(), F_OK) != 0)
 		throw HTTPError(404);
 

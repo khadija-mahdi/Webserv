@@ -1,4 +1,5 @@
 #include "Include/MethodDelete.hpp"
+#define vebros 0
 
 MethodDelete::MethodDelete(DataPool &Data) : Request(Data) {}
 
@@ -30,7 +31,7 @@ bool deleteFolderContents(const std::string &folderPath)
 			{
 				std::string filePath = folderPath + "/" + entry->d_name;
 
-				if (!access(filePath.c_str(), W_OK))
+				if (access(filePath.c_str(), W_OK) < 0)
 				{
 					closedir(dir);
 					return false;
@@ -45,7 +46,6 @@ bool deleteFolderContents(const std::string &folderPath)
 						return false;
 					}
 				}
-
 				if (unlink(filePath.c_str()) != 0 && rmdir(filePath.c_str()) != 0)
 				{
 					closedir(dir);
@@ -64,7 +64,7 @@ bool deleteFolderContents(const std::string &folderPath)
 
 bool MethodDelete::DeleteDirectoryHandler()
 {
-	DEBUGMSGT(1, COLORED("Delete Method the Path Is a Directory : " << dataPool.Path, Green));
+	DEBUGMSGT(vebros, COLORED("Delete Method the Path Is a Directory : " << dataPool.Path, Green));
 	if (dataPool.Path[dataPool.Path.length() - 1] != '/')
 		throw HTTPError(409);
 	if (!dataPool.currentLocation.getCgiAccept().empty())
@@ -88,7 +88,7 @@ bool MethodDelete::DeleteDirectoryHandler()
 			throw HTTPError(204);
 		else
 		{
-			if (hasWritePermission(dataPool.Path))
+			if (access(dataPool.Path.c_str(), W_OK) >= 0)
 				throw HTTPError(500);
 			throw HTTPError(403);
 		}
@@ -98,9 +98,8 @@ bool MethodDelete::DeleteDirectoryHandler()
 
 bool MethodDelete::HandleRequest(std::string &data)
 {
-	DEBUGMSGT(0, COLORED(data, Blue));
-
-	DEBUGMSGT(1, COLORED("\n 	Delete Method Handler : \n", Blue));
+	DEBUGMSGT(0, data);
+	DEBUGMSGT(vebros, COLORED("\n 	Delete Method Handler : \n", Blue));
 	if (directoryStatus(dataPool.Path) == DIRE)
 		return DeleteDirectoryHandler();
 	if (directoryStatus(dataPool.Path) == VALID_PATH)

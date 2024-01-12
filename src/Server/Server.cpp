@@ -28,7 +28,6 @@ void Server::CreatSocket(const std::string &node, const std::string &serv)
 	socket_fd = socket(addr->ai_family, addr->ai_socktype, 0);
 	if (socket_fd < 0)
 	{
-		perror("socket: ");
 		freeaddrinfo(addr);
 		throw std::runtime_error("socket() failed");
 	}
@@ -43,7 +42,6 @@ void Server::CreatSocket(const std::string &node, const std::string &serv)
 
 	if (bind(socket_fd, addr->ai_addr, addr->ai_addrlen) < 0)
 	{
-		perror("bind() ");
 		freeaddrinfo(addr);
 		throw std::runtime_error("bind() failed : " + node + ":" + serv);
 	}
