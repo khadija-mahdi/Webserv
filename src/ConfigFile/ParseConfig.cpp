@@ -36,12 +36,7 @@ void ParseConfig::includeMimeTypes(std::string &_file)
 		}
 	}
 	else
-	{
-		errorMessage << "\033[1;" << Red << "mError: "
-					 << "\ncould not open file." << _file
-					 << "\033[0m" << std::endl;
-		throw std::runtime_error(errorMessage.str());
-	}
+		throw std::runtime_error(THROW_COLORED("\ncould not open file." + _file));
 }
 
 void ParseConfig::ParseConfig::syntaxForm(std::string &line)
@@ -63,11 +58,7 @@ void ParseConfig::ParseConfig::syntaxForm(std::string &line)
 	if (!flag)
 	{
 		if (line[line.size() - 1] != ';')
-		{
-			errorMessage << "\033[1;" << Red << "mError: "
-						 << "syntax error in no ; in end of line :" << line << "\033[0m" << std::endl;
-			throw std::runtime_error(errorMessage.str());
-		}
+			throw std::runtime_error(THROW_COLORED("syntax error in no ; in end of line :" + line));
 	}
 }
 
@@ -77,12 +68,7 @@ void ParseConfig::readConfigFile(std::string const &file)
 	std::string line = "";
 	std::ifstream conf(file.c_str());
 	if (!conf.is_open())
-	{
-		errorMessage << "\033[1;" << Red << "mError: "
-					 << "could not open file."
-					 << "\033[0m" << std::endl;
-		throw std::runtime_error(errorMessage.str());
-	}
+		throw std::runtime_error(THROW_COLORED("could not open file."));
 	while (std::getline(conf, line, '\n'))
 	{
 		line = skepComment(line);
@@ -111,12 +97,7 @@ void ParseConfig::CurlyBrackets()
 			CloseBrackets--;
 	}
 	if (CloseBrackets || !openBrackets)
-	{
-		errorMessage << "\033[1;" << Red << "mError: "
-					 << "syntax error in curly Brackets."
-					 << "\033[0m" << std::endl;
-		throw std::runtime_error(errorMessage.str());
-	}
+		throw std::runtime_error(THROW_COLORED("syntax error in curly Brackets."));
 }
 
 void ParseConfig::PreProcessingFile(std::string &file)
@@ -135,7 +116,7 @@ void ParseConfig::parseEventsBlock(std::string &events)
 	if (isDigit(key) || linesLength(events) == 2)
 		event.setWorkerConnections(atoi(key.c_str()));
 	else
-		throw std::runtime_error("events Block error!!");
+		throw std::runtime_error(THROW_COLORED("events Block error!!"));
 }
 
 Location ParseConfig::parseLocationBlock(std::string &locationBlock)
@@ -160,37 +141,21 @@ void ParseConfig::locationInServer(std::string &ServerBlock, ConfServer &ConfSer
 	{
 		Location location = parseLocationBlock(extractedBlocks[i].first);
 		if (paths[i][0] != '/' || paths[i][paths[i].length() - 1] != '/')
-		{
-			errorMessage << "\033[1;" << Red << "mError: "
-						 << "Location Path  " << paths[i] << " should end and start with '/' :"
-						 << "\033[0m" << std::endl;
-			throw std::runtime_error(errorMessage.str());
-		}
+			throw std::runtime_error(THROW_COLORED("Location Path  " + paths[i] + " should end and start with '/' :"));
 		location.setPath(paths[i]);
 		ConfServerConfig.addLocation(location);
 		if (location.getPath() == "/")
 			ConfServerConfig.setDefaultLocation(i);
 		if (location.getAllow().empty())
-		{
-			errorMessage << "\033[1;" << Red << "mError: "
-						 << "Location Block  " << location.getPath() << " should have 1 method at least :"
-						 << "\033[0m" << std::endl;
-			throw std::runtime_error(errorMessage.str());
-		}
+			throw std::runtime_error(THROW_COLORED("Location Block  " + location.getPath() + " should have 1 method at least :"));
 		start = extractedBlocks[0].second.first;
 		end = extractedBlocks[i].second.second;
 	}
 	std::vector<Location> locations = ConfServerConfig.getLocations();
-	;
 	for (size_t i = 0; i < locations.size(); i++)
 	{
 		if ((locations[i].getUpload() == true && locations[i].getUpload_stor().empty()))
-		{
-			errorMessage << "\033[1;" << Red << "mError: "
-						 << "upload on and no upload_store exist ! "
-						 << "\033[0m" << std::endl;
-			throw std::runtime_error(errorMessage.str());
-		}
+			throw std::runtime_error(THROW_COLORED("upload on and no upload_store exist ! "));
 	}
 	ServerBlock = ServerBlock.substr(0, start) + ServerBlock.substr(end + 1);
 }
@@ -214,12 +179,7 @@ void ParseConfig::ServerInHttp(std::string &httpBlock, Http &httpConfig)
 
 	extractedBlocks = serv.BlocksS(httpBlock, "server");
 	if (extractedBlocks.size() < 1)
-	{
-		errorMessage << "\033[1;" << Red << "mError: "
-					 << "Block server not found ."
-					 << "\033[0m" << std::endl;
-		throw std::runtime_error(errorMessage.str());
-	}
+		throw std::runtime_error(THROW_COLORED("Block server not found ."));
 	for (size_t i = 0; i < extractedBlocks.size(); ++i)
 	{
 		server = parseServerBlock(extractedBlocks[i].first);
@@ -256,12 +216,7 @@ void ParseConfig::parseHttpBlock(std::string &httpBlock)
 				Configurations::http.setError_pages(errs);
 		}
 		else
-		{
-			errorMessage << "\033[1;" << Red << "mError: "
-						 << " Http wrong key ! .\n"
-						 << "\033[0m" << std::endl;
-			throw std::runtime_error(errorMessage.str());
-		}
+			throw std::runtime_error(THROW_COLORED(" Http wrong key ! .\n"));
 	}
 }
 
@@ -273,12 +228,7 @@ void ParseConfig::parsingValues()
 	{
 		std::vector<std::string> events = BlocksExtra(lines, "events");
 		if (events.size() != 1)
-		{
-			errorMessage << "\033[1;" << Red << "mError: "
-						 << "Events Block Duplicate !"
-						 << "\033[0m" << std::endl;
-			throw std::runtime_error(errorMessage.str());
-		}
+			throw std::runtime_error(THROW_COLORED("Events Block Duplicate !"));
 		std::string event = events[0];
 		parseEventsBlock(event);
 		pos = 0;
@@ -288,22 +238,12 @@ void ParseConfig::parsingValues()
 	{
 		std::vector<std::string> https = BlocksExtra(lines, "http");
 		if (https.size() != 1)
-		{
-			errorMessage << "\033[1;" << Red << "mError: "
-						 << "Http Block Duplicate !"
-						 << "\033[0m" << std::endl;
-			throw std::runtime_error(errorMessage.str());
-		}
+			throw std::runtime_error(THROW_COLORED("Http Block Duplicate !"));
 		std::string httpBlock = https[0];
 		parseHttpBlock(httpBlock);
 	}
 	else
-	{
-		errorMessage << "\033[1;" << Red << "mError: "
-					 << "NO Http Block Found !"
-					 << "\033[0m" << std::endl;
-		throw std::runtime_error(errorMessage.str());
-	}
+		throw std::runtime_error(THROW_COLORED("NO Http Block Found !"));
 }
 
 void ParseConfig::pacingConfigFile(char *_file)
@@ -311,4 +251,16 @@ void ParseConfig::pacingConfigFile(char *_file)
 	std::string file = _file;
 	PreProcessingFile(file);
 	parsingValues();
+	std::vector<ConfServer> Servers = Configurations::http.getConfServes();
+	std::vector<Location> locations;
+	for(size_t i = 0; i < Servers.size(); i++){
+		locations = Servers[i].getLocations();
+		if(Servers[i].getRoot().empty() && !locations.size())
+			throw std::runtime_error(THROW_COLORED("Must be one root in Location or In the server at least !" + Servers[i].getListen()));
+		for (size_t j = 0; j < locations.size(); j++)
+		{
+			if(Servers[i].getRoot().empty() && locations[j].getRoot().empty())
+				throw std::runtime_error(THROW_COLORED("Must be one root in Location or In the server at least !" + Servers[i].getListen()));
+		}
+	}
 }

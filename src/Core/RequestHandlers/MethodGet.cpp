@@ -78,10 +78,7 @@ std::string getCorrectIndex(std::vector<std::string> &indexes, std::string &Path
 
 bool MethodGet::handleDirectoryPath()
 {
-	DEBUGMSGT(1, "GET Handler Directory : ");
-
-	if (access(dataPool.Path.c_str(), R_OK) != 0 || dataPool.currentLocation.getAutoindex() == "off")
-		throw HTTPError(403);
+	DEBUGMSGT(0, "GET Handler Directory : auto index : " << dataPool.currentLocation.getAutoindex());
 
 	std::vector<std::string> indexes;
 	indexes = dataPool.currentServer.getIndex();
@@ -98,8 +95,10 @@ bool MethodGet::handleDirectoryPath()
 			dataPool.Path = Path;
 			return GetFileHandler();
 		}
-		throw HTTPError(404);
 	}
+	if (access(dataPool.Path.c_str(), R_OK) != 0 || dataPool.currentLocation.getAutoindex() == "off")
+		throw HTTPError(403);
+
 	dataPool.response.fileFd = open(autoIndexListenDir(dataPool).c_str(), O_RDONLY, 0664);
 	return true;
 }

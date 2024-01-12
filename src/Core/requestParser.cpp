@@ -1,7 +1,7 @@
 #include "Include/RequestParser.hpp"
+#define vebros 1
 
-
-RequestParser::RequestParser() {} 
+RequestParser::RequestParser() {}
 
 RequestParser::~RequestParser() {}
 
@@ -54,6 +54,7 @@ void RequestParser::printHeaderdata(DataPool &headerData)
 
 void RequestParser::getContentType(DataPool &headerData)
 {
+	DEBUGMSGT(vebros, COLORED("--- " << headerData.Path << "  -----", Blue));
 	size_t pos = headerData.Path.find(".");
 	if (pos != std::string::npos)
 	{
@@ -62,11 +63,16 @@ void RequestParser::getContentType(DataPool &headerData)
 
 		if (Types.find(extention) != Types.end())
 			headerData.response.contentType = Types[extention];
+		else
+			DEBUGMSGT(vebros, COLORED("NOT IN MIMES : " << extention, Blue));
+
 		if (Configurations::http.getDefault_type().empty())
 			headerData.response.contentType = "application/octet-stream";
 		else
 			headerData.response.contentType = Configurations::http.getDefault_type();
 	}
+	if (headerData.response.contentType.empty())
+		headerData.response.contentType = "application/octet-stream";
 }
 
 void RequestParser::fillHeaderData(DataPool &headerData, std::string Buffer)
@@ -98,41 +104,43 @@ void RequestParser::fillHeaderData(DataPool &headerData, std::string Buffer)
 	}
 	size_t index;
 	if ((index = headerData.url.find("?")) != std::string::npos)
-        headerData.Query = headerData.url.substr(index + 1);
+		headerData.Query = headerData.url.substr(index + 1);
 }
 
-bool inServerName(std::vector<ConfServer> &confServers, DataPool &headerData){
+bool inServerName(std::vector<ConfServer> &confServers, DataPool &headerData)
+{
 	size_t pos = headerData.Headers["Host"].find(":");
-    std::string server_name = headerData.Headers["Host"].substr(0, pos);
-    std::string Port = headerData.Headers["Host"].substr(pos + 1);
-    std::vector<std::string> serverNames;
+	std::string server_name = headerData.Headers["Host"].substr(0, pos);
+	std::string Port = headerData.Headers["Host"].substr(pos + 1);
+	std::vector<std::string> serverNames;
 
-    for (size_t i = 0; i < confServers.size(); i++)
-    {
-        serverNames = confServers[i].getConfServer_names();
-        
-        std::vector<std::string>::iterator it = std::find(serverNames.begin(), serverNames.end(), server_name);
-        if (it != serverNames.end())
-        {
-            if (confServers[i].getListen() == Port)
-            {
-                headerData.currentServer = confServers[i];
-                return true;
-            }
-        }
+	for (size_t i = 0; i < confServers.size(); i++)
+	{
+		serverNames = confServers[i].getConfServer_names();
+
+		std::vector<std::string>::iterator it = std::find(serverNames.begin(), serverNames.end(), server_name);
+		if (it != serverNames.end())
+		{
+			if (confServers[i].getListen() == Port)
+			{
+				headerData.currentServer = confServers[i];
+				return true;
+			}
+		}
 	}
 	return false;
 }
 
 void RequestParser::getCurrentServer(std::vector<ConfServer> &confServers, DataPool &headerData)
 {
-    std::string Port;
-    size_t pos;
-	
+	std::string Port;
+	size_t pos;
+
 	pos = headerData.Headers["Host"].find(":");
 	Port = headerData.Headers["Host"].substr(pos + 1);
-    
-	if (!inServerName(confServers, headerData)){
+
+	if (!inServerName(confServers, headerData))
+	{
 		for (size_t i = 0; i < confServers.size(); i++)
 		{
 			if (confServers[i].getListen() == Port)
@@ -143,7 +151,6 @@ void RequestParser::getCurrentServer(std::vector<ConfServer> &confServers, DataP
 		}
 	}
 }
-
 
 bool RequestParser::redirectionType(std::vector<Location> &confLocation, DataPool &headerData)
 {
@@ -161,33 +168,39 @@ void RequestParser::getCurrentLocationIndex(std::vector<Location> &confLocation,
 	bool pathMatched = false;
 	size_t length = 0;
 	std::string matched = headerData.Path;
-	for (size_t i = 0; i < confLocation.size(); ++i) {
-        if (confLocation[i].getPath() == "/") 
-            continue;
+	for (size_t i = 0; i < confLocation.size(); ++i)
+	{
+		if (confLocation[i].getPath() == "/")
+			continue;
 
-        std::string pathToCheck = confLocation[i].getPath();
-        size_t foundPosition = matched.find(pathToCheck);
+		std::string pathToCheck = confLocation[i].getPath();
+		size_t foundPosition = matched.find(pathToCheck);
 
-        if (foundPosition != std::string::npos && foundPosition == 0) {
-            if (pathToCheck.length() > length) {
-                length = pathToCheck.length();
-                headerData.locationIndex = i;
-                pathMatched = true;
-            }
-        }
-    }
-    if (!pathMatched && headerData.currentServer.getDefaultLocation() != -1) {
-        headerData.locationIndex = headerData.currentServer.getDefaultLocation();
-        std::cout << matched << std::endl;
-        if (matched == "/") {
-            headerData.Path += "/";
-        }
-    }
+		if (foundPosition != std::string::npos && foundPosition == 0)
+		{
+			if (pathToCheck.length() > length)
+			{
+				length = pathToCheck.length();
+				headerData.locationIndex = i;
+				pathMatched = true;
+			}
+		}
+	}
+	if (!pathMatched && headerData.currentServer.getDefaultLocation() != -1)
+	{
+		headerData.locationIndex = headerData.currentServer.getDefaultLocation();
+		std::cout << matched << std::endl;
+		if (matched == "/")
+		{
+			headerData.Path += "/";
+		}
+	}
 
 	if (headerData.locationIndex != -1)
 	{
 		headerData.currentLocation = confLocation[headerData.locationIndex];
-		if (!headerData.currentLocation.getRedirection().ReturnLocation.empty()){
+		if (!headerData.currentLocation.getRedirection().ReturnLocation.empty())
+		{
 			headerData.REDIRECTION_STAGE = true;
 			headerData.response.Location = headerData.currentLocation.getRedirection().ReturnLocation;
 			headerData.response.StatusCode = headerData.currentLocation.getRedirection().statusCode;
@@ -238,20 +251,19 @@ void RequestParser::ParseRequest(DataPool &headerData, std::string Buffer)
 	std::vector<Location> confLocation = headerData.currentServer.getLocations();
 	if (confLocation.size() > 0)
 		getCurrentLocationIndex(confLocation, headerData);
-	if (!headerData.REDIRECTION_STAGE && !headerData.currentServer.getRedirection().ReturnLocation.empty()){
+	if (!headerData.REDIRECTION_STAGE && !headerData.currentServer.getRedirection().ReturnLocation.empty())
+	{
 		headerData.REDIRECTION_STAGE = true;
 		headerData.response.Location = headerData.currentServer.getRedirection().ReturnLocation;
 		headerData.response.StatusCode = headerData.currentServer.getRedirection().statusCode;
-
 	}
 	if (!headerData.REDIRECTION_STAGE)
 		ParseUrl(headerData);
 	if (directoryStatus(headerData.Path.substr(1)) >= 1 && headerData.Path[0] == '/')
 		headerData.Path = headerData.Path.substr(1);
-		DEBUGMSGT(1, COLORED("\n the current Server is  : " << headerData.currentServer.getListen() << "\n", Cyan));
-		DEBUGMSGT(1, COLORED("\n the current Location is  : " << headerData.currentLocation.getPath() << "\n", Cyan));
-		DEBUGMSGT(1, COLORED("\n the Path : " << headerData.Path << ", dir status : " << directoryStatus(headerData.Path) << "\n", Green));
-		DEBUGMSGT(1, COLORED("\n REDIRECTION_STAGE " << headerData.REDIRECTION_STAGE << "\n", Green));
-		DEBUGMSGT(1, COLORED("\n MEthod " << headerData.Method << "\n", Green));
-
+	DEBUGMSGT(vebros, COLORED("\n the current Server is  : " << headerData.currentServer.getListen() << "\n", Cyan));
+	DEBUGMSGT(vebros, COLORED("\n the current Location is  : " << headerData.currentLocation.getPath() << "\n", Cyan));
+	DEBUGMSGT(vebros, COLORED("\n the Path : " << headerData.Path << ", dir status : " << directoryStatus(headerData.Path) << "\n", Green));
+	DEBUGMSGT(vebros, COLORED("\n REDIRECTION_STAGE " << headerData.REDIRECTION_STAGE << "\n", Green));
+	DEBUGMSGT(vebros, COLORED("\n MEthod " << headerData.Method << "\n", Green));
 }

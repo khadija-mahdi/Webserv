@@ -1,5 +1,4 @@
 #include "ParseConfig.hpp"
-std::stringstream errorMessage;
 
 void processErrorPage(const std::string &line, std::string &value, int &errorCode)
 {
@@ -7,32 +6,18 @@ void processErrorPage(const std::string &line, std::string &value, int &errorCod
 	std::string firstWord, secondWord;
 	iss >> firstWord;
 	if (!isDigitStr(firstWord) || (atoi(firstWord.c_str()) < 100 || atoi(firstWord.c_str()) > 599))
-	{
-		errorMessage << "\033[1;" << Red << "mError: "
-					 << "The status code not correct  : " << atoi(firstWord.c_str()) << "\033[0m" << std::endl;
-		throw std::runtime_error(errorMessage.str());
-	}
+		throw std::runtime_error(THROW_COLORED("The status code not correct  : " + STOI(firstWord.c_str())));
 	errorCode = atoi(firstWord.c_str());
 	iss >> secondWord;
 
 	std::string remaining;
 	iss >> remaining;
 	if (!remaining.empty())
-	{
-		errorMessage << "\033[1;" << Red << "mError: "
-					 << "Need just the status code and Path , Nothing More !"
-					 << "\033[0m" << std::endl;
-		throw std::runtime_error(errorMessage.str());
-	}
+		throw std::runtime_error(THROW_COLORED("Need just the status code and Path , Nothing More !"));
 	value = secondWord;
 	int fd = open(value.c_str(), O_RDONLY, 0664);
 	if (fd == -1)
-	{
-		errorMessage << "\033[1;" << Red << "mError: "
-					 << "Wrong Path " << value << ", please use a valid path! : "
-					 << "\033[0m" << std::endl;
-		throw std::runtime_error(errorMessage.str());
-	}
+		throw std::runtime_error(THROW_COLORED("Wrong Path :" + value + " , please use a valid path!"));
 	close(fd);
 }
 
@@ -70,7 +55,7 @@ std::map<std::string, std::string> extractKeyValuesIN(const std::string &Block)
 				keyValues[individualKey] = values;
 		}
 		else
-			throw std::runtime_error("syntax error values value : " + Block);
+			throw std::runtime_error(THROW_COLORED("syntax error values value : " + Block));
 	}
 
 	return keyValues;
@@ -92,11 +77,7 @@ bool processRedirection(std::string &path, int &status, std::string &key)
 		i++;
 	}
 	if (i != 1 || path.empty())
-	{
-		errorMessage << "\033[1;" << Red << "mError: "
-					 << "Please Correct The Redirection Syntax !" << key << "\033[0m" << std::endl;
-		throw std::runtime_error(errorMessage.str());
-	}
+		throw std::runtime_error(THROW_COLORED("Please Correct The Redirection Syntax !" + key));
 	return 1;
 }
 
@@ -120,14 +101,14 @@ bool processErrors(std::string &path, int &status, std::string &key)
 			path = word;
 		}
 		else if (i != 2)
-			throw std::runtime_error("not a true error pages syntax: " + key);
+			throw std::runtime_error(THROW_COLORED("not a true error pages syntax: " + key));
 	}
 	if ((i == 2) && status >= 100 && status <= 599)
 		return true;
 	else
-		throw std::runtime_error("not a true error pages syntax: " + key);
+		throw std::runtime_error(THROW_COLORED("not a true error pages syntax: " + key));
 	return 0;
-} //? it's does not wor
+} 
 
 std::map<std::string, std::string> extractKeyValues(const std::string &Block, std::map<int, std::string> &errors, std::map<std::string, std::string> &cgi)
 {
@@ -180,22 +161,14 @@ std::map<std::string, std::string> extractKeyValues(const std::string &Block, st
 				iss >> accept >> cgi_path;
 				int fd = open(cgi_path.c_str(), O_RDONLY, 0664);
 				if (accept.empty() || cgi_path.empty() || fd == -1)
-				{
-					errorMessage << "\033[1;" << Red << "mError: "
-								 << "cgi Error , please correct the path or extention:" << key + "\t" + value << "\033[0m" << std::endl;
-					throw std::runtime_error(errorMessage.str());
-				}
+					throw std::runtime_error(THROW_COLORED("cgi Error , please correct the path or extention:" + key + "\t" + value));
 				close(fd);
 				cgi[accept] = cgi_path;
 			}
 			keyValues[key] = value;
 		}
 		else
-		{
-			errorMessage << "\033[1;" << Red << "mError: "
-						 << "Syntax Error in  :" << line << "\033[0m" << std::endl;
-			throw std::runtime_error(errorMessage.str());
-		}
+			throw std::runtime_error(THROW_COLORED("Syntax Error in  :" + line));
 	}
 	return keyValues;
 }
@@ -206,11 +179,7 @@ void splitKeyValue(std::string &block, std::string &key, std::string &value, std
     std::string keyValue = "";
     size_t pos = block.find(word);
     if (pos == std::string::npos && flag == 1)
-    {
-        errorMessage << "\033[1;" << Red << "mError: "
-                     << "Block " << block << "\033[0m" << std::endl;
-        throw std::runtime_error(errorMessage.str());
-    }
+        throw std::runtime_error(THROW_COLORED("ERROR : Block " + block));
     size_t end = block.find("}");
     for (size_t i = pos; i < end; i++)
         keyValue += block[i];
@@ -313,11 +282,7 @@ void singleData(ConfServer &ConfServer, std::string &ConfServerBlock)
 	for (; it != values.end(); ++it)
 	{
 		if (it->second == "")
-		{
-			errorMessage << "\033[1;" << Red << "mError: "
-						 << "Not a Valid value : " << it->second << "\033[0m" << std::endl;
-			throw std::runtime_error(errorMessage.str());
-		}
+			throw std::runtime_error(THROW_COLORED("Not a Valid value : " + it->second));
 		if (it->first == "listen")
 		{
 			flag++;
@@ -328,20 +293,15 @@ void singleData(ConfServer &ConfServer, std::string &ConfServerBlock)
 					ConfServer.setListen(static_cast<std::ostringstream &>(std::ostringstream() << std::dec << value).str());
 			}
 			else
-			{
-				errorMessage << "\033[1;" << Red << "mError: "
-							 << "Not a Valid Port : " << it->second << "\033[0m" << std::endl;
-				throw std::runtime_error(errorMessage.str());
-			}
+				throw std::runtime_error(THROW_COLORED("Not a Valid Port : " + it->second));
 		}
-		else if (it->first == "host")
+		else if (it->first == "host"){
+			flag++;
 			ConfServer.setHost(it->second.c_str());
+		}
 		else if (it->first == "root"){
-			if( getDirectoryStatus(it->second) != 1){
-				errorMessage << "\033[1;" << Red << "mError: "
-							 << "Not a Valid Root should be a directory end with /: " << it->second << "\033[0m" << std::endl;
-				throw std::runtime_error(errorMessage.str());
-			}
+			if( getDirectoryStatus(it->second) != 1 && it->second[it->second.size()] != '/')
+				throw std::runtime_error(THROW_COLORED("Not a Valid Root should be a directory end with /: " + it->second));
 			ConfServer.setRoot(it->second.c_str());
 		}
 		else if (it->first == "server_names")
@@ -368,20 +328,10 @@ void singleData(ConfServer &ConfServer, std::string &ConfServerBlock)
 				ConfServer.setIndex(word);
 		}
 		else
-		{
-			errorMessage << "\033[1;" << Red << "mError: "
-						 << "Server Block Wrong Key found !"
-						 << "\033[0m" << std::endl;
-			throw std::runtime_error(errorMessage.str());
-		}
+			throw std::runtime_error(THROW_COLORED("Server Block Wrong Key found !"));
 	}
-	if (flag != 1)
-	{
-		errorMessage << "\033[1;" << Red << "mError: "
-					 << "Server Block obligation Keys Not Found !"
-					 << "\033[0m" << std::endl;
-		throw std::runtime_error(errorMessage.str());
-	}
+	if (flag != 2)
+		throw std::runtime_error(THROW_COLORED("Server Block obligation Keys Not Found !"));
 }
 
 int getDirectoryStatus(const std::string &path)
@@ -413,8 +363,11 @@ void locationValues(Location &location, std::string &locationBlock)
 	for (; it != values.end(); ++it)
 	{
 		location.is_uploadStore = 0;
-		if (it->first == "root")
+		if (it->first == "root"){
+			if( getDirectoryStatus(it->second) != 1 && it->second[it->second.size()] != '/')
+				throw std::runtime_error(THROW_COLORED("Not a Valid Root should be a directory end with /: " + it->second));
 			location.setRoot(it->second.c_str());
+		}
 		else if (it->first == "index")
 		{
 			std::string key = it->second;
@@ -428,11 +381,7 @@ void locationValues(Location &location, std::string &locationBlock)
 			if (it->second == "on" || it->second == "off")
 				location.setAutoindex(it->second);
 			else
-			{
-				errorMessage << "\033[1;" << Red << "mError: "
-							 << "Location Block : " << it->first << "\033[0m" << std::endl;
-				throw std::runtime_error(errorMessage.str());
-			}
+				throw std::runtime_error(THROW_COLORED("Location Block : " + it->first));
 		}
 		else if (it->first == "allow")
 		{
@@ -453,10 +402,7 @@ void locationValues(Location &location, std::string &locationBlock)
 						location.setAllow(methodName);
 				}
 				else
-				{
-					errorMessage << "\033[1;" << Red << "NO Method called : " << methodName << "\033[0m" << std::endl;
-					throw std::runtime_error(errorMessage.str());
-				}
+					throw std::runtime_error(THROW_COLORED("NO Method called : [" + methodName + "]" ));
 			}
 			location.setAllow(it->second.c_str());
 		}
@@ -465,21 +411,13 @@ void locationValues(Location &location, std::string &locationBlock)
 			if (it->second == "on" || it->second == "off")
 				location.setUpload(IS_ON_OR_OFF(it->second));
 			else
-			{
-				errorMessage << "\033[1;" << Red << "mError: "
-							 << "Location Block Wrong Value : " << it->first << " = " << it->second << "\033[0m" << std::endl;
-				throw std::runtime_error(errorMessage.str());
-			}
+				throw std::runtime_error(THROW_COLORED("Location Block Wrong Value : " + it->first + " = " + it->second));
 		}
 		else if (it->first == "upload_stor")
 		{
 			location.is_uploadStore = 1;
 			if (getDirectoryStatus(it->second) != 1)
-			{
-				errorMessage << "\033[1;" << Red << "mError: "
-							 << "upload stor  Wrong Path:" << it->second << "\033[0m" << std::endl;
-				throw std::runtime_error(errorMessage.str());
-			}
+				throw std::runtime_error(THROW_COLORED("upload stor  Wrong Path:" + it->second));
 			location.setUpload_stor(it->second.c_str());
 		}
 		else if (it->first == "return" && processRedirection(path, st, it->second))
@@ -502,10 +440,6 @@ void locationValues(Location &location, std::string &locationBlock)
 				location.setError_pages(errs);
 		}
 		else
-		{
-			errorMessage << "\033[1;" << Red << "mError: "
-						 << "Location Block Wrong Key Found :" << it->first << "\033[0m" << std::endl;
-			throw std::runtime_error(errorMessage.str());
-		}
+			throw std::runtime_error(THROW_COLORED("Location Block Wrong Key Found :" + it->first));
 	}
 }

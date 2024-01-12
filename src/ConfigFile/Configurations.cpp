@@ -1,4 +1,5 @@
 #include "Configurations.hpp"
+#include "ParseConfig.hpp"
 #define MB 1048576
 #define GB 1073741824
 
@@ -42,7 +43,6 @@ std::map<std::string, std::string> ReverseTypesMap(std::map<std::string, std::st
 
 unsigned long long ConvertToBytes(std::string &value)
 {
-	std::stringstream errorMessage;
 
 	char MUnit;
 	unsigned long long DecimalValue;
@@ -50,12 +50,7 @@ unsigned long long ConvertToBytes(std::string &value)
 	for (size_t i = 0; i < value.size() - 1; i++)
 	{
 		if (!isdigit(value[i]))
-		{
-			errorMessage << "\033[1;" << 31 << "mError: "
-						 << "\nInvalide Value of `client_max_body_size` Incorrect" << value
-						 << "\033[0m" << std::endl;
-			throw std::runtime_error(errorMessage.str());
-		}
+			throw std::runtime_error(THROW_COLORED("\nInvalide Value of `client_max_body_size` Incorrect" + value));
 	}
 	DecimalValue = atoll(value.c_str());
 	MUnit = *(value.end() - 1);
@@ -85,29 +80,21 @@ unsigned long long ConvertToBytes(std::string &value)
 
 void checkValues(const std::string &lines)
 {
-	std::stringstream errorMessage;
 	std::istringstream lineStream(lines);
 	std::string line;
 	size_t nextLine = 0;
 
 	while (std::getline(lineStream, line))
 	{
-
 		if (nextLine == 1)
 		{
 			size_t openBrace = line.find('{');
 			size_t closeBrace = line.find('}');
 
 			if (openBrace == std::string::npos && closeBrace == std::string::npos)
-			{
-				errorMessage << "\033[1;31mError: Syntax error. Please add The Value inside Braces "
-							 << "\033[0m" << std::endl;
-				throw std::runtime_error(errorMessage.str());
-			}
-
+				throw std::runtime_error(THROW_COLORED("Syntax error. Please add The Value inside Braces "));
 			nextLine = 0;
 		}
-
 		size_t openBrace = line.find('}');
 		if (openBrace != std::string::npos)
 			nextLine = 1;

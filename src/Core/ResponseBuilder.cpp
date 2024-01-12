@@ -64,6 +64,29 @@ ResponseBuilder::ResponseBuilder(DataPool dataPool, HeadersType &ResponseHeaders
 		FillHeaders(dataPool.response.StatusCode);
 }
 
+void getContentType(DataPool &headerData)
+{
+	size_t pos = headerData.Path.find(".");
+	if (pos != std::string::npos)
+	{
+
+		std::string extention = headerData.Path.substr(pos + 1, headerData.Path.length());
+		std::map<std::string, std::string> Types = Configurations::http.getMimeTypes();
+
+		if (Types.find(extention) != Types.end())
+		{
+			headerData.response.contentType = Types[extention];
+			return;
+		}
+		if (Configurations::http.getDefault_type().empty())
+			headerData.response.contentType = "application/octet-stream";
+		else
+			headerData.response.contentType = Configurations::http.getDefault_type();
+	}
+	if (headerData.response.contentType.empty())
+		headerData.response.contentType = "application/octet-stream";
+}
+
 std::string ResponseBuilder::GetDefaultErrorPagePath()
 {
 	std::string FileName = "/tmp/" + Lstring::RandomStr(16);
@@ -101,6 +124,8 @@ void ResponseBuilder::FillHeaders(int StatusCode)
 {
 	std::string Status;
 	size_t index;
+
+	getContentType(this->dataPool);
 	Status = ResponseHeaders["Status"].empty()
 				 ? (SSTR(StatusCode) + " " + StatusCodes[StatusCode])
 				 : ResponseHeaders["Status"];
@@ -109,6 +134,7 @@ void ResponseBuilder::FillHeaders(int StatusCode)
 		dataPool.response.fileFd == NOBODY &&
 		dataPool.response.Location.empty())
 		CreateStatusFile();
+
 	for (HeadersIterator it = ResponseHeaders.begin(); it != ResponseHeaders.end(); it++)
 	{
 		if (it->first == "Status")
@@ -120,6 +146,7 @@ void ResponseBuilder::FillHeaders(int StatusCode)
 		}
 		Buffer += (it->first + ": " + it->second + "\r\n");
 	}
+	DEBUGMSGT(1, COLORED("- " << this->dataPool.response.contentType << " -", Yellow));
 	if (ResponseHeaders.find("Content-type") == ResponseHeaders.end())
 		Buffer += ("Content-Type: " + this->dataPool.response.contentType + "\r\n");
 	Buffer += "Connection: closed\r\n";
@@ -177,7 +204,6 @@ void ResponseBuilder::FillBuffer()
 {
 	if (this->dataPool.response.fileFd < 0)
 	{
-		// this->Buffer.append(SSTR(0) + "\r\n\r\n");
 		this->Buffer.clear();
 		return;
 	}
