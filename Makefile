@@ -3,7 +3,7 @@ NAME = webserv
 SRC = $(shell find . -name '*.cpp')
 INC = $(shell find . -name '*.hpp')
 
-OBJ_DIR = compiled
+OBJ_DIR = .compiled
 OBJ = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
 CPP = c++
