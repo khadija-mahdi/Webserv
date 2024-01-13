@@ -195,6 +195,9 @@ int ResponseBuilder::FlushBuffer(int SocketFd)
 	int i = 0;
 	if ((i = write(SocketFd, this->Buffer.c_str(), this->Buffer.size())) < 0 || this->Buffer == "0\r\n\r\n")
 		return (0);
+	DEBUGMSGT(SHOWBUFFER, COLORED("Response Sent : \n"
+							 << this->Buffer << "\n",
+						 Green));
 	this->Buffer.clear();
 	this->FillBuffer();
 	return (1);

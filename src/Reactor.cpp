@@ -28,6 +28,7 @@ void Reactor::RegisterSocket(int socketFd, EventHandler *eventHandler)
 
 void Reactor::UnRegisterSocket(int SocketFd)
 {
+
 	std::string Type = dynamic_cast<AcceptEventHandler *>(this->clients[SocketFd]) != NULL ? "Server " : "Client ";
 	DEBUGMSGT(verbose, COLORED("UnRegister " << Type << "Socket "
 											 << SSTR(SocketFd) << "\n",
@@ -39,6 +40,7 @@ void Reactor::UnRegisterSocket(int SocketFd)
 
 	if (this->clients[SocketFd] != NULL)
 	{
+		ClearRunningProcess(SocketFd);
 		delete clients[SocketFd];
 		this->clients.erase(SocketFd);
 	}
@@ -93,6 +95,18 @@ void Reactor::Dispatch()
 			}
 		}
 	}
+}
+
+void Reactor::ClearRunningProcess(int SocketFd)
+{
+	HttpEventHandler *client;
+	Request *RequestHandler;
+
+	if ((client = dynamic_cast<HttpEventHandler *>(this->clients[SocketFd])) != NULL &&
+		(RequestHandler = client->GetRequestHandler()) != NULL &&
+		RequestHandler->GetRunningProcessId() != 0)
+		if (kill(RequestHandler->GetRunningProcessId(), SIGKILL) < 0)
+			throw std::runtime_error("kill() Failed");
 }
 
 void CheckCGIOutput(HttpEventHandler *client)

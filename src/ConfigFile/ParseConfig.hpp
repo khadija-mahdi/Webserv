@@ -26,7 +26,8 @@
 
 #include "Configurations.hpp"
 #include "ConfServer.hpp"
-#define Red 31
+#include "../Lib/Lstring.hpp"
+
 #define STOI(x) static_cast<std::ostringstream &>(std::ostringstream() << std::dec << x).str()
 #define THROW_COLORED(str) "\033[1;" + STOI(Red) + "m" + str + "\033[0m"
 

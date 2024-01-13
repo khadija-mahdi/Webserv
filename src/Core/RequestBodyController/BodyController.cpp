@@ -34,14 +34,17 @@ void BodyController::CreateFile(std::string ContentType, bool isTemp)
 	std::string uploadStore;
 
 	uploadStore = this->dataPool.currentLocation.getUpload_stor();
-	extention = Configurations::http.GetFileExtention(ContentType);
-	extention = extention.empty() ? "" : "." + extention;
 	if (ContentType.empty())
 		ContentType = GetHeaderAttr(dataPool.Headers, "Content-Type");
+
+	extention = Configurations::http.GetFileExtention(ContentType);
+	extention = extention.empty() ? "" : "." + extention;
+
 	if (!isTemp)
 		this->FileName = Lstring::RTrim(uploadStore, "/") + "/" + Lstring::RandomStr(10) + extention;
 	else
 		this->FileName = "/tmp/" + Lstring::RandomStr(16);
+
 	if ((this->FileFd = IO::OpenFile(this->FileName.c_str(), "w+")) < 0)
 		throw std::runtime_error("Couldn't Open File : " + this->FileName);
 }

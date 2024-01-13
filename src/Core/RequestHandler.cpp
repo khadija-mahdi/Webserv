@@ -1,4 +1,5 @@
 #include "Include/RequestHandler.hpp"
+#define vebros 1
 
 RequestHandler::RequestHandler(/* args */)
 {
@@ -89,7 +90,8 @@ bool RequestHandler::HandlerRequest1(std::string Data)
 	case HEADERS_STAGE:
 		if ((index = Buffer.find("\r\n\r\n")) != std::string::npos)
 		{
-			requestParser.ParseRequest(dataPool, Buffer);
+			DEBUGMSGT(vebros, COLORED(Buffer.substr(0, index), Green));
+			requestParser.ParseRequest(dataPool, Buffer.substr(0, index));
 			handlerRequestMethods();
 			if (parseHeaderErrors())
 				return true;

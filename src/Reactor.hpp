@@ -33,6 +33,7 @@ public:
 	void HandleEvents();
 	void Dispatch();
 	void EventLoop();
+	void ClearRunningProcess(int SocketFd);
 };
 typedef std::map<int, EventHandler *>::iterator iterator;
 void CheckCGIOutput(HttpEventHandler *client);
