@@ -114,8 +114,10 @@ std::string ResponseBuilder::GetDefaultErrorPagePath()
 void ResponseBuilder::CreateStatusFile()
 {
 	std::string FileName;
-	if (GetErrorPage())
+	if (GetErrorPage()){
+		this->dataPool.response.contentType = "text/html";
 		return;
+	}
 	if (FileName.empty())
 		FileName = GetDefaultErrorPagePath();
 	this->dataPool.response.fileFd = IO::OpenFile(FileName.c_str(), "r+");
